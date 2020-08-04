@@ -298,64 +298,6 @@ matrix e[`i',`j']=mu`i'`j'*cdf`i'mean/wu`i'mean-`delta'+(pdf`i'mean*tau[`i',`j']
 *}
 *}
 
-************NUTRIENT AVAILABILITY PER SIMULATION (TBD)***********
-
-/*qui {
-forv i=1(1)`J' {
-sum QME`i' ,d
-scalar QME`i'm=r(p50)/30/x1mean
-}
-}
-
-matrix n1=J(10,7,1)
-matrix n2=J(10,7,1)
-matrix n3=J(10,7,1)
-matrix aux=J(1,9,1)
-
-matrix nu=(2949,527,399,1063,79,39,35\5182,567,17,5852,294,38,61\2951,9,5,3526,253,84,158\ ///
-687,110,46,487,18,3,35\2449,470,13,1899,26,3,87\374,93,90,130,0,0,3\143,34,33,110,0,0,6\ ///
-7,2,0,22,0,0,0\469,52,48,592,16,10,31)
-
-scalar t11=0.18
-scalar t21=0.18
-scalar t31=0.045
-scalar t41=0.045
-forv i=1(1)9 {
-	forv j=1(1)7 {
-		matrix n1[`i',`j']= QME`i'm*(nu[`i',`j']*(t11*e[`i',1]+t21*e[`i',2]+t31*e[`i',6]+t41*e[`i',7]))
-	}
-}
-forv j=1(1)7 {
-	matrix n1[10,`j']=aux*n1[1..9,`j']
-}
-	
-scalar t12=0
-scalar t22=0
-scalar t32=0.24
-scalar t42=0.24
-forv i=1(1)9 {
-	forv j=1(1)7 {
-		matrix n2[`i',`j']= QME`i'm*(nu[`i',`j']*(t12*e[`i',1]+t22*e[`i',2]+t32*e[`i',6]+t42*e[`i',7]))
-	}
-}
-forv j=1(1)7 {
-	matrix n2[10,`j']=aux*n2[1..9,`j']
-}
-
-scalar t13=0.11
-scalar t23=0
-scalar t33=0.12
-scalar t43=0.20
-forv i=1(1)9 {
-	forv j=1(1)7 {
-		matrix n3[`i',`j']= QME`i'm*(nu[`i',`j']*(t13*e[`i',1]+t23*e[`i',2]+t33*e[`i',6]+t43*e[`i',7]))
-	}
-}
-
-forv j=1(1)7 {
-	matrix n3[10,`j']=aux*n3[1..9,`j']
-}
-*/
 
 local bsize = `J'*`J'
 
@@ -365,24 +307,6 @@ forv i=1(1)`J' {
 		matrix `bb'[1,`J'*(`i'-1)+`j']=e[`i',`j']
 	}
 }
-
-/*
-forv i=1(1)10 {
-	forv j=1(1)7 {
-		matrix `bb'[1,81+7*(`i'-1)+`j']=n1[`i',`j']
-	}
-}
-forv i=1(1)10 {
-	forv j=1(1)7 {
-		matrix `bb'[1,151+7*(`i'-1)+`j']=n2[`i',`j']
-	}
-}
-forv i=1(1)10 {
-	forv j=1(1)7 {
-		matrix `bb'[1,221+7*(`i'-1)+`j']=n3[`i',`j']
-	}
-}
-*/
 
 matrix `vv'=0*I(`bsize')
 local cn: colnames `vv'
