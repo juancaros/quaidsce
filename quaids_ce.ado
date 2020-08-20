@@ -248,8 +248,8 @@ scalar dem`i'= `r`i'1'*x1mean+`r`i'2'*x2mean+`r`i'3'*x3mean+`r`i'4'*elnexpmean
 scalar asum=0
 scalar lp=0
 forv i=1(1)`J' {
-scalar asum`i' = asum + (`a`i''+dem`i')*lnp1mean
-scalar lp`i' = lp + `l`i''*lnp1mean
+scalar asum`i' = asum + (`a`i''+dem`i')*lnp`i'mean
+scalar lp`i' = lp + `l`i''*lnp`i'mean
 }
 
 scalar gsum=0
