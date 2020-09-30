@@ -8,7 +8,7 @@
 		quaidsce_p.ado
 */
 
-ms_get_version quaidsce
+*ms_get_version quaidsce
 
 mata
 

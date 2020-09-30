@@ -16,8 +16,8 @@ program quaidsce, eclass
 
 end
 
-ms_get_version quaidsce
-ms_compile_mata, package(quaidsce) version(`1.1.0') verbose force
+*ms_get_version quaidsce
+*ms_compile_mata, package(quaidsce) version(`1.1.0') verbose force
 
 program Estimate, eclass
 
