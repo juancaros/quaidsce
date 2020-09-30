@@ -1,10 +1,10 @@
 *! version 1.0.0  29dec2011
 
-program quaids_p
+program quaidsce_p
 
 	version 12
 	
-	if "`e(cmd)'" != "quaids" {
+	if "`e(cmd)'" != "quaidsce" {
 		exit 301
 	}
 	
@@ -59,7 +59,7 @@ program quaids_p
 	tempname betas
 	mat `betas' = e(b)
 	
-	mata:_quaids__predshrs("`vars'", "`touse'", 			///
+	mata:_quaidsce__predshrs("`vars'", "`touse'", 			///
 			       "`lnexp'","`lnp'",			///
 			       `=e(ngoods)', `=e(ndemos)',		///
 			       `=e(anot)', "`e(quadratic)'",		///

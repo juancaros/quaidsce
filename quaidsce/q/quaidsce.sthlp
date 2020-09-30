@@ -1,29 +1,29 @@
 {smcl}
 {* *! version 1.1.0  24jul2013}{...}
-{cmd:help quaids}{right: ({browse "http://www.stata-journal.com/article.html?article=up0041":SJ13-3: st0268_1})}
-{right:also see:  {help quaids postestimation}}
+{cmd:help quaidsce}{right: ({browse "http://www.stata-journal.com/article.html?article=up0041":SJ13-3: st0268_1})}
+{right:also see:  {help quaidsce postestimation}}
 {hline}
 
 {title:Title}
 
 {p2colset 5 15 17 2}{...}
-{p2col :{cmd:quaids} {hline 2}}Estimate almost-ideal demand systems{p_end}
+{p2col :{cmd:quaidsce} {hline 2}}Estimate almost-ideal demand systems{p_end}
 {p2colreset}{...}
 
 
 {title:Syntax}
 
 {p 8 14 2}
-{opt quaids} {it:varlist_expshares} {ifin}{cmd:,} {opt anot(#)}
+{opt quaidsce} {it:varlist_expshares} {ifin}{cmd:,} {opt anot(#)}
    {c -(}{opt pr:ices(varlist_prices)}|{opt lnpr:ices(varlist_lnprices)}{c )-} 
    {c -(}{opt exp:enditure(varlist_exp)}|{opt lnexp:enditure(varlist_lnexp)}{c )-}
-   [{it:{help quaids##options:options}}]
+   [{it:{help quaidsce##options:options}}]
 
 {pstd}
 where {it:varlist_expshares} is the list of expenditure share
 variables.  You must specify all the expenditure share variables.  Do
 not omit one of the shares to avoid a singular covariance matrix;
-{cmd:quaids} does that automatically.
+{cmd:quaidsce} does that automatically.
 
 {synoptset 30 tabbed}{...}
 {marker options}{...}
@@ -37,7 +37,7 @@ not omit one of the shares to avoid a singular covariance matrix;
 {synopt :{opt demo:graphics(varlist_demo)}}demographic variables to include{p_end}
 {synopt :{opt noqu:adratic}}do not include quadratic expenditure term{p_end}
 {synopt :{opt nolo:g}}suppress the iteration log{p_end}
-{synopt :{cmd:vce(}{it:{help quaids##vcetype:vcetype}}{cmd:)}}{it:vcetype} may be {opt gnr}, {opt r:obust}, {opt cl:uster} {it:clustvar}, {opt boot:strap}, or {opt jack:knife}{p_end}
+{synopt :{cmd:vce(}{it:{help quaidsce##vcetype:vcetype}}{cmd:)}}{it:vcetype} may be {opt gnr}, {opt r:obust}, {opt cl:uster} {it:clustvar}, {opt boot:strap}, or {opt jack:knife}{p_end}
 {synopt :{opt l:evel(#)}}set confidence level; default is {cmd:level(95)}{p_end}
 {synoptline}
 {p2colreset}{...}
@@ -49,7 +49,7 @@ not omit one of the shares to avoid a singular covariance matrix;
 {title:Description}
 
 {pstd}
-{cmd:quaids} estimates the parameters of Deaton and Muellbauer's
+{cmd:quaidsce} estimates the parameters of Deaton and Muellbauer's
 (1980) almost-ideal demand system (AIDS) and Banks, Blundell, and
 Lewbel's (1997) quadratic AIDS model.  Demographic variables can be
 included in the model based on Ray's (1983) expenditure function scaling
@@ -122,25 +122,25 @@ regression.
 
 {pstd}
 Fit a 5-good quadratic AIDS model with alpha_0 = 10:{p_end}
-{phang2}{cmd:. quaids w1-w5, anot(10) prices(p1-p5) expenditure(totalexp)}
+{phang2}{cmd:. quaidsce w1-w5, anot(10) prices(p1-p5) expenditure(totalexp)}
 {p_end}
 
 {pstd}
 Same as above, but including household-size variable {opt hhsize}:{p_end}
-{phang2}{cmd:. quaids w1-w5, anot(10) prices(p1-p5) expenditure(totalexp)}
+{phang2}{cmd:. quaidsce w1-w5, anot(10) prices(p1-p5) expenditure(totalexp)}
             {cmd:demographics(hhsize)}{p_end}
 
 {pstd} Fit a 4-good AIDS model using a dataset for which the price and
 expenditure variables are already in natural logarithms with alpha_0 =
 5:{p_end}
-{phang2}{cmd:. quaids w1-w4, anot(5) lnprices(lnp1-lnp4) lnexpenditure(lnexp)}
+{phang2}{cmd:. quaidsce w1-w4, anot(5) lnprices(lnp1-lnp4) lnexpenditure(lnexp)}
              {cmd:noquadratic}{p_end}
 
 
 {title:Saved results}
 
 {pstd}
-{cmd:quaids} saves the following in {cmd:e()}:
+{cmd:quaidsce} saves the following in {cmd:e()}:
 
 {synoptset 20 tabbed}{...}
 {p2col 5 15 17 2: Scalars}{p_end}
@@ -152,7 +152,7 @@ expenditure variables are already in natural logarithms with alpha_0 =
 {synopt:{cmd:e(ngoods)}}number of goods{p_end}
 
 {p2col 5 15 17 2: Macros}{p_end}
-{synopt:{cmd:e(cmd)}}{cmd:quaids}{p_end}
+{synopt:{cmd:e(cmd)}}{cmd:quaidsce}{p_end}
 {synopt:{cmd:e(clustvar)}}name of cluster variable{p_end}
 {synopt:{cmd:e(vce)}}{it:vcetype} specified in {cmd:vce()}{p_end}
 {synopt:{cmd:e(vcetype)}}title used in label Std. Err.{p_end}
@@ -218,4 +218,4 @@ Ray, R.  1983.  Measuring the costs of children: An alternative approach.
 {p 4 14 2}Article:  {it:Stata Journal}, volume 13, number 3: {browse "http://www.stata-journal.com/article.html?article=up0041":st0268_1},{break}
                     {it:Stata Journal}, volume 12, number 3: {browse "http://www.stata-journal.com/article.html?article=st0268":st0268}
 
-{p 7 14 2}Help:  {help quaids postestimation}{p_end}
+{p 7 14 2}Help:  {help quaidsce postestimation}{p_end}

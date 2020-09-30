@@ -1,10 +1,10 @@
 *! version 1.1.0  18jul2013
 
-program quaids_estat
+program quaidsce_estat
 
 	version 12
 	
-	if "`e(cmd)'" != "quaids" {
+	if "`e(cmd)'" != "quaidsce" {
 		exit 301
 	}
 	
@@ -101,7 +101,7 @@ program DoExp, rclass
 	if `ndemo' > 0 {
 		local demos `e(demographics)'
 	}
-	mata:_quaids__expelas("`touse'", "`e(quadratic)'", 		///
+	mata:_quaidsce__expelas("`touse'", "`e(quadratic)'", 		///
 			      "`atmeans'", "`lnp'", "`lnexp'", 		///
 			      `ndemo', "`demos'",	 		///
 			      "`stderrs'", "`stderrmat'",		///
@@ -200,7 +200,7 @@ program DoUncomp, rclass
 	if `ndemo' > 0 {
 		local demos `e(demographics)'
 	}
-	mata:_quaids__uncompelas("`touse'", "`e(quadratic)'",		///
+	mata:_quaidsce__uncompelas("`touse'", "`e(quadratic)'",		///
 				 "`atmeans'", "`lnp'", "`lnexp'",	///
 				 `ndemo', "`demos'",			///
 				 "`stderrs'", "`stderrmat'",		///
@@ -305,7 +305,7 @@ program DoComp, rclass
 	if `ndemo' > 0 {
 		local demos `e(demographics)'
 	}
-	mata:_quaids__compelas("`touse'", "`e(quadratic)'",		///
+	mata:_quaidsce__compelas("`touse'", "`e(quadratic)'",		///
 			       "`atmeans'", "`lnp'", "`lnexp'",		///
 			       `ndemo', "`demos'",			///
 			       "`stderrs'", "`stderrmat'",		///

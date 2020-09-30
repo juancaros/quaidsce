@@ -1,11 +1,11 @@
 *! version 1.1.0  24jul2013
 
-program quaids, eclass
+program quaidsce, eclass
 
 	version 12
 	
 	if replay() {
-		if "`e(cmd)'" != "quaids" {
+		if "`e(cmd)'" != "quaidsce" {
 			error 301 
 		}
 		Display `0'
@@ -15,6 +15,9 @@ program quaids, eclass
 	Estimate `0'
 
 end
+
+ms_get_version quaidsce
+ms_compile_mata, package(quaidsce) version(`1.1.0') verbose force
 
 program Estimate, eclass
 
@@ -157,7 +160,7 @@ program Estimate, eclass
 		}
 	}
 	
-	nlsur __quaids @ `shares2' if `touse',				///
+	nlsur __quaidsce @ `shares2' if `touse',				///
 		lnp(`lnprices') lnexp(`lnexpenditure') a0(`anot')	///
 		nparam(`np') neq(`=`neqn'-1') ifgnls noeqtab nocoeftab	///
 		`quadratic' `options' `demoopt' `initialopt' `log' 	///
@@ -169,9 +172,9 @@ program Estimate, eclass
 	mat `b' = e(b)
 	mat `V' = e(V)
 
-	mata:_quaids__fullvector("`b'", `neqn', "`quadratic'", 		///
+	mata:_quaidsce__fullvector("`b'", `neqn', "`quadratic'", 		///
 					`ndemos', "`bfull'")
-	mata:_quaids__delta(`neqn', "`quadratic'", `ndemos', "`Delta'")
+	mata:_quaidsce__delta(`neqn', "`quadratic'", `ndemos', "`Delta'")
 	mat `Vfull' = `Delta'*`V'*`Delta''
 
 	forvalues i = 1/`neqn' {
@@ -206,7 +209,7 @@ program Estimate, eclass
 	mat rownames `Vfull' = `namestripe'
 	
 	tempname alpha beta gamma lambda eta rho ll
-	mata:_quaids__getcoefs("`b'", `neqn', "`quadratic'", `ndemos', 	///
+	mata:_quaidsce__getcoefs("`b'", `neqn', "`quadratic'", `ndemos', 	///
 			"`alpha'", "`beta'", "`gamma'", "`lambda'",	///
 			"`eta'", "`rho'")	
 	scalar `ll' = e(ll)
@@ -269,9 +272,9 @@ program Estimate, eclass
 	eret matrix best = `b'
 	eret matrix Vest = `V'
 	
-	eret local predict	"quaids_p"
-	eret local estat_cmd 	"quaids_estat"
-	eret local cmd 		"quaids"
+	eret local predict	"quaidsce_p"
+	eret local estat_cmd 	"quaidsce_estat"
+	eret local cmd 		"quaidsce"
 
 	Display, level(`level')
 

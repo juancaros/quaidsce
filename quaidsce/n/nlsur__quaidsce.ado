@@ -1,7 +1,7 @@
 *! version 1.0.0  29dec2011
-* Not to be called alone; for use with -quaids-
+* Not to be called alone; for use with -quaidsce-
 
-program nlsur__quaids
+program nlsur__quaidsce
 
 	version 12
 	
@@ -16,7 +16,7 @@ program nlsur__quaids
 	local neqn = `nm1' + 1
 	local ndemo : word count `demographics'
 
-	mata:_quaids__expshrs("`varlist'", "`touse'", "`lnexp'",	///
+	mata:_quaidsce__expshrs("`varlist'", "`touse'", "`lnexp'",	///
 		"`lnp'", `neqn', `ndemo', `a0', "`quadratic'", "`at'",	///
 		"`demographics'")
 	

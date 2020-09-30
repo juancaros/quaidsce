@@ -1,30 +1,30 @@
 {smcl}
 {* *! version 1.1.0  25jul2013}{...}
-{cmd:help quaids postestimation}{right: ({browse "http://www.stata-journal.com/article.html?article=up0041":SJ13-3: st0268_1})}
-{right:also see:  {help quaids} {space 1}}
+{cmd:help quaidsce postestimation}{right: ({browse "http://www.stata-journal.com/article.html?article=up0041":SJ13-3: st0268_1})}
+{right:also see:  {help quaidsce} {space 1}}
 {hline}
 
 {title:Title}
 
 {p2colset 5 30 32 2}{...}
-{p2col :{cmd:quaids postestimation} {hline 2}}Postestimation tools for quaids{p_end}
+{p2col :{cmd:quaidsce postestimation} {hline 2}}Postestimation tools for quaidsce{p_end}
 {p2colreset}{...}
 
 
 {title:Description}
 
 {pstd}
-The following postestimation commands are available after {cmd:quaids}:
+The following postestimation commands are available after {cmd:quaidsce}:
 
 {synoptset 21}{...}
 {p2coldent :Command}Description{p_end}
 {synoptline}
-{synopt :{helpb quaids postestimation##expelas:estat expenditure}}expenditure elasticities{p_end}
-{synopt :{helpb quaids postestimation##comelas:estat compensated}}compensated price elasticities{p_end}
-{synopt :{helpb quaids postestimation##uncelas:estat uncompensated}}uncompensated price elasticities{p_end}
+{synopt :{helpb quaidsce postestimation##expelas:estat expenditure}}expenditure elasticities{p_end}
+{synopt :{helpb quaidsce postestimation##comelas:estat compensated}}compensated price elasticities{p_end}
+{synopt :{helpb quaidsce postestimation##uncelas:estat uncompensated}}uncompensated price elasticities{p_end}
 INCLUDE help post_estimates
 INCLUDE help post_lincom
-{synopt :{helpb quaids postestimation##predict:predict}}predicted expenditure shares{p_end}
+{synopt :{helpb quaidsce postestimation##predict:predict}}predicted expenditure shares{p_end}
 INCLUDE help post_predictnl
 INCLUDE help post_test
 INCLUDE help post_testnl
@@ -171,7 +171,7 @@ and {cmd:in} to restrict the sample to one observation.
 
 {pstd}Setup{p_end}
 {phang2}{cmd:. webuse food}{p_end}
-{phang2}{cmd:. quaids w1-w4, anot(10) lnprices(lnp1-lnp4) expenditure(expfd)}{p_end}
+{phang2}{cmd:. quaidsce w1-w4, anot(10) lnprices(lnp1-lnp4) expenditure(expfd)}{p_end}
 
 {pstd}
 Calculate observation-level predicted expenditure shares and elasticities{p_end}
@@ -266,4 +266,4 @@ elasticities{p_end}
 {p 4 14 2}Article:  {it:Stata Journal}, volume 13, number 3: {browse "http://www.stata-journal.com/article.html?article=up0041":st0268_1},{break}
                     {it:Stata Journal}, volume 12, number 3: {browse "http://www.stata-journal.com/article.html?article=st0268":st0268}
 
-{p 7 14 2}Help:  {helpb quaids}{p_end}
+{p 7 14 2}Help:  {helpb quaidsce}{p_end}

@@ -1,18 +1,20 @@
 *! version 1.1.1  04sep2013
 /*
-	_quaids__utils.mata
+	_quaidsce__utils.mata
 	
 	Mata routines called by
-		nlsur__quaids.ado
-		quaids_estat.ado
-		quaids_p.ado
+		nlsur__quaidsce.ado
+		quaidsce_estat.ado
+		quaidsce_p.ado
 */
+
+ms_get_version quaidsce
 
 mata
 
 mata set matastrict on
 
-void _quaids__expelas(string scalar touses,
+void _quaidsce__expelas(string scalar touses,
 		      string scalar quadratics,
 		      string scalar atmeans,
 		      string scalar lnps,
@@ -52,11 +54,11 @@ void _quaids__expelas(string scalar touses,
 		expelas = J(1, cols(shares), .)
 	}
 	
-	_quaids__expelas_wrk(st_matrix("e(best)"), quadratics,
+	_quaidsce__expelas_wrk(st_matrix("e(best)"), quadratics,
 			     ndemo, shares, lnp, lnexp, demo, expelas)
 
 	if (stderrs != "") {
-		_quaids__expelas_stderr(st_matrix("e(best)"), quadratics,
+		_quaidsce__expelas_stderr(st_matrix("e(best)"), quadratics,
 			     ndemo, shares, lnp, lnexp, demo, semat)
 		st_matrix(stderrmat, semat)
 	}
@@ -72,7 +74,7 @@ void _quaids__expelas(string scalar touses,
 
 }
 
-void _quaids__expelas_stderr(real vector   params,
+void _quaidsce__expelas_stderr(real vector   params,
 			     string scalar quadratics,
 			     real scalar   ndemo,
 			     real matrix   shares,
@@ -86,7 +88,7 @@ void _quaids__expelas_stderr(real vector   params,
 	transmorphic D
 	
 	D = deriv_init()
-	deriv_init_evaluator(D, &_quaids__expelas_wrk())
+	deriv_init_evaluator(D, &_quaidsce__expelas_wrk())
 	deriv_init_evaluatortype(D, "t")
 	deriv_init_params(D, params)
 	deriv_init_argument(D, 1, quadratics)
@@ -102,7 +104,7 @@ void _quaids__expelas_stderr(real vector   params,
 
 }
 
-void _quaids__expelas_wrk(real vector   params,
+void _quaidsce__expelas_wrk(real vector   params,
 			  string scalar quadratics,
 			  real scalar   ndemo,
 			  real matrix   shares,
@@ -125,7 +127,7 @@ void _quaids__expelas_wrk(real vector   params,
 	*/
 	if (rows(expelas) == 1) 	expelas = J(1, ng, .)
 	
-	_quaids__getcoefs_wrk(params, ng, 
+	_quaidsce__getcoefs_wrk(params, ng, 
 		      	      quadratics, ndemo,
 		      	      alpha, beta, gamma, lambda, eta, rho)
 	if (quadratics == "") {
@@ -163,7 +165,7 @@ void _quaids__expelas_wrk(real vector   params,
 }
 
 
-void _quaids__uncompelas(string scalar touses,
+void _quaidsce__uncompelas(string scalar touses,
 			 string scalar quadratics,
 			 string scalar atmeans,
 			 string scalar lnps,
@@ -201,11 +203,11 @@ void _quaids__uncompelas(string scalar touses,
 		elas    = J(1, (cols(shares)^2), .)
 	}
 	
-	_quaids__uncompelas_wrk(st_matrix("e(best)"), quadratics,
+	_quaidsce__uncompelas_wrk(st_matrix("e(best)"), quadratics,
 			        ndemo, shares, lnp, lnexp, demo, elas)
 	
 	if (stderrs != "") {
-		_quaids__uncompelas_stderr(st_matrix("e(best)"), quadratics,
+		_quaidsce__uncompelas_stderr(st_matrix("e(best)"), quadratics,
 			ndemo, shares, lnp, lnexp, demo, semat)
 		st_matrix(stderrmat, rowshape(semat, cols(lnp)))
 	}
@@ -220,7 +222,7 @@ void _quaids__uncompelas(string scalar touses,
 	}
 }
 
-void _quaids__uncompelas_stderr(real vector   params,
+void _quaidsce__uncompelas_stderr(real vector   params,
 			        string scalar quadratics,
 			        real scalar   ndemo,
 			        real matrix   shares,
@@ -233,7 +235,7 @@ void _quaids__uncompelas_stderr(real vector   params,
 	transmorphic D
 	
 	D = deriv_init()
-	deriv_init_evaluator(D, &_quaids__uncompelas_wrk())
+	deriv_init_evaluator(D, &_quaidsce__uncompelas_wrk())
 	deriv_init_evaluatortype(D, "t")
 	deriv_init_params(D, params)
 	deriv_init_argument(D, 1, quadratics)
@@ -248,7 +250,7 @@ void _quaids__uncompelas_stderr(real vector   params,
 
 }
 
-void _quaids__uncompelas_wrk(real vector   params,
+void _quaidsce__uncompelas_wrk(real vector   params,
 			     string scalar quadratics,
 			     real scalar   ndemo,
 			     real matrix   shares,
@@ -269,7 +271,7 @@ void _quaids__uncompelas_wrk(real vector   params,
 		*/
 	if (cols(elas) == 1)	elas = J(1, ng^2, .)
 
-	_quaids__getcoefs_wrk(params, ng, 
+	_quaidsce__getcoefs_wrk(params, ng, 
 		      	      quadratics, ndemo,
 		      	      alpha, beta, gamma, lambda, eta, rho)
 
@@ -320,7 +322,7 @@ elas[obs,index] =
 }
 
 
-void _quaids__compelas(string scalar touses,
+void _quaidsce__compelas(string scalar touses,
 		       string scalar quadratics,
 		       string scalar atmeans,
 		       string scalar lnps,
@@ -357,10 +359,10 @@ void _quaids__compelas(string scalar touses,
 		lnexp   = mean(st_data(., lnexps, touses))
 		elas    = J(1, (cols(shares)^2), .)
 	}
-	_quaids__compelas_wrk(st_matrix("e(best)"), quadratics, 
+	_quaidsce__compelas_wrk(st_matrix("e(best)"), quadratics, 
 			      ndemo, shares, lnp, lnexp, demo, elas)
 	if (stderrs != "") {
-		_quaids__compelas_stderr(st_matrix("e(best)"), quadratics,
+		_quaidsce__compelas_stderr(st_matrix("e(best)"), quadratics,
 			ndemo, shares, lnp, lnexp, demo, semat)
 		st_matrix(stderrmat, rowshape(semat, cols(lnp)))
 	}
@@ -375,7 +377,7 @@ void _quaids__compelas(string scalar touses,
 	}
 }
 
-void _quaids__compelas_stderr(real vector   params,
+void _quaidsce__compelas_stderr(real vector   params,
 			        string scalar quadratics,
 			        real scalar   ndemo,
 			        real matrix   shares,
@@ -388,7 +390,7 @@ void _quaids__compelas_stderr(real vector   params,
 	transmorphic D
 	
 	D = deriv_init()
-	deriv_init_evaluator(D, &_quaids__compelas_wrk())
+	deriv_init_evaluator(D, &_quaidsce__compelas_wrk())
 	deriv_init_evaluatortype(D, "t")
 	deriv_init_params(D, params)
 	deriv_init_argument(D, 1, quadratics)
@@ -404,7 +406,7 @@ void _quaids__compelas_stderr(real vector   params,
 }
 
 
-void _quaids__compelas_wrk(real vector   params,
+void _quaidsce__compelas_wrk(real vector   params,
 			     string scalar quadratics,
 			     real scalar   ndemo,
 			     real matrix   shares,
@@ -422,9 +424,9 @@ void _quaids__compelas_wrk(real vector   params,
 	up   = J(rows(lnp), cols(lnp)^2, .)
 	elas = J(rows(lnp), cols(lnp)^2, .)
 	
-	_quaids__expelas_wrk(params, quadratics, ndemo, shares, lnp,
+	_quaidsce__expelas_wrk(params, quadratics, ndemo, shares, lnp,
 			     lnexp, demo, ee)
-	_quaids__uncompelas_wrk(params, quadratics, ndemo, shares, lnp,
+	_quaidsce__uncompelas_wrk(params, quadratics, ndemo, shares, lnp,
 			     lnexp, demo, up)
 
 	for(i=1; i<=ng; ++i) {
@@ -437,7 +439,7 @@ void _quaids__compelas_wrk(real vector   params,
 
 
 
-void _quaids__fullvector(string scalar ins,
+void _quaidsce__fullvector(string scalar ins,
 			real scalar neqn,
 			string scalar quadratics,
 			real scalar ndemo,
@@ -449,7 +451,7 @@ void _quaids__fullvector(string scalar ins,
 	real matrix	gamma, eta
 	
 	in = st_matrix(ins)
-	_quaids__getcoefs_wrk(in, neqn, quadratics, ndemo,
+	_quaidsce__getcoefs_wrk(in, neqn, quadratics, ndemo,
 		alpha, beta, gamma, lambda, eta, rho)
 	if (quadratics == "" & ndemo > 0) {
 		st_matrix(outs, (alpha, beta, (vech(gamma)'), 
@@ -468,7 +470,7 @@ void _quaids__fullvector(string scalar ins,
 	
 }
 
-void _quaids__getcoefs(string scalar ins,
+void _quaidsce__getcoefs(string scalar ins,
 		       real   scalar neqn,
 		       string scalar quadratics,
 		       real   scalar ndemo,
@@ -496,11 +498,11 @@ void _quaids__getcoefs(string scalar ins,
 		np = np + ndemo*(neqn-1) + ndemo
 	}
 	if (cols(in) != np) {
-		errprintf("_quaids__getcoefs received invalid vector\n")
+		errprintf("_quaidsce__getcoefs received invalid vector\n")
 		exit(9999)
 	}
 	
-	_quaids__getcoefs_wrk(in, neqn, quadratics, ndemo, 
+	_quaidsce__getcoefs_wrk(in, neqn, quadratics, ndemo, 
 				alpha, beta, gamma, lambda, eta, rho)
 	
 	st_matrix(alphas, alpha)
@@ -516,7 +518,7 @@ void _quaids__getcoefs(string scalar ins,
 	
 }
 
-void _quaids__getcoefs_wrk(real rowvector 	in,
+void _quaidsce__getcoefs_wrk(real rowvector 	in,
 			   real scalar		neqn,
 			   string scalar	quadratics,
 			   real scalar		ndemo,
@@ -591,7 +593,7 @@ void _quaids__getcoefs_wrk(real rowvector 	in,
 }
 
 
-void _quaids__expshrs(string scalar shrs,			///
+void _quaidsce__expshrs(string scalar shrs,			///
 		      string scalar touses,			///
 		      string scalar lnexps,			///
 		      string scalar lnps,			///
@@ -620,7 +622,7 @@ void _quaids__expshrs(string scalar shrs,			///
 	}
 	
 	// Get all the parameters
-	_quaids__getcoefs_wrk(at, neqn, quadratics, ndemo,
+	_quaidsce__getcoefs_wrk(at, neqn, quadratics, ndemo,
 		alpha, beta, gamma, lambda, eta, rho)
 
 	// First get the price index
@@ -667,7 +669,7 @@ void _quaids__expshrs(string scalar shrs,			///
 
 }
 
-void _quaids__predshrs(string scalar shrs,			///
+void _quaidsce__predshrs(string scalar shrs,			///
 		       string scalar touses,			///
 		       string scalar lnexps,			///
 		       string scalar lnps,			///
@@ -744,7 +746,7 @@ void _quaids__predshrs(string scalar shrs,			///
 }
 
 
-void _quaids__sharebar(string scalar outs, touses)
+void _quaidsce__sharebar(string scalar outs, touses)
 {
 
 	st_matrix(outs, mean(st_data(., st_global("e(lhs)"), touses)))
@@ -780,7 +782,7 @@ void _quaids__sharebar(string scalar outs, touses)
 		
 */
 
-void _quaids__delta(real scalar ng, 
+void _quaidsce__delta(real scalar ng, 
 		    string scalar quadratics,
 		    real scalar ndemo,
 		    string scalar Dmats)
