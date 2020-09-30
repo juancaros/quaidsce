@@ -1,5 +1,7 @@
 # quaidsce
 Censored QUAIDS for Stata
+version Octubre 2020  
+Grace Melo, JC Salgado, JC Caro, J. Alberto Molina
 
 Descripcion de los archivos en la carpeta **old quaidsce**:  
 
