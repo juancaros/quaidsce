@@ -1,5 +1,7 @@
-*! version 1.1.0  24jul2013
-
+*! version 1.0.1  14may2012
+cap program drop quaidsce
+cap program drop Estimate
+cap program drop Display
 program quaidsce, eclass
 
 	version 12
@@ -16,9 +18,6 @@ program quaidsce, eclass
 
 end
 
-*ms_get_version quaidsce
-*ms_compile_mata, package(quaidsce) version(`1.1.0') verbose force
-
 program Estimate, eclass
 
 	version 12
@@ -31,10 +30,8 @@ program Estimate, eclass
 		  LNPRices(varlist numeric) 				///
 		  DEMOgraphics(varlist numeric)				///
 		  noQUadratic 						///
-		  INITial(name) noLOg Level(cilevel) VCE(passthru) 	///
-		  IFGNLSIterate(integer 20) /* not documented */	///
-		  ITerate(integer 250)      /* not documented */	///
-		   * ]
+		  noCEnsor   ///
+		  INITial(name) noLOg Level(cilevel) VCE(passthru) * ]
 		  
 	local shares `varlist'
 	
@@ -88,6 +85,8 @@ program Estimate, eclass
 	markout `touse' `prices' `lnprices' `demographics'
 	markout `touse' `expenditure' `lnexpenditure'
 
+
+
 	local i 1
 	while (`i' < `neqn') {
 		local shares2 `shares2' `:word `i' of `shares''
@@ -130,12 +129,16 @@ program Estimate, eclass
 		local lnexpenditure `lnexp'
 	}
 	
+	
 	if "`quadratic'" == "noquadratic" {
 		local np = 2*(`neqn'-1) + `neqn'*(`neqn'-1)/2
 	}
 	else {
 		local np = 3*(`neqn'-1) + `neqn'*(`neqn'-1)/2
 	}
+	
+	
+	
 	if "`demographics'" == "" {
 		local demos "nodemos"
 		local demoopt ""
@@ -160,11 +163,66 @@ program Estimate, eclass
 		}
 	}
 	
+	// GM: Check whether censoring exists & Probit
+		
+
+		foreach x of varlist `shares' {
+			summ `x' if `touse', mean
+			if r(min) > 0 {
+				di as error "noncensoring for `x' found"
+				exit 499
+			}
+	// GM: Probit	as 
+			tempvar z`x' pdf`x' cdf`x' du`x' tmp`x' tau
+			qui gen double `z`x'' = 1 if `x' > 0  & `touse'
+			replace `z`x'' = 0 if `x' == 0  & `touse'
+			probit `z`x'' `lnprices' `lnexp'   `demographics'
+			matrix `tmp`x''=e(b)
+			
+
+			quietly predict `du`x''
+			gen `pdf`x''= normalden(`du`x'')
+			gen `cdf`x''= normal(`du`x'')
+	
+		}
+		
+		local np2 : word count `lnprices' `lnexp'  `demographics' intercept
+		 		
+		mat c=J(1,`np2',.)
+		foreach x of varlist `shares' {
+		mat c=c \ `tmp`x''
+		
+		}
+		*delete the first row
+		mata st_matrix("tau",select(st_matrix("c"),st_matrix("c")[.,2]:~=.))
+		
+		local pdf
+		foreach x of varlist `shares' {
+		local pdf `pdf' `pdf`x''
+		}
+		
+	// pdf enter as demo
+	
+	if "`censor'" == "nocensor" {
+	local demographics `demographics'
+	local np = `np' 
+	}
+	else {
+		local ndemos : word count `demographics' intercept
+		local np = `np' + `ndemos'*(`neqn'-1) + `ndemos'
+		}
+		
+	
+		
+		*how to enter cdf ??
+		*how to enter pdf
+	
 	nlsur __quaidsce @ `shares2' if `touse',				///
 		lnp(`lnprices') lnexp(`lnexpenditure') a0(`anot')	///
 		nparam(`np') neq(`=`neqn'-1') ifgnls noeqtab nocoeftab	///
-		`quadratic' `options' `demoopt' `initialopt' `log' 	///
-		`vce' ifgnlsiterate(`ifgnlsiterate') iterate(`iterate')
+		`quadratic' `options' `demoopt'  `initialopt' `log' `vce'
+		
+		*add `censor'
 
 	// do delta method to get cov matrix
 
@@ -268,9 +326,6 @@ program Estimate, eclass
 	if "`nclust'" != "" {
 		eret scalar N_clust	= `nclust'
 	}
-
-	eret matrix best = `b'
-	eret matrix Vest = `V'
 	
 	eret local predict	"quaidsce_p"
 	eret local estat_cmd 	"quaidsce_estat"
