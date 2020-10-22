@@ -1,7 +1,5 @@
 *! version 1.0.1  14may2012
-cap program drop quaidsce
-cap program drop Estimate
-cap program drop Display
+
 program quaidsce, eclass
 
 	version 12
@@ -164,15 +162,23 @@ program Estimate, eclass
 	}
 	
 	// GM: Check whether censoring exists & Probit
-		
-
+	
+		if "`censor'" == "nocensor" {
+		}
+		else {
+		local np2 : word count `lnprices' `lnexp'  `demographics' intercept
+		mat c=J(1,`np2',.)
+		local pdf 
+		local cdf
 		foreach x of varlist `shares' {
 			summ `x' if `touse', mean
 			if r(min) > 0 {
 				di as error "noncensoring for `x' found"
 				exit 499
 			}
+
 	// GM: Probit	as 
+				
 			tempvar z`x' pdf`x' cdf`x' du`x' tmp`x' tau
 			qui gen double `z`x'' = 1 if `x' > 0  & `touse'
 			replace `z`x'' = 0 if `x' == 0  & `touse'
@@ -184,35 +190,35 @@ program Estimate, eclass
 			gen `pdf`x''= normalden(`du`x'')
 			gen `cdf`x''= normal(`du`x'')
 	
-		}
 		
-		local np2 : word count `lnprices' `lnexp'  `demographics' intercept
-		 		
-		mat c=J(1,`np2',.)
-		foreach x of varlist `shares' {
-		mat c=c \ `tmp`x''
-		
+			mat c=c \ `tmp`x''
+			local pdf `pdf' `pdf`x''
+			local cdf `cdf' `cdf`x''
+			
 		}
 		*delete the first row
 		mata st_matrix("tau",select(st_matrix("c"),st_matrix("c")[.,2]:~=.))
 		
-		local pdf
-		foreach x of varlist `shares' {
-		local pdf `pdf' `pdf`x''
+		local i 1
+		while (`i' < `neqn') {
+		local pdf2 `pdf2' `:word `i' of `pdf''
+		local `++i'
 		}
-		
-	// pdf enter as demo
-	
-	if "`censor'" == "nocensor" {
-	local demographics `demographics'
-	local np = `np' 
+		local i 1
+		while (`i' < `neqn') {
+		local cdf2 `cdf2' `:word `i' of `cdf''
+		local `++i'
+		*local np = `np' + (`neqn'-1) 
+		local np = `np' 
+
 	}
-	else {
-		local ndemos : word count `demographics' intercept
-		local np = `np' + `ndemos'*(`neqn'-1) + `ndemos'
-		}
-		
+	}
 	
+
+	
+replace cdf1=
+replace cdf2=1
+replace cdf3=1
 		
 		*how to enter cdf ??
 		*how to enter pdf
