@@ -6,7 +6,7 @@ program nlsur__quaidsce
 	version 12
 	
 	syntax varlist if, at(name) lnexp(varname) lnp(varlist)		///
-		a0(real) [ noQUADratic DEMOGRAPHICS(varlist) ]
+		cdfi(varlist) pdfi(varlist) a0(real) [ noQUADratic DEMOGRAPHICS(varlist) ]
 	
 	tempvar touse
 	qui gen byte `touse' = 0
@@ -17,7 +17,7 @@ program nlsur__quaidsce
 	local ndemo : word count `demographics'
 
 	mata:_quaidsce__expshrs("`varlist'", "`touse'", "`lnexp'",	///
-		"`lnp'", `neqn', `ndemo', `a0', "`quadratic'", "`at'",	///
+		"`lnp'", "`cdfi'", "`pdfi'",  `neqn', `ndemo', `a0', "`quadratic'", "`at'",	///
 		"`demographics'")
 	
 end

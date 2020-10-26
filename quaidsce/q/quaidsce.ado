@@ -33,6 +33,8 @@ program Estimate, eclass
 		  
 	local shares `varlist'
 	
+	di `shares'
+	
 	if "`options'" != "" {
 		di as error "`options' not allowed"
 		exit 198
@@ -208,23 +210,14 @@ program Estimate, eclass
 		while (`i' < `neqn') {
 		local cdf2 `cdf2' `:word `i' of `cdf''
 		local `++i'
-		*local np = `np' + (`neqn'-1) 
-		local np = `np' 
-
-	}
-	}
-	
-
-	
-replace cdf1=
-replace cdf2=1
-replace cdf3=1
+		local np = `np' + (`neqn'-1) 
 		
-		*how to enter cdf ??
-		*how to enter pdf
+	}
+	}
+	
 	
 	nlsur __quaidsce @ `shares2' if `touse',				///
-		lnp(`lnprices') lnexp(`lnexpenditure') a0(`anot')	///
+		lnp(`lnprices') lnexp(`lnexpenditure') cdfi(`cdf2') pdfi(`pdf2') a0(`anot')	///
 		nparam(`np') neq(`=`neqn'-1') ifgnls noeqtab nocoeftab	///
 		`quadratic' `options' `demoopt'  `initialopt' `log' `vce'
 		

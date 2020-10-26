@@ -597,6 +597,8 @@ void _quaidsce__expshrs(string scalar shrs,			///
 		      string scalar touses,			///
 		      string scalar lnexps,			///
 		      string scalar lnps,			///
+			  string scalar cdfis,			///
+			  string scalar pdfis,			///			 
 		      real scalar neqn,				///
 		      real scalar ndemo,			///
 		      real scalar a0,				///
@@ -614,6 +616,8 @@ void _quaidsce__expshrs(string scalar shrs,			///
 	
 	st_view(shr=.,   .,    shrs, touses)
 	st_view(lnp=.,   .,    lnps, touses)
+	st_view(cdfi=.,   .,    cdfis, touses)
+	st_view(pdfi=.,   .,    pdfis, touses)
 	st_view(lnexp=., .,  lnexps, touses)
 	st_view(demo=.,   .,  demos, touses)
 	
@@ -663,12 +667,12 @@ void _quaidsce__expshrs(string scalar shrs,			///
 				(lnexp - lnpindex - ln(mbar))):*cdf_JC[., i]
 		}
 		else {
-			shr[., i] = (shr[., i] + beta[i]*(lnexp - lnpindex)):*cdf_JC[., i]
+			shr[., i] = (shr[., i] + beta[i]*(lnexp - lnpindex)):*cdfi[., i]
 
 		}
 		if (quadratics == "") {
 			shr[., i] = (shr[., i] + lambda[i]:/(bofp:*cofp):*(
-				(lnexp - lnpindex - ln(mbar)):^2)):*cdf_JC[., i]
+				(lnexp - lnpindex - ln(mbar)):^2)):*cdfi[., i]
 		}
 	}
 	shr_JC= shr
