@@ -1,4 +1,4 @@
-*! version 1.0.0  29dec2011
+*! version 1.1.1  1dec2020
 * Not to be called alone; for use with -quaidsce-
 
 program nlsur__quaidsce

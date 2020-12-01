@@ -1,8 +1,10 @@
-*! version 1.0.1  14may2012
+*! version 1.1.1  1dec2020
 
 program quaidsce, eclass
 
 	version 12
+	ms_get_version quaidsce
+	ms_compile_mata, package(quaidsce) version(`package_version')
 	
 	if replay() {
 		if "`e(cmd)'" != "quaidsce" {
@@ -218,7 +220,7 @@ program Estimate, eclass
 	
 	nlsur __quaidsce @ `shares2' if `touse',				///
 		lnp(`lnprices') lnexp(`lnexpenditure') cdfi(`cdf2') pdfi(`pdf2') a0(`anot')	///
-		nparam(`np') neq(`=`neqn'-1') ifgnls noeqtab nocoeftab	///
+		nparam(`np') neq(`=`neqn'-1') fgnls noeqtab nocoeftab	///
 		`quadratic' `options' `demoopt'  `initialopt' `log' `vce'
 		
 		*add `censor'

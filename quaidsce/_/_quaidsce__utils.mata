@@ -1,4 +1,5 @@
 *! version 1.1.1  04sep2013
+
 /*
 	_quaidsce__utils.mata
 	
@@ -8,7 +9,10 @@
 		quaidsce_p.ado
 */
 
-*ms_get_version quaidsce
+ms_get_version quaidsce
+assert("`package_version'" != "")
+mata: string scalar quaidsce_version() return("`package_version'")
+mata: string scalar quaidsce_stata_version() return("`c(stata_version)'")
 
 mata
 
