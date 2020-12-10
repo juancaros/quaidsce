@@ -9,11 +9,6 @@
 		quaidsce_p.ado
 */
 
-ms_get_version quaidsce
-assert("`package_version'" != "")
-mata: string scalar quaidsce_version() return("`package_version'")
-mata: string scalar quaidsce_stata_version() return("`c(stata_version)'")
-
 mata
 
 mata set matastrict on
@@ -614,19 +609,14 @@ void _quaidsce__expshrs(string scalar shrs,			///
 	real vector at, alpha, beta, lambda, rho
 	real vector lnexp, lnpindex, bofp, cofp, mbar
 	real matrix gamma, eta
-	real matrix lnp, shr, demo
-	external real matrix shr_JC
-	external real matrix cdf_JC 
-	
+	real matrix lnp, shr, demo, cdfi, pdfi
+
 	st_view(shr=.,   .,    shrs, touses)
 	st_view(lnp=.,   .,    lnps, touses)
 	st_view(cdfi=.,   .,    cdfis, touses)
 	st_view(pdfi=.,   .,    pdfis, touses)
 	st_view(lnexp=., .,  lnexps, touses)
 	st_view(demo=.,   .,  demos, touses)
-	
-	
-	cdf_JC=st_data(.,("cdf*")) //JCSH Guarantee that cdf are arranged from the first to the N-1 category
 	
 	at = st_matrix(ats)
 
@@ -668,7 +658,7 @@ void _quaidsce__expshrs(string scalar shrs,			///
 		if (ndemo > 0) {
 			shr[., i] = (shr[., i] + 
 				(J(rows(lnp), 1, beta[i]) + demo*eta[.,i]):*
-				(lnexp - lnpindex - ln(mbar))):*cdf_JC[., i]
+				(lnexp - lnpindex - ln(mbar))):*cdfi[., i]
 		}
 		else {
 			shr[., i] = (shr[., i] + beta[i]*(lnexp - lnpindex)):*cdfi[., i]
@@ -679,7 +669,7 @@ void _quaidsce__expshrs(string scalar shrs,			///
 				(lnexp - lnpindex - ln(mbar)):^2)):*cdfi[., i]
 		}
 	}
-	shr_JC= shr
+
 }
 
 void _quaidsce__predshrs(string scalar shrs,			///

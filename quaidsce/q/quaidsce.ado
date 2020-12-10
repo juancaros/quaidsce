@@ -3,9 +3,7 @@
 program quaidsce, eclass
 
 	version 12
-	ms_get_version quaidsce
-	ms_compile_mata, package(quaidsce) version(`package_version')
-	
+
 	if replay() {
 		if "`e(cmd)'" != "quaidsce" {
 			error 301 
