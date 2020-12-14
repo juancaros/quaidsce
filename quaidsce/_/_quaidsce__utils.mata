@@ -1,4 +1,4 @@
-*! version 1.1.1  04sep2013
+*! version 1.1.1  01dec2020
 
 /*
 	_quaidsce__utils.mata
