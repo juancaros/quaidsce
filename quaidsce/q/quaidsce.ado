@@ -219,9 +219,9 @@ program Estimate, eclass
 	nlsur __quaidsce @ `shares2' if `touse',				///
 		lnp(`lnprices') lnexp(`lnexpenditure') cdfi(`cdf2') pdfi(`pdf2') a0(`anot')	///
 		nparam(`np') neq(`=`neqn'-1') fgnls noeqtab nocoeftab	///
-		`quadratic' `options' `demoopt'  `initialopt' `log' `vce'
+		`quadratic' `options' `censor' `demoopt'  `initialopt' `log' `vce'
+
 		
-		*add `censor'
 
 	// do delta method to get cov matrix
 
