@@ -1,8 +1,8 @@
-*! version 1.1.1  1dec2020
+*! version 1.1.1  01dec2020
 
 program quaidsce, eclass
 
-	version 12
+	version 14
 
 	if replay() {
 		if "`e(cmd)'" != "quaidsce" {
