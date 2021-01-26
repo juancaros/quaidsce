@@ -603,10 +603,11 @@ void _quaidsce__expshrs(string scalar shrs,			///
 		      real scalar a0,				///
 		      string scalar quadratics,			///
 		      string scalar ats,			///
+			  string scalar censor,			///
 		      string scalar demos)
 {
 	real scalar i
-	real vector at, alpha, beta, lambda, rho
+	real vector at, alpha, beta, lambda, rho, delta
 	real vector lnexp, lnpindex, bofp, cofp, mbar
 	real matrix gamma, eta
 	real matrix lnp, shr, demo, cdfi, pdfi
@@ -625,8 +626,8 @@ void _quaidsce__expshrs(string scalar shrs,			///
 	}
 	
 	// Get all the parameters
-	_quaidsce__getcoefs_wrk(at, neqn, quadratics, ndemo,
-		alpha, beta, gamma, lambda, eta, rho)
+	_quaidsce__getcoefs_wrk(at, neqn, quadratics, ndemo, censor,
+		alpha, beta, gamma, lambda, eta, rho, delta)
 
 	// First get the price index
 	lnpindex = a0 :+ lnp*alpha'
@@ -658,16 +659,19 @@ void _quaidsce__expshrs(string scalar shrs,			///
 		if (ndemo > 0) {
 			shr[., i] = (shr[., i] + 
 				(J(rows(lnp), 1, beta[i]) + demo*eta[.,i]):*
-				(lnexp - lnpindex - ln(mbar))):*cdfi[., i]
+				(lnexp - lnpindex - ln(mbar)))
 		}
 		else {
-			shr[., i] = (shr[., i] + beta[i]*(lnexp - lnpindex)):*cdfi[., i]
-
+			shr[., i] = (shr[., i] + beta[i]*(lnexp - lnpindex))
 		}
 		if (quadratics == "") {
 			shr[., i] = (shr[., i] + lambda[i]:/(bofp:*cofp):*(
-				(lnexp - lnpindex - ln(mbar)):^2)):*cdfi[., i]
+				(lnexp - lnpindex - ln(mbar)):^2))
 		}
+		if (censor == "") {
+			shr[., i] = shr[., i]:*cdfi[., i] + delta[i]:*pdfi[., i]
+		}		
+		
 	}
 
 }
