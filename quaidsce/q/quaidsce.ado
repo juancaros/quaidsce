@@ -166,25 +166,25 @@ program Estimate, eclass
 	// GM: Check whether censoring exists & Probit
 	
 		if "`censor'" == "nocensor" {
+				
 		}
+		
 		else {
-		local np2 : word count `lnprices' `lnexp'  `demographics' intercept
-		mat c=J(1,`np2',.)
-		local pdf 
-		local cdf
+		local np_prob : word count `lnprices' `lnexp'  `demographics' intercept
+		mat c=J(1,`np_prob',.)
 		foreach x of varlist `shares' {
 			summ `x' if `touse', mean
 			if r(min) > 0 {
 				di as error "noncensoring for `x' found"
 				exit 499
 			}
-
-	// GM: Probit	as 
+		}
+			// GM: Probit	
 				
 			tempvar z`x' pdf`x' cdf`x' du`x' tmp`x' tau
 			qui gen double `z`x'' = 1 if `x' > 0  & `touse'
 			replace `z`x'' = 0 if `x' == 0  & `touse'
-			probit `z`x'' `lnprices' `lnexp'   `demographics'
+			probit `z`x'' `lnprices' `lnexp'  `demographics'
 			matrix `tmp`x''=e(b)
 			
 
@@ -194,31 +194,43 @@ program Estimate, eclass
 	
 		
 			mat c=c \ `tmp`x''
+			local pdf
+			local cdf
 			local pdf `pdf' `pdf`x''
 			local cdf `cdf' `cdf`x''
 			
-		}
+	
 		*delete the first row
 		mata st_matrix("tau",select(st_matrix("c"),st_matrix("c")[.,2]:~=.))
 		
-		local i 1
-		while (`i' < `neqn') {
-		local pdf2 `pdf2' `:word `i' of `pdf''
-		local `++i'
-		}
-		local i 1
-		while (`i' < `neqn') {
-		local cdf2 `cdf2' `:word `i' of `cdf''
-		local `++i'
-		local np = `np' + (`neqn'-1) 
+	
+		*pdf parameters
 		
-	}
-	}
+		local np = `np'
+		local np2 = `np' + (`neqn') 
+		
+		}
 	
 	
-	nlsur __quaidsce @ `shares2' if `touse',				///
-		lnp(`lnprices') lnexp(`lnexpenditure') cdfi(`cdf2') pdfi(`pdf2') a0(`anot')	///
-		nparam(`np') neq(`=`neqn'-1') fgnls noeqtab nocoeftab	///
+		
+		if "`censor'" == "nocensor" {
+		local shares `shares2' 
+		local np2= `np'
+		local neqn=`=`neqn'-1'
+		
+		}
+		
+		
+		else {
+		local shares `varlist'
+		local np2 = `np2'
+		local neqn `neqn'
+			}
+		
+		
+	nlsur __quaidsce @ `shares' if `touse',				///
+		lnp(`lnprices') lnexp(`lnexpenditure') cdfi(`cdf') pdfi(`pdf') a0(`anot')	///
+		nparam(`np2') neq(`neqn') fgnls noeqtab nocoeftab	///
 		`quadratic' `options' `censor' `demoopt'  `initialopt' `log' `vce'
 
 		
