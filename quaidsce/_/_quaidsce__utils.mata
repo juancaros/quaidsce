@@ -1,4 +1,4 @@
-*! version 1.1.1  25may2021
+*! version 1.1.1  25jan2021
 
 /*
 	_quaidsce__utils.mata
@@ -447,7 +447,7 @@ void _quaidsce__fullvector(string scalar ins,
 {
 
 	real vector	in
-	real vector	alpha, beta, lambda, rho
+	real vector	alpha, beta, lambda, rho, delta
 	real matrix	gamma, eta
 	
 	in = st_matrix(ins)
@@ -471,19 +471,25 @@ void _quaidsce__fullvector(string scalar ins,
 			lambda, delta)
 	}
 
-	//JCSH: fin; agrego else en el if de abajo
-		
 	else if (quadratics == "" & ndemo > 0) {
 		st_matrix(outs, (alpha, beta, (vech(gamma)'), 
 			lambda, (vec(eta')'), rho))
 	}
+	
 	else if (quadratics == "") {
 		st_matrix(outs, (alpha, beta, (vech(gamma)'), lambda))
 	}
+	
 	else if (ndemo > 0) {
 		st_matrix(outs, (alpha, beta, (vech(gamma)'), 
 			(vec(eta')'), rho))
 	}
+	
+	else if (censor == "") {
+		st_matrix(outs, (alpha, beta, (vech(gamma)'), 
+			delta))
+	}
+	
 	else {
 		st_matrix(outs, (alpha, beta, (vech(gamma)')))
 	}
@@ -628,6 +634,7 @@ void _quaidsce__getcoefs_wrk(real rowvector 	in,
 		}
 	}
 	
+	
 	//JCSH como delta sera un rowvector como lambda sigo el mismo procedimiento de arriba
 	if (censor == "") {
 		delta = J(1, neqn, 0)		// NB initialize to zero
@@ -668,9 +675,10 @@ void _quaidsce__expshrs(string scalar shrs,			///
 		      real scalar ndemo,			///
 		      real scalar a0,				///
 		      string scalar quadratics,			///
-		      string scalar ats,			///
 			  string scalar censor,			///
+		      string scalar ats,			///
 		      string scalar demos)
+			  
 {
 	real scalar i
 	real vector at, alpha, beta, lambda, rho, delta
@@ -692,8 +700,9 @@ void _quaidsce__expshrs(string scalar shrs,			///
 	}
 	
 	// Get all the parameters
-	_quaidsce__getcoefs_wrk(at, neqn, quadratics, censor, ndemo, censor,
+	_quaidsce__getcoefs_wrk(at, neqn, quadratics, censor, ndemo, 
 		alpha, beta, gamma, lambda, delta, eta, rho)
+
 
 	// First get the price index
 	lnpindex = a0 :+ lnp*alpha'
@@ -736,8 +745,8 @@ void _quaidsce__expshrs(string scalar shrs,			///
 		}
 		if (censor == "") {
 			shr[., i] = shr[., i]:*cdfi[., i] + delta[i]:*pdfi[., i]
-		}		
-		
+		}
+		// fix delta parameters in the estimation if nocensor
 	}
 
 }

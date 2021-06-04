@@ -33,7 +33,7 @@ program Estimate, eclass
 		  
 	local shares `varlist'
 	
-	di `shares'
+	*di `shares'
 	
 	if "`options'" != "" {
 		di as error "`options' not allowed"
@@ -166,7 +166,15 @@ program Estimate, eclass
 	// GM: Check whether censoring exists & Probit
 	
 		if "`censor'" == "nocensor" {
-				
+		foreach x of varlist `shares2' {
+		tempvar pdf`x' cdf`x'
+		gen `pdf`x''=0
+		gen `cdf`x''=1
+		local pdf
+		local cdf
+		local pdf `pdf' `pdf`x''
+		local cdf `cdf' `cdf`x''
+		}
 		}
 		
 		else {
@@ -178,13 +186,12 @@ program Estimate, eclass
 				di as error "noncensoring for `x' found"
 				exit 499
 			}
-		}
 			// GM: Probit	
 				
 			tempvar z`x' pdf`x' cdf`x' du`x' tmp`x' tau
 			qui gen double `z`x'' = 1 if `x' > 0  & `touse'
 			replace `z`x'' = 0 if `x' == 0  & `touse'
-			probit `z`x'' `lnprices' `lnexp'  `demographics'
+			qui probit `z`x'' `lnprices' `lnexp'  `demographics'
 			matrix `tmp`x''=e(b)
 			
 
@@ -198,39 +205,31 @@ program Estimate, eclass
 			local cdf
 			local pdf `pdf' `pdf`x''
 			local cdf `cdf' `cdf`x''
-			
+		}		
 	
 		*delete the first row
 		mata st_matrix("tau",select(st_matrix("c"),st_matrix("c")[.,2]:~=.))
 		
-	
-		*pdf parameters
-		
-		local np = `np'
-		local np2 = `np' + (`neqn') 
-		
 		}
 	
 	
-		
 		if "`censor'" == "nocensor" {
 		local shares `shares2' 
 		local np2= `np'
 		local neqn=`=`neqn'-1'
-		
+		}
+		else {
+		local shares `varlist'
+		// agregar condicionales para np2 en cada combinacion con censor
+		//if...
+		// local np2 = `np' + ...
+		local neqn `neqn'
 		}
 		
 		
-		else {
-		local shares `varlist'
-		local np2 = `np2'
-		local neqn `neqn'
-			}
-		
-		
-	nlsur __quaidsce @ `shares' if `touse',				///
+nlsur __quaidsce @ `shares' if `touse',				///
 		lnp(`lnprices') lnexp(`lnexpenditure') cdfi(`cdf') pdfi(`pdf') a0(`anot')	///
-		nparam(`np2') neq(`neqn') fgnls noeqtab nocoeftab	///
+		nparam(`np2') neq(`neqn') nls noeqtab nocoeftab	///
 		`quadratic' `options' `censor' `demoopt'  `initialopt' `log' `vce'
 
 		
