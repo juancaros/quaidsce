@@ -127,8 +127,8 @@ void _quaidsce__expelas_wrk(real vector   params,
 	if (rows(expelas) == 1) 	expelas = J(1, ng, .)
 	
 	_quaidsce__getcoefs_wrk(params, ng, 
-		      	      quadratics, ndemo,
-		      	      alpha, beta, gamma, lambda, eta, rho)
+		      	      quadratics, censor, ndemo,
+		      	      alpha, beta, gamma, lambda, delta, eta, rho)
 	if (quadratics == "") {
 		bofp = exp(lnp*beta')
 		lnpindex = lnp*alpha' :+ st_numscalar("e(anot)")
@@ -271,8 +271,8 @@ void _quaidsce__uncompelas_wrk(real vector   params,
 	if (cols(elas) == 1)	elas = J(1, ng^2, .)
 
 	_quaidsce__getcoefs_wrk(params, ng, 
-		      	      quadratics, ndemo,
-		      	      alpha, beta, gamma, lambda, eta, rho)
+		      	      quadratics, censor, ndemo,
+		      	      alpha, beta, gamma, lambda, delta, eta, rho)
 
 	if (quadratics == "") {
 		bofp = exp(lnp*beta')
@@ -442,7 +442,8 @@ void _quaidsce__fullvector(string scalar ins,
 			real scalar neqn,
 			string scalar quadratics,
 			real scalar ndemo,
-			string scalar outs)
+			string scalar outs,
+			string scalar censor)
 {
 
 	real vector	in
@@ -450,9 +451,29 @@ void _quaidsce__fullvector(string scalar ins,
 	real matrix	gamma, eta
 	
 	in = st_matrix(ins)
-	_quaidsce__getcoefs_wrk(in, neqn, quadratics, ndemo,
-		alpha, beta, gamma, lambda, eta, rho)
-	if (quadratics == "" & ndemo > 0) {
+	_quaidsce__getcoefs_wrk(in, neqn, quadratics, censor, ndemo,
+		alpha, beta, gamma, lambda, delta, eta, rho)
+	
+	
+	//JCSH: inicio	
+	if (quadratics == "" & censor == "" &  ndemo > 0) {
+		st_matrix(outs, (alpha, beta, (vech(gamma)'), 
+			lambda, delta, (vec(eta')'), rho))
+	}
+	
+	else if (censor == "" &  ndemo > 0) {
+		st_matrix(outs, (alpha, beta, (vech(gamma)'), 
+			delta, (vec(eta')'), rho))
+	}
+	
+	else if (quadratics == "" & censor == "") {
+		st_matrix(outs, (alpha, beta, (vech(gamma)'), 
+			lambda, delta)
+	}
+
+	//JCSH: fin; agrego else en el if de abajo
+		
+	else if (quadratics == "" & ndemo > 0) {
 		st_matrix(outs, (alpha, beta, (vech(gamma)'), 
 			lambda, (vec(eta')'), rho))
 	}
@@ -469,27 +490,46 @@ void _quaidsce__fullvector(string scalar ins,
 	
 }
 
+//JCSH agrego censor y delta como en _quaidsce__getcoefs_wrk
+//Para delta agrego una "s" como lo hace el autor
+//para cada uno de los input que representan coeficientes del modelo
+
 void _quaidsce__getcoefs(string scalar ins,
 		       real   scalar neqn,
 		       string scalar quadratics,
+			   string scalar censor,
 		       real   scalar ndemo,
 		       string scalar alphas,
 		       string scalar betas,
 		       string scalar gammas,
 		       string scalar lambdas,
+			   real rowvector deltas,
 		       string scalar etas,
 		       string scalar rhos)
 {
 	real scalar	np
 	real vector	in
-	real vector	alpha, beta, lambda, rho
+	real vector	alpha, beta, lambda, delta, rho //JCSH agrego delta
 	real matrix	gamma, eta
 
 	in = st_matrix(ins)
 
-	if (quadratics == "") {
+	//JCSH np abajo representa numero de parametros
+	// JCHS nuevo incia
+	if (quadratics == "" & censor == "") {
+		np = 4*(neqn-1) + neqn*(neqn-1)/2
+	}
+
+	else if (censor == "" ) {
 		np = 3*(neqn-1) + neqn*(neqn-1)/2
 	}
+
+	// JCHS nuevo termina; meto un else mas en el if de abajo
+	
+	else if (quadratics == "") {
+		np = 3*(neqn-1) + neqn*(neqn-1)/2
+	}
+	
 	else {
 		np = 2*(neqn-1) + neqn*(neqn-1)/2
 	}
@@ -501,12 +541,19 @@ void _quaidsce__getcoefs(string scalar ins,
 		exit(9999)
 	}
 	
-	_quaidsce__getcoefs_wrk(in, neqn, quadratics, ndemo, 
-				alpha, beta, gamma, lambda, eta, rho)
+	_quaidsce__getcoefs_wrk(in, neqn, quadratics, censor, ndemo, 
+				alpha, beta, gamma, lambda, delta, eta, rho)
 	
 	st_matrix(alphas, alpha)
 	st_matrix(betas, beta)
 	st_matrix(gammas, gamma)
+	
+	//JCSH Nuevo: inicio
+	if (censor == "") {
+		st_matrix(deltas, delta)
+	}
+	//JCSH Nuevo: fin
+	
 	if (quadratics == "") {
 		st_matrix(lambdas, lambda)
 	}
@@ -517,14 +564,18 @@ void _quaidsce__getcoefs(string scalar ins,
 	
 }
 
+//JCSH: agrego "censor" y "delta" abajo y actualizo en consecuencia donde se llame
+//a la funcion _quaidsce__getcoefs_wrk
 void _quaidsce__getcoefs_wrk(real rowvector 	in,
 			   real scalar		neqn,
 			   string scalar	quadratics,
+			   string scalar	censor,
 			   real scalar		ndemo,
 			   real rowvector	alpha,
 			   real rowvector	beta,
 			   real matrix		gamma,
 			   real rowvector	lambda,
+			   real rowvector 	delta, 
 			   real matrix		eta,
 			   real rowvector	rho)
 {
@@ -546,6 +597,7 @@ void _quaidsce__getcoefs_wrk(real rowvector 	in,
 		++col
 	}
 	
+		
 	gamma = J(neqn, neqn, 0)	// NB initialize to 0
 		// j is in outer loop, so that what we are doing corresponds
 		// to standard vech() and invvech() functions.
@@ -565,6 +617,8 @@ void _quaidsce__getcoefs_wrk(real rowvector 	in,
 	for(i=1; i<neqn; ++i) {
 		gamma[neqn,neqn] = gamma[neqn,neqn]-gamma[i,neqn]
 	}
+	
+	
 	if (quadratics == "") {
 		lambda = J(1, neqn, 0)		// NB initialize to zero
 		for(i=1; i<neqn; ++i) {
@@ -573,6 +627,18 @@ void _quaidsce__getcoefs_wrk(real rowvector 	in,
 			++col
 		}
 	}
+	
+	//JCSH como delta sera un rowvector como lambda sigo el mismo procedimiento de arriba
+	if (censor == "") {
+		delta = J(1, neqn, 0)		// NB initialize to zero
+		for(i=1; i<neqn; ++i) {
+			delta[i] = in[col]
+			delta[neqn] = delta[neqn] - delta[i]
+			++col
+		}
+	}
+	
+	
 	if (ndemo > 0) {
 		eta = J(ndemo, neqn, 0)
 		for(i=1; i<=ndemo; ++i) {
@@ -626,8 +692,8 @@ void _quaidsce__expshrs(string scalar shrs,			///
 	}
 	
 	// Get all the parameters
-	_quaidsce__getcoefs_wrk(at, neqn, quadratics, ndemo, censor,
-		alpha, beta, gamma, lambda, eta, rho, delta)
+	_quaidsce__getcoefs_wrk(at, neqn, quadratics, censor, ndemo, censor,
+		alpha, beta, gamma, lambda, delta, eta, rho)
 
 	// First get the price index
 	lnpindex = a0 :+ lnp*alpha'
