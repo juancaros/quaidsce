@@ -12,8 +12,10 @@ program nlsur__quaidsce
 	qui gen byte `touse' = 0
 	qui replace `touse' = 1 `if'
 
-	local nm1 : word count `varlist'
-	local neqn = `nm1' + 1
+	local neqn : word count `varlist'
+		if "`censor'" == "nocensor" {
+		local neqn = `neqn'+1
+		}
 	local ndemo : word count `demographics'
 
 	mata:_quaidsce__expshrs("`varlist'", "`touse'", "`lnexp'",	///

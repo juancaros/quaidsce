@@ -595,6 +595,10 @@ void _quaidsce__getcoefs_wrk(real rowvector 	in,
 		alpha[neqn] = alpha[neqn] - alpha[i]
 		++col
 	}
+	if (censor == "") {
+	alpha[neqn] = in[col]
+	++col
+	}
 	
 	beta = J(1, neqn, 0)		// NB initialize to 0
 	for(i=1; i<neqn; ++i) {
@@ -602,8 +606,11 @@ void _quaidsce__getcoefs_wrk(real rowvector 	in,
 		beta[neqn] = beta[neqn] - beta[i]
 		++col
 	}
-	
-		
+	if (censor == "") {
+	beta[neqn] = in[col]
+	++col
+	}
+			
 	gamma = J(neqn, neqn, 0)	// NB initialize to 0
 		// j is in outer loop, so that what we are doing corresponds
 		// to standard vech() and invvech() functions.
@@ -624,7 +631,6 @@ void _quaidsce__getcoefs_wrk(real rowvector 	in,
 		gamma[neqn,neqn] = gamma[neqn,neqn]-gamma[i,neqn]
 	}
 	
-	
 	if (quadratics == "") {
 		lambda = J(1, neqn, 0)		// NB initialize to zero
 		for(i=1; i<neqn; ++i) {
@@ -632,20 +638,22 @@ void _quaidsce__getcoefs_wrk(real rowvector 	in,
 			lambda[neqn] = lambda[neqn] - lambda[i]
 			++col
 		}
-	}
-	
-	
-	//JCSH como delta sera un rowvector como lambda sigo el mismo procedimiento de arriba
-	if (censor == "") {
-		delta = J(1, neqn, 0)		// NB initialize to zero
-		for(i=1; i<neqn; ++i) {
-			delta[i] = in[col]
-			delta[neqn] = delta[neqn] - delta[i]
-			++col
+		if (censor == "") {
+		lambda[neqn] = in[col]
+		++col
 		}
 	}
 	
 	
+	//JCSH como delta sera un rowvector como lambda sigo el mismo procedimiento de arriba
+	delta = J(1, neqn, 1)		// NB initialize to one
+	if (censor == "") {
+		for(i=1; i<=neqn; ++i) {
+			delta[i] = in[col]
+			++col
+		}
+	}
+		
 	if (ndemo > 0) {
 		eta = J(ndemo, neqn, 0)
 		for(i=1; i<=ndemo; ++i) {
@@ -661,7 +669,6 @@ void _quaidsce__getcoefs_wrk(real rowvector 	in,
 			++col
 		}
 	}
-	
 }
 
 
@@ -694,15 +701,21 @@ void _quaidsce__expshrs(string scalar shrs,			///
 	st_view(demo=.,   .,  demos, touses)
 	
 	at = st_matrix(ats)
-
-	if (cols(shr) != (neqn-1)) {
+	
+	if (censor == "") {
+		if (cols(shr) != (neqn)) {
 		exit(9998)
+		}
+	}
+	else {
+		if (cols(shr) != (neqn-1)) {
+		exit(9998)
+		}
 	}
 	
 	// Get all the parameters
 	_quaidsce__getcoefs_wrk(at, neqn, quadratics, censor, ndemo, 
 		alpha, beta, gamma, lambda, delta, eta, rho)
-
 
 	// First get the price index
 	lnpindex = a0 :+ lnp*alpha'
@@ -728,7 +741,26 @@ void _quaidsce__expshrs(string scalar shrs,			///
 	}
 	else {
 		bofp = J(rows(lnp), 1, 1)
-	}	
+	}
+	if (censor == "") {
+	for(i=1; i<=neqn; ++i) {
+		shr[.,i] = (alpha[i] :+ lnp*gamma[i,.]')
+		if (ndemo > 0) {
+			shr[., i] = (shr[., i] + 
+				(J(rows(lnp), 1, beta[i]) + demo*eta[.,i]):*
+				(lnexp - lnpindex - ln(mbar)))
+		}
+		else {
+			shr[., i] = (shr[., i] + beta[i]*(lnexp - lnpindex))
+		}
+		if (quadratics == "") {
+			shr[., i] = (shr[., i] + lambda[i]:/(bofp:*cofp):*(
+				(lnexp - lnpindex - ln(mbar)):^2))
+		}
+		shr[., i] = shr[., i]:*cdfi[., i] + delta[i]:*pdfi[., i]
+	}
+	}
+	else {
 	for(i=1; i<neqn; ++i) {
 		shr[.,i] = (alpha[i] :+ lnp*gamma[i,.]')
 		if (ndemo > 0) {
@@ -743,12 +775,8 @@ void _quaidsce__expshrs(string scalar shrs,			///
 			shr[., i] = (shr[., i] + lambda[i]:/(bofp:*cofp):*(
 				(lnexp - lnpindex - ln(mbar)):^2))
 		}
-		if (censor == "") {
-			shr[., i] = shr[., i]:*cdfi[., i] + delta[i]:*pdfi[., i]
-		}
-		// fix delta parameters in the estimation if nocensor
+	}	
 	}
-
 }
 
 void _quaidsce__predshrs(string scalar shrs,			///

@@ -132,9 +132,11 @@ program Estimate, eclass
 	
 	if "`quadratic'" == "noquadratic" {
 		local np = 2*(`neqn'-1) + `neqn'*(`neqn'-1)/2
+		local np2 = 2*(`neqn') + `neqn'*(`neqn'-1)/2
 	}
 	else {
 		local np = 3*(`neqn'-1) + `neqn'*(`neqn'-1)/2
+		local np2 = 3*(`neqn') + `neqn'*(`neqn'-1)/2
 	}
 	
 	
@@ -149,6 +151,7 @@ program Estimate, eclass
 		local demoopt "demographics(`demographics')"
 		local ndemos : word count `demographics'
 		local np = `np' + `ndemos'*(`neqn'-1) + `ndemos'
+		local np2 = `np2' + `ndemos'*(`neqn'-1) + `ndemos'
 	}
 	
 	if "`initial'" != "" {
@@ -211,25 +214,21 @@ program Estimate, eclass
 		mata st_matrix("tau",select(st_matrix("c"),st_matrix("c")[.,2]:~=.))
 		
 		}
-	
-	
+		
 		if "`censor'" == "nocensor" {
 		local shares `shares2' 
 		local np2= `np'
-		local neqn=`=`neqn'-1'
+		local neqn2=`=`neqn'-1'
 		}
 		else {
-		local shares `varlist'
-		// agregar condicionales para np2 en cada combinacion con censor
-		//if...
-		// local np2 = `np' + ...
-		local neqn `neqn'
+		local np2= `np2' + `neqn' //add deltas
+		local neqn2 `neqn'
 		}
 		
 		
 nlsur __quaidsce @ `shares' if `touse',				///
 		lnp(`lnprices') lnexp(`lnexpenditure') cdfi(`cdf') pdfi(`pdf') a0(`anot')	///
-		nparam(`np2') neq(`neqn') nls noeqtab nocoeftab	///
+		nparam(`np2') neq(`neqn2') nls noeqtab nocoeftab	///
 		`quadratic' `options' `censor' `demoopt'  `initialopt' `log' `vce'
 
 		

@@ -5,10 +5,10 @@ lmbuild lquaidsce.mlib, replace dir( C:\ado\personal\l\)
 
 webuse food, clear
 program drop _all
-*set trace on
-*set tracedepth 4
-*set matadebug on
-*mata: mata set matalnum on
+set trace on
+set tracedepth 4
+set matadebug on
+mata: mata set matalnum on
 
 set seed 1
 gen nkids = int(runiform()*4)
