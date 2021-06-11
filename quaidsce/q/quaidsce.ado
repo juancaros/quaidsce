@@ -258,13 +258,13 @@ nlsur __quaidsce @ `shares' if `touse',				///
 		}
 	}
 	
-	//JCSH temporal
+	
 	if "`censor'" == "" {
 		forvalues i = 1/`neqn' {
 			local namestripe `namestripe' delta:delta_`i'
 		}
 	}
-	//JCSH temporal
+
 	if `ndemos' > 0 {
 		foreach var of varlist `demographics' {
 			forvalues i = 1/`neqn' {
@@ -276,12 +276,6 @@ nlsur __quaidsce @ `shares' if `touse',				///
 		}
 	}
 	
-	//JCSH temporary global and matricces
-	global bfull "`bfull'"
-	global namestripe "`namestripe'"
-	matrix A1=`bfull'
-	matrix A2=colsof(`bfull')
-
 	mat colnames `bfull' = `namestripe'
 	mat colnames `Vfull' = `namestripe'
 	mat rownames `Vfull' = `namestripe'
@@ -367,15 +361,15 @@ program Display
 	syntax , [Level(cilevel)]
 	
 	di
-	if "`e(quadratic)'" == "" {
+	if "`quadratic'" == "" {
 		di in smcl as text "Quadratic AIDS model"
 		di in smcl as text "{hline 20}"
 	}
-	else if "`e(censor)'" == "" {
+	else if "`censor'" == "" {
 		di in smcl as text "Censored AIDS model"
 		di in smcl as text "{hline 20}"
 	}
-	else if "`e(censor)'" == "" & "`e(quadratic)'" == "" {
+	else if "`censor'" == "" & "`quadratic'" == "" {
 		di in smcl as text "Censored Quadratic AIDS model"
 		di in smcl as text "{hline 20}"
 	}
