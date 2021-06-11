@@ -167,19 +167,17 @@ program Estimate, eclass
 	}
 	
 	// GM: Check whether censoring exists & Probit
-	
+		local pdf
+		local cdf
 		if "`censor'" == "nocensor" {
 		foreach x of varlist `shares2' {
 		tempvar pdf`x' cdf`x'
 		gen `pdf`x''=0
 		gen `cdf`x''=1
-		local pdf
-		local cdf
 		local pdf `pdf' `pdf`x''
 		local cdf `cdf' `cdf`x''
 		}
 		}
-		
 		else {
 		local np_prob : word count `lnprices' `lnexp'  `demographics' intercept
 		mat c=J(1,`np_prob',.)
@@ -193,22 +191,23 @@ program Estimate, eclass
 				
 			tempvar z`x' pdf`x' cdf`x' du`x' tmp`x' tau
 			qui gen double `z`x'' = 1 if `x' > 0  & `touse'
-			replace `z`x'' = 0 if `x' == 0  & `touse'
+			qui replace `z`x'' = 0 if `x' == 0  & `touse'
+			/*make check for probit*/
 			qui probit `z`x'' `lnprices' `lnexp'  `demographics'
 			matrix `tmp`x''=e(b)
 			
-
 			quietly predict `du`x''
+			if e(N) < _N {
+				di as error "at least one demographic completely predicts probit outcome, check your data"
+				exit 499
+			}
 			gen `pdf`x''= normalden(`du`x'')
 			gen `cdf`x''= normal(`du`x'')
-	
-		
+			
 			mat c=c \ `tmp`x''
-			local pdf
-			local cdf
 			local pdf `pdf' `pdf`x''
 			local cdf `cdf' `cdf`x''
-		}		
+		}
 	
 		*delete the first row
 		mata st_matrix("tau",select(st_matrix("c"),st_matrix("c")[.,2]:~=.))
@@ -228,10 +227,9 @@ program Estimate, eclass
 		
 nlsur __quaidsce @ `shares' if `touse',				///
 		lnp(`lnprices') lnexp(`lnexpenditure') cdfi(`cdf') pdfi(`pdf') a0(`anot')	///
-		nparam(`np2') neq(`neqn2') nls noeqtab nocoeftab	///
+		nparam(`np2') neq(`neqn2') ifgnls noeqtab nocoeftab	///
 		`quadratic' `options' `censor' `demoopt'  `initialopt' `log' `vce'
 
-		
 
 	// do delta method to get cov matrix
 
@@ -239,11 +237,10 @@ nlsur __quaidsce @ `shares' if `touse',				///
 	mat `b' = e(b)
 	mat `V' = e(V)
 
-	mata:_quaidsce__fullvector("`b'", `neqn', "`quadratic'", 		///
-					`ndemos', "`bfull'")
-	mata:_quaidsce__delta(`neqn', "`quadratic'", `ndemos', "`Delta'")
+	mata:_quaidsce__fullvector("`b'", `neqn', "`quadratic'", `ndemos', "`bfull'", "`censor'")
+	mata:_quaidsce__delta(`neqn', "`quadratic'", "`censor'", `ndemos', "`Delta'")
 	mat `Vfull' = `Delta'*`V'*`Delta''
-
+	
 	forvalues i = 1/`neqn' {
 		local namestripe `namestripe' alpha:alpha_`i'
 	}
@@ -260,6 +257,14 @@ nlsur __quaidsce @ `shares' if `touse',				///
 			local namestripe `namestripe' lambda:lambda_`i'
 		}
 	}
+	
+	//JCSH temporal
+	if "`censor'" == "" {
+		forvalues i = 1/`neqn' {
+			local namestripe `namestripe' delta:delta_`i'
+		}
+	}
+	//JCSH temporal
 	if `ndemos' > 0 {
 		foreach var of varlist `demographics' {
 			forvalues i = 1/`neqn' {
@@ -271,14 +276,21 @@ nlsur __quaidsce @ `shares' if `touse',				///
 		}
 	}
 	
+	//JCSH temporary global and matricces
+	global bfull "`bfull'"
+	global namestripe "`namestripe'"
+	matrix A1=`bfull'
+	matrix A2=colsof(`bfull')
+
 	mat colnames `bfull' = `namestripe'
 	mat colnames `Vfull' = `namestripe'
 	mat rownames `Vfull' = `namestripe'
 	
-	tempname alpha beta gamma lambda eta rho ll
-	mata:_quaidsce__getcoefs("`b'", `neqn', "`quadratic'", `ndemos', 	///
-			"`alpha'", "`beta'", "`gamma'", "`lambda'",	///
+	tempname alpha beta gamma lambda delta eta rho ll
+	mata:_quaidsce__getcoefs("`b'", `neqn', "`quadratic'", "`censor'", `ndemos', 	///
+			"`alpha'", "`beta'", "`gamma'", "`lambda'", "`delta'",	///
 			"`eta'", "`rho'")	
+			
 	scalar `ll' = e(ll)
 	local vcetype	`e(vcetype)'
 	local clustvar	`e(clustvar)'
@@ -297,6 +309,12 @@ nlsur __quaidsce @ `shares' if `touse',				///
 	}
 	else {
 		eret local quadratic	"noquadratic"
+	}	
+	if "`censor'" == "" {
+		eret matrix delta = `delta'
+	}
+	else {
+		eret local censor	"nocensor"
 	}
 	if `ndemos' > 0 {
 		eret matrix eta = `eta'
@@ -351,6 +369,14 @@ program Display
 	di
 	if "`e(quadratic)'" == "" {
 		di in smcl as text "Quadratic AIDS model"
+		di in smcl as text "{hline 20}"
+	}
+	else if "`e(censor)'" == "" {
+		di in smcl as text "Censored AIDS model"
+		di in smcl as text "{hline 20}"
+	}
+	else if "`e(censor)'" == "" & "`e(quadratic)'" == "" {
+		di in smcl as text "Censored Quadratic AIDS model"
 		di in smcl as text "{hline 20}"
 	}
 	else {

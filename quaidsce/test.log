@@ -1,0 +1,118 @@
+---------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\jccaro\quaidsce\quaidsce\test.log
+  log type:  text
+ opened on:  11 Jun 2021, 16:35:29
+
+. webuse food, clear
+
+. program drop _all
+
+. *set trace on
+. *set tracedepth 4
+. *set matadebug on
+. *mata: mata set matalnum on
+. 
+. set seed 1
+
+. gen nkids = int(runiform()*4)
+
+. gen rural = (runiform() > 0.7)
+
+. gen income = exp(rnormal())
+
+. 
+. quaids w1-w4, anot(10) prices(p1-p4) expenditure(expfd) demographics(nkids income) nolog 
+(obs = 4,048)
+Calculating NLS estimates...
+Calculating FGNLS estimates...
+FGNLS iteration 2...
+FGNLS iteration 3...
+FGNLS iteration 4...
+
+Quadratic AIDS model
+--------------------
+Number of obs          =       4048
+Number of demographics =          2
+Alpha_0                =         10
+Log-likelihood         =  13097.822
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+alpha        |
+     alpha_1 |   .9566136   .0676272    14.15   0.000     .8240667     1.08916
+     alpha_2 |  -.0872321   .0754198    -1.16   0.247    -.2350521     .060588
+     alpha_3 |   .0086646   .0455246     0.19   0.849     -.080562    .0978911
+     alpha_4 |   .1219539   .0728821     1.67   0.094    -.0208924    .2648002
+-------------+----------------------------------------------------------------
+beta         |
+      beta_1 |   .2260468   .0287995     7.85   0.000     .1696008    .2824928
+      beta_2 |  -.1119623   .0291143    -3.85   0.000    -.1690253   -.0548993
+      beta_3 |  -.0366088   .0165902    -2.21   0.027     -.069125   -.0040926
+      beta_4 |  -.0774757   .0276097    -2.81   0.005    -.1315898   -.0233617
+-------------+----------------------------------------------------------------
+gamma        |
+   gamma_1_1 |    .304762   .0495152     6.15   0.000     .2077139    .4018101
+   gamma_2_1 |   -.142961   .0314966    -4.54   0.000    -.2046931   -.0812289
+   gamma_3_1 |  -.0647388   .0151246    -4.28   0.000    -.0943825   -.0350951
+   gamma_4_1 |  -.0970622   .0277391    -3.50   0.000    -.1514297   -.0426946
+   gamma_2_2 |   .1101483   .0239404     4.60   0.000      .063226    .1570707
+   gamma_3_2 |   .0133083   .0071416     1.86   0.062    -.0006889    .0273056
+   gamma_4_2 |   .0195044   .0108891     1.79   0.073    -.0018379    .0408466
+   gamma_3_3 |    .047224   .0046368    10.18   0.000      .038136    .0563119
+   gamma_4_3 |   .0042065   .0059935     0.70   0.483    -.0075406    .0159536
+   gamma_4_4 |   .0733513    .016072     4.56   0.000     .0418508    .1048518
+-------------+----------------------------------------------------------------
+lambda       |
+    lambda_1 |   .0187804   .0029073     6.46   0.000     .0130821    .0244786
+    lambda_2 |  -.0077083   .0027008    -2.85   0.004    -.0130017   -.0024149
+    lambda_3 |  -.0034188   .0014763    -2.32   0.021    -.0063124   -.0005253
+    lambda_4 |  -.0076532   .0025318    -3.02   0.003    -.0126155   -.0026909
+-------------+----------------------------------------------------------------
+eta          |
+ eta_nkids_1 |  -.0000236   .0003033    -0.08   0.938    -.0006181    .0005709
+ eta_nkids_2 |  -.0001712   .0003621    -0.47   0.636    -.0008808    .0005385
+ eta_nkids_3 |  -.0000462   .0001122    -0.41   0.680    -.0002662    .0001737
+ eta_nkids_4 |    .000241   .0002394     1.01   0.314    -.0002283    .0007103
+eta_income_1 |   .0000295   .0001142     0.26   0.796    -.0001943    .0002532
+eta_income_2 |   .0000226   .0001319     0.17   0.864    -.0002359    .0002811
+eta_income_3 |  -.0000708   .0000495    -1.43   0.153    -.0001679    .0000263
+eta_income_4 |   .0000187   .0001081     0.17   0.863    -.0001932    .0002306
+-------------+----------------------------------------------------------------
+rho          |
+   rho_nkids |  -.0445272   .0742974    -0.60   0.549    -.1901474    .1010929
+  rho_income |    .039113   .0494035     0.79   0.429     -.057716     .135942
+------------------------------------------------------------------------------
+
+. quaidsce w1-w4, anot(10) prices(p1-p4) expenditure(expfd) demographics(nkids income) nolog nocens
+> or
+(obs = 4,048)
+Calculating NLS estimates...
+Calculating FGNLS estimates...
+FGNLS iteration 2...
+FGNLS iteration 3...
+FGNLS iteration 4...
+
+Quadratic AIDS model
+--------------------
+else not found
+r(111);
+
+end of do-file
+
+r(111);
+
+. do "C:\Users\jccaro\AppData\Local\Temp\STD270c_000000.tmp"
+
+. quaidsce w1-w4, anot(10) prices(p1-p4) expenditure(expfd) demographics(nkids income) nolog 
+(obs = 4,048)
+Calculating NLS estimates...
+Calculating FGNLS estimates...
+FGNLS iteration 2...
+FGNLS iteration 3...
+FGNLS iteration 4...
+FGNLS iteration 5...
+FGNLS iteration 6...
+FGNLS iteration 7...
+FGNLS iteration 8...

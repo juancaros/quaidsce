@@ -437,7 +437,6 @@ void _quaidsce__compelas_wrk(real vector   params,
 }
 
 
-
 void _quaidsce__fullvector(string scalar ins,
 			real scalar neqn,
 			string scalar quadratics,
@@ -455,49 +454,34 @@ void _quaidsce__fullvector(string scalar ins,
 		alpha, beta, gamma, lambda, delta, eta, rho)
 	
 	
-	//JCSH: inicio	
-	if (quadratics == "" & censor == "" &  ndemo > 0) {
-		st_matrix(outs, (alpha, beta, (vech(gamma)'), 
-			lambda, delta, (vec(eta')'), rho))
-	}
+	//JCSH: Rescribo todas las posible combinaciones	
+	//Censoring, quadratics, and demographics
+	if (censor == "" & quadratics == ""  &  ndemo >  0) st_matrix(outs, (alpha, beta, (vech(gamma)'), lambda, delta, (vec(eta')'), rho))
+	//Censoring and quadratics
+	if (censor == "" & quadratics == ""  &  ndemo == 0) st_matrix(outs, (alpha, beta, (vech(gamma)'), lambda, delta))
+	//Censoring and demographics
+	if (censor == "" & quadratics != ""  &  ndemo >  0) st_matrix(outs, (alpha, beta, (vech(gamma)'), delta, (vec(eta')'), rho))
+	//Censoring
+	if (censor == "" & quadratics != ""  &  ndemo == 0) st_matrix(outs, (alpha, beta, (vech(gamma)'), delta))
+	//Quadratics and demographics
+	if (censor != "" & quadratics == ""  &  ndemo >  0) st_matrix(outs, (alpha, beta, (vech(gamma)'), lambda, (vec(eta')'), rho))
+	//Quadratics 
+	if (censor != "" & quadratics == ""  &  ndemo == 0) st_matrix(outs, (alpha, beta, (vech(gamma)'), lambda))
+	//Demographics
+	if (censor != "" & quadratics != ""  &  ndemo >  0) st_matrix(outs, (alpha, beta, (vech(gamma)'), (vec(eta')'), rho))
 	
-	else if (censor == "" &  ndemo > 0) {
-		st_matrix(outs, (alpha, beta, (vech(gamma)'), 
-			delta, (vec(eta')'), rho))
-	}
+	//No censoring, no quadratics, and no demographics
 	
-	else if (quadratics == "" & censor == "") {
-		st_matrix(outs, (alpha, beta, (vech(gamma)'), 
-			lambda, delta)
-	}
-
-	else if (quadratics == "" & ndemo > 0) {
-		st_matrix(outs, (alpha, beta, (vech(gamma)'), 
-			lambda, (vec(eta')'), rho))
-	}
-	
-	else if (quadratics == "") {
-		st_matrix(outs, (alpha, beta, (vech(gamma)'), lambda))
-	}
-	
-	else if (ndemo > 0) {
-		st_matrix(outs, (alpha, beta, (vech(gamma)'), 
-			(vec(eta')'), rho))
-	}
-	
-	else if (censor == "") {
-		st_matrix(outs, (alpha, beta, (vech(gamma)'), 
-			delta))
-	}
-	
-	else {
-		st_matrix(outs, (alpha, beta, (vech(gamma)')))
-	}
+	if (censor != "" & quadratics != ""  &  ndemo == 0) st_matrix(outs, (alpha, beta, (vech(gamma)')))
+	//else st_matrix(outs, (alpha, beta, (vech(gamma)')))
+		
 	
 }
 
+
 //JCSH agrego censor y delta como en _quaidsce__getcoefs_wrk
 //Para delta agrego una "s" como lo hace el autor
+//Asimismo deltas entra como string variable
 //para cada uno de los input que representan coeficientes del modelo
 
 void _quaidsce__getcoefs(string scalar ins,
@@ -509,10 +493,12 @@ void _quaidsce__getcoefs(string scalar ins,
 		       string scalar betas,
 		       string scalar gammas,
 		       string scalar lambdas,
-			   real rowvector deltas,
+			   string scalar deltas,
 		       string scalar etas,
 		       string scalar rhos)
 {
+	
+	external scalar quadratics
 	real scalar	np
 	real vector	in
 	real vector	alpha, beta, lambda, delta, rho //JCSH agrego delta
@@ -523,22 +509,19 @@ void _quaidsce__getcoefs(string scalar ins,
 	//JCSH np abajo representa numero de parametros
 	// JCHS nuevo incia
 	if (quadratics == "" & censor == "") {
-		np = 4*(neqn-1) + neqn*(neqn-1)/2
+		np = 4*neqn + neqn*(neqn-1)/2  
 	}
-
 	else if (censor == "" ) {
-		np = 3*(neqn-1) + neqn*(neqn-1)/2
+		np = 3*neqn + neqn*(neqn-1)/2
 	}
-
 	// JCHS nuevo termina; meto un else mas en el if de abajo
-	
 	else if (quadratics == "") {
 		np = 3*(neqn-1) + neqn*(neqn-1)/2
 	}
-	
 	else {
 		np = 2*(neqn-1) + neqn*(neqn-1)/2
 	}
+	
 	if (ndemo > 0) {
 		np = np + ndemo*(neqn-1) + ndemo
 	}
@@ -687,12 +670,12 @@ void _quaidsce__expshrs(string scalar shrs,			///
 		      string scalar demos)
 			  
 {
-	real scalar i
+	real scalar i, j 
 	real vector at, alpha, beta, lambda, rho, delta
 	real vector lnexp, lnpindex, bofp, cofp, mbar
 	real matrix gamma, eta
 	real matrix lnp, shr, demo, cdfi, pdfi
-
+		
 	st_view(shr=.,   .,    shrs, touses)
 	st_view(lnp=.,   .,    lnps, touses)
 	st_view(cdfi=.,   .,    cdfis, touses)
@@ -742,41 +725,52 @@ void _quaidsce__expshrs(string scalar shrs,			///
 	else {
 		bofp = J(rows(lnp), 1, 1)
 	}
-	if (censor == "") {
-	for(i=1; i<=neqn; ++i) {
-		shr[.,i] = (alpha[i] :+ lnp*gamma[i,.]')
-		if (ndemo > 0) {
-			shr[., i] = (shr[., i] + 
-				(J(rows(lnp), 1, beta[i]) + demo*eta[.,i]):*
-				(lnexp - lnpindex - ln(mbar)))
+
+		if (censor == "") {
+			for(i=1; i<=neqn; ++i) {
+			shr[.,i] = (alpha[i] :+ lnp*gamma[i,.]')
+			if (ndemo > 0) {
+				shr[., i] = (shr[., i] + 
+					(J(rows(lnp), 1, beta[i]) + demo*eta[.,i]):*
+					(lnexp - lnpindex - ln(mbar)))
+			}
+			else {
+				shr[., i] = (shr[., i] + beta[i]*(lnexp - lnpindex))
+			}
+			if (quadratics == "") {
+				shr[., i] = (shr[., i] + lambda[i]:/(bofp:*cofp):*(
+					(lnexp - lnpindex - ln(mbar)):^2))
+			}
+			shr[., i] = shr[., i]:*cdfi[., i] + delta[i]*pdfi[., i]
+			
+			//for(j=1; j<=rows(shr); ++j) {
+			//	if (shr[j, i] > 0) {
+			//	shr[j, i] = shr[j, i]*cdfi[j, i] + delta[i]*pdfi[j, i]
+			//	}
+			//	else {
+			//	shr[j, i] = 0
+			//	}
+			//}
+			
+			}
 		}
 		else {
-			shr[., i] = (shr[., i] + beta[i]*(lnexp - lnpindex))
+			for(i=1; i<neqn; ++i) {
+			shr[.,i] = (alpha[i] :+ lnp*gamma[i,.]')
+			if (ndemo > 0) {
+				shr[., i] = (shr[., i] + 
+					(J(rows(lnp), 1, beta[i]) + demo*eta[.,i]):*
+					(lnexp - lnpindex - ln(mbar)))
+			}
+			else {
+				shr[., i] = (shr[., i] + beta[i]*(lnexp - lnpindex))
+			}
+			if (quadratics == "") {
+				shr[., i] = (shr[., i] + lambda[i]:/(bofp:*cofp):*(
+					(lnexp - lnpindex - ln(mbar)):^2))
+			}
+			}
 		}
-		if (quadratics == "") {
-			shr[., i] = (shr[., i] + lambda[i]:/(bofp:*cofp):*(
-				(lnexp - lnpindex - ln(mbar)):^2))
-		}
-		shr[., i] = shr[., i]:*cdfi[., i] + delta[i]:*pdfi[., i]
-	}
-	}
-	else {
-	for(i=1; i<neqn; ++i) {
-		shr[.,i] = (alpha[i] :+ lnp*gamma[i,.]')
-		if (ndemo > 0) {
-			shr[., i] = (shr[., i] + 
-				(J(rows(lnp), 1, beta[i]) + demo*eta[.,i]):*
-				(lnexp - lnpindex - ln(mbar)))
-		}
-		else {
-			shr[., i] = (shr[., i] + beta[i]*(lnexp - lnpindex))
-		}
-		if (quadratics == "") {
-			shr[., i] = (shr[., i] + lambda[i]:/(bofp:*cofp):*(
-				(lnexp - lnpindex - ln(mbar)):^2))
-		}
-	}	
-	}
 }
 
 void _quaidsce__predshrs(string scalar shrs,			///
@@ -894,16 +888,23 @@ void _quaidsce__sharebar(string scalar outs, touses)
 
 void _quaidsce__delta(real scalar ng, 
 		    string scalar quadratics,
+			string scalar censor,		
 		    real scalar ndemo,
 		    string scalar Dmats)
 {
 	real scalar	i, j, ic, jc, m, n
 	real scalar	ngm1
-	real matrix	block, Delta, Gamma
+	real matrix	block, blockd, Delta, Gamma
 
 	ngm1 = ng - 1
-	block = I(ngm1) \ J(1, ngm1, -1)
 	
+	if (censor == "") {
+	block = I(ng) 
+	}
+	else {
+	block = I(ngm1) \ J(1, ngm1, -1)
+	}
+	blockd = I(ngm1) \ J(1, ngm1, -1)
 	Delta = block				// alpha
 	Delta = blockdiag(Delta, block)		// beta
 
@@ -935,17 +936,22 @@ void _quaidsce__delta(real scalar ng,
 			++m
 		}
 	}
+	
 	Delta = blockdiag(Delta, Gamma)
 
 	if (quadratics == "") {
 		Delta = blockdiag(Delta, block)		// lambda	
 	}
 	
+	if (censor == "") {
+		Delta = blockdiag(Delta, block)		// delta	
+	}
+	
 	if (ndemo > 0) {
-		for(i=1; i<= ndemo; ++i) Delta = blockdiag(Delta, block)
+		for(i=1; i<= ndemo; ++i) Delta = blockdiag(Delta, blockd)
 		Delta = blockdiag(Delta, I(ndemo))
 	}
-
+	
 	st_matrix(Dmats, Delta)
 	
 }
