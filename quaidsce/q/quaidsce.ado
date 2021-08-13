@@ -183,28 +183,33 @@ program Estimate, eclass
 		mat c=J(1,`np_prob',.)
 		foreach x of varlist `shares' {
 			summ `x' if `touse', mean
-			if r(min) > 0 {
-				di as error "noncensoring for `x' found"
-				exit 499
-			}
+			*if r(min) > 0 {
+			*	di as error "noncensoring for `x' found"
+			*	exit 499
+			*}
 			// GM: Probit	
-				
 			tempvar z`x' pdf`x' cdf`x' du`x' tmp`x' tau
 			qui gen double `z`x'' = 1 if `x' > 0  & `touse'
 			qui replace `z`x'' = 0 if `x' == 0  & `touse'
+			qui gen `pdf`x''=0
+			qui gen `cdf`x''=1
 			/*make check for probit*/
+			summ `z`x'' if `touse', mean
+			if r(min) == 0 {
 			qui probit `z`x'' `lnprices' `lnexp'  `demographics'
 			matrix `tmp`x''=e(b)
-			
+			mat c=c \ `tmp`x''
 			quietly predict `du`x''
 			if e(N) < _N {
-				di as error "at least one demographic completely predicts probit outcome, check your data"
+				di as error "at least one variable completely predicts probit outcome, check your data"
 				exit 499
 			}
-			gen `pdf`x''= normalden(`du`x'')
-			gen `cdf`x''= normal(`du`x'')
+			qui replace `pdf`x''= normalden(`du`x'')
+			qui replace `cdf`x''= normal(`du`x'')
+			}
+			else {
+			}
 			
-			mat c=c \ `tmp`x''
 			local pdf `pdf' `pdf`x''
 			local cdf `cdf' `cdf`x''
 		}
@@ -227,8 +232,8 @@ program Estimate, eclass
 		
 nlsur __quaidsce @ `shares' if `touse',				///
 		lnp(`lnprices') lnexp(`lnexpenditure') cdfi(`cdf') pdfi(`pdf') a0(`anot')	///
-		nparam(`np2') neq(`neqn2') ifgnls noeqtab nocoeftab	///
-		`quadratic' `options' `censor' `demoopt'  `initialopt' `log' `vce'
+		nparam(`np2') neq(`neqn2') nls noeqtab nocoeftab	///
+		`quadratic' `options' `censor' `demoopt'  `initialopt' `log' `vce' 
 
 
 	// do delta method to get cov matrix
