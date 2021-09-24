@@ -1,3 +1,6 @@
 v 3
-d Juan Caro, University of Luxembourg.
+d Juan Carlos Caro, University of Luxembourg.
+d Juan Carlos Salgado, INSP Mexico.
+d Grace Melo, Texas A&M
+d Jose Alberto Molina, Universidad de Zaragoza.
 p quaidsce Censored QUAIDS estimation.
