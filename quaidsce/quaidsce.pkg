@@ -1,0 +1,11 @@
+v 1
+d quaidsce Censored QUAIDS estimation
+d Juan Caro, University of Luxembourg
+f _quaidsce_utils.mata 
+f lquaidsce.mlib
+f nlsur__quaidsce.ado
+f quaidsce.ado
+f quaidsce.sthlp
+f quaidsce_estat.ado
+f quaidsce_p.ado
+f quaidsce_postestimation_sthlp

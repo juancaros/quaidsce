@@ -1,0 +1,3 @@
+v 1
+d Juan Caro, University of Luxembourg
+p quaidsce Censored QUAIDS estimation
