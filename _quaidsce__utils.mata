@@ -1,7 +1,7 @@
 *! version 1.1.1  25jan2021
 
 /*
-	_quaidsce_utils.mata
+	_quaidsce__utils.mata
 	
 	Mata routines called by
 		nlsur__quaidsce.ado
