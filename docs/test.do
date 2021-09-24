@@ -1,10 +1,10 @@
 clear all
 capture log close
 set maxvar 10000
-cd "C:\ado\personal\_"  //set path
+*cd "C:\ado\plus\u"  //set path
 
-do _quaidsce__utils.mata //run mata to update libraries
-lmbuild lquaidsce.mlib, replace dir( C:\ado\personal\l\)
+*do utils__quaidsce.mata //run mata to update libraries
+*lmbuild lquaidsce.mlib, replace dir( C:\ado\personal\l\)
 
 log using  "C:\Users\jccaro\quaidsce\quaidsce\test.log", replace
 webuse food, clear
