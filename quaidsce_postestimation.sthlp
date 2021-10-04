@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.1.0  25jul2013}{...}
+{* *! version 1.1.0  Sep 2021}{...}
 {right:also see:  {help quaidsce} {space 1}}
 {hline}
 
