@@ -1,4 +1,4 @@
-*! version 1.1.0  18jul2013
+*! version 1.1.0  Sep 2021
 
 program quaidsce_estat
 
@@ -27,71 +27,48 @@ program quaidsce_estat
 	
 end
 
-program quaidsce_p
 
-	version 12
-	
-	if "`e(cmd)'" != "quaidsce" {
-		exit 301
-	}
-	
-	syntax [anything(name = vlist id = "newvarlist")] [if] [in]
-	
-	
-
-end
-
-exit
-
+/// EXPENDITURE ELASTICITY
 
 program DoExp, rclass
 
-	syntax [anything(name = vlist id = "newvarlist")] [if] [in] 	///
-		[, atmeans Stderrs]
+	syntax [if] [in] 
 	
 	marksample touse
 
-	if ("`stderrs'" != "" & "`atmeans'" == "") {
-		qui count if `touse'
-		if r(N) != 1 {
-			di as err			/// 
-"may only specify {bf:stderrs} if the selected sample has one observation"
-			exit 198
-		}
-	}
-	
+/// WRITE HERE THE IF/ELSE WITH THE CORRESPONDING FORMULA FOR THE SHARES USING LOCALS SO WE CAN PREDICT USING MARGINS
 
+/// WRITE HERE THE LOOP FOR THE MARGINS COMMAND INTO TWO MATRICES (elas, se) AND RETURN AS e()
 
 end
 
+/// UNCOMPENSATED PRICE ELASTICITY
 
 program DoUncomp, rclass
 
-	syntax [anything(name = vlist id = "newvarlist")] [if] [in]	///
-		[, atmeans Stderrs]
+	syntax [if] [in] 
 	
 	marksample touse
-	
-	if ("`stderrs'" != "" & "`atmeans'" == "") {
-		qui count if `touse'
-		if r(N) != 1 {
-			di as err			/// 
-"may only specify {bf:stderrs} if the selected sample has one observation"
-			exit 198
-		}
-	}
-	
 
+	
+/// WRITE HERE THE IF/ELSE WITH THE CORRESPONDING FORMULA FOR THE SHARES USING LOCALS SO WE CAN PREDICT USING MARGINS
+
+/// WRITE HERE THE LOOP FOR THE MARGINS COMMAND INTO TWO MATRICES (elas, se) AND RETURN AS e()
 
 end
 
+/// COMPENSATED PRICE ELASTICITY
+
 program DoComp, rclass
 
-	syntax [anything(name = vlist id = "newvarlist")] [if] [in] 	///
-		[, atmeans Stderrs]
+	syntax [if] [in] 
 
 	marksample touse
 
+/// WRITE HERE THE IF/ELSE WITH THE CORRESPONDING FORMULA FOR THE SHARES USING LOCALS SO WE CAN PREDICT USING MARGINS
+/// NOTE THAT HERE YOU SHOULD CALL THE TWO PROGRAMS ABOVE
+
+/// WRITE HERE THE LOOP FOR THE MARGINS COMMAND INTO TWO MATRICES (elas, se) AND RETURN AS e()
 
 end
 

@@ -1,4 +1,4 @@
-*! version 1.1.1  25jan2021
+*! version 1.1.1  Sep 2021
 
 program quaidsce, eclass
 
