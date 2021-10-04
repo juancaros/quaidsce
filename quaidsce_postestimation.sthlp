@@ -106,6 +106,8 @@ Calculate elasticities and standard errors at variable means{p_end}
 
 {pstd}
 {synopt:{cmd:r(expelas)}}vector of expenditure elasticities{p_end}
+
+{pstd}
 {synopt:{cmd:r(sd)}}vector of standard errors of expenditure
 elasticities{p_end}
 
