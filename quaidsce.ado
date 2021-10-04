@@ -29,7 +29,7 @@ program Estimate, eclass
 		  DEMOgraphics(varlist numeric)				///
 		  noQUadratic 						///
 		  noCEnsor   ///
-		  INITial(name) noLOg Level(cilevel) VCE(passthru) method(name) * ] 
+		  INITial(name) noLOg Level(cilevel) VCE(passthru) Method(name) * ] 
 		  
 		  
 	local shares `varlist'
@@ -171,7 +171,7 @@ program Estimate, eclass
 		local estimator "ifgnls"
 		}
 		else {
-			local estimator method(`method')
+			local estimator `method'
 		}
 
 	

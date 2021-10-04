@@ -34,7 +34,7 @@ gen income = exp(rnormal())+exp(rnormal())
 
 quaids w1 w2 w3 w4, anot(10) prices(p1 p2 p3 p4 p5) expenditure(expfd) demographics(nkids rural income) nolog 
 quaidsce w1 w2 w3 w4, anot(10) prices(p1 p2 p3 p4) expenditure(expfd) demographics(nkids income) nolog nocensor
-quaidsce w1 w2 w3 w4 w5, anot(10) prices(p1 p2 p3 p4 p5) expenditure(expfd) demographics(nkids income) nolog 
+quaidsce w1 w2 w3 w4 w5, anot(10) prices(p1 p2 p3 p4 p5) expenditure(expfd) demographics(nkids income) nolog method(nls)
 
 log close
 
