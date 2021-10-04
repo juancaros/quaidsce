@@ -184,7 +184,7 @@ Same as above, but including household-size variable {opt hhsize}:{p_end}
 {synopt:{cmd:e(lambda)}}lambda vector{p_end}
 {synopt:{cmd:e(eta)}}eta matrix{p_end}
 {synopt:{cmd:e(rho)}}rho vector{p_end}
-{synopt:{cmd:e(rho)}}delta vector{p_end}
+{synopt:{cmd:e(delta)}}delta vector{p_end}
 
 {p2col 5 15 17 2: Functions}{p_end}
 {synopt:{cmd:e(sample)}}marks estimation sample{p_end}
