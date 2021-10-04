@@ -105,6 +105,9 @@ Calculate elasticities and standard errors at variable means{p_end}
 {title:Stored results}
 
 {pstd}
+{cmd:estat expenditure} stores the following:{p_end}
+
+{synoptset 18 tabbed}{...}
 {synopt:{cmd:r(expelas)}}vector of expenditure elasticities{p_end}
 
 {pstd}
@@ -112,6 +115,9 @@ Calculate elasticities and standard errors at variable means{p_end}
 elasticities{p_end}
 
 {pstd}
+{cmd:estat compensated} stores the following:{p_end}
+
+{synoptset 18 tabbed}{...}
 {synopt:{cmd:r(compelas)}}matrix of compensated price elasticities{p_end}
 
 {phang2}
@@ -124,6 +130,9 @@ good {it:j}.
 elasticities{p_end}
 
 {pstd}
+{cmd:estat uncompensated} stores the following:{p_end}
+
+{synoptset 18 tabbed}{...}
 {synopt:{cmd:r(uncompelas)}}matrix of uncompensated price elasticities{p_end}
 
 {phang2}
