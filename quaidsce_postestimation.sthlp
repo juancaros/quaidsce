@@ -102,6 +102,7 @@ Calculate elasticities and standard errors at variable means{p_end}
 {phang2}{cmd:. estat compensated}{p_end}
 {phang2}{cmd:. estat uncompensated}{p_end}
 
+
 {title:Stored results}
 
 {pstd}
@@ -110,7 +111,6 @@ Calculate elasticities and standard errors at variable means{p_end}
 {synoptset 18 tabbed}{...}
 {synopt:{cmd:r(expelas)}}vector of expenditure elasticities{p_end}
 
-{pstd}
 {synopt:{cmd:r(sd)}}vector of standard errors of expenditure
 elasticities{p_end}
 
@@ -125,7 +125,6 @@ The element in row {it:i}, column {it:j} of {cmd:r(compelas)} contains the
 compensated price elasticity of good {it:i} with respect to the price of
 good {it:j}.
 
-{pstd}
 {synopt:{cmd:r(sd)}}matrix of standard errors of compensated price
 elasticities{p_end}
 
@@ -140,7 +139,6 @@ The element in row {it:i}, column {it:j} of {cmd:r(uncompelas)} contains the
 uncompensated price elasticity of good {it:i} with respect to the price of good
 {it:j}.
 
-{pstd}
 {synopt:{cmd:r(sd)}}matrix of standard errors of uncompensated price
 elasticities{p_end}
 
