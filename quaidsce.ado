@@ -29,7 +29,8 @@ program Estimate, eclass
 		  DEMOgraphics(varlist numeric)				///
 		  noQUadratic 						///
 		  noCEnsor   ///
-		  INITial(name) noLOg Level(cilevel) VCE(passthru) * ]
+		  INITial(name) noLOg Level(cilevel) VCE(passthru) method(name) * ] 
+		  
 		  
 	local shares `varlist'
 	
@@ -166,6 +167,14 @@ program Estimate, eclass
 		}
 	}
 	
+	if "`method'" == "" {
+		local estimator = ifgnls
+		}
+		else {
+			local estimator method(`method')
+		}
+	}
+	
 	// GM: Check whether censoring exists & Probit
 		local pdf
 		local cdf
@@ -232,7 +241,7 @@ program Estimate, eclass
 		
 nlsur __quaidsce @ `shares' if `touse',				///
 		lnp(`lnprices') lnexp(`lnexpenditure') cdfi(`cdf') pdfi(`pdf') a0(`anot')	///
-		nparam(`np2') neq(`neqn2') nls noeqtab nocoeftab	///
+		nparam(`np2') neq(`neqn2') `estimator' noeqtab nocoeftab	///
 		`quadratic' `options' `censor' `demoopt'  `initialopt' `log' `vce' 
 
 

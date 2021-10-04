@@ -27,6 +27,23 @@ program quaidsce_estat
 	
 end
 
+program quaidsce_p
+
+	version 12
+	
+	if "`e(cmd)'" != "quaidsce" {
+		exit 301
+	}
+	
+	syntax [anything(name = vlist id = "newvarlist")] [if] [in]
+	
+	
+
+end
+
+exit
+
+
 program DoExp, rclass
 
 	syntax [anything(name = vlist id = "newvarlist")] [if] [in] 	///
