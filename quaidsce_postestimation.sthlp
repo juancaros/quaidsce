@@ -36,8 +36,7 @@ INCLUDE help post_testnl
 
 {p 8 16 2}
 {cmd:predict} 
-[{it:type}]
-{c -(}{it:stub}{cmd:*}|{it:newvarlist}{c )-}
+{c -(}{it:stub}{cmd:*}}
 {ifin}
 
 {pstd}

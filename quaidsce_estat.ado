@@ -40,6 +40,12 @@ program DoExp, rclass
 
 /// WRITE HERE THE LOOP FOR THE MARGINS COMMAND INTO TWO MATRICES (elas, se) AND RETURN AS e()
 
+	for i=1(1)`J' {
+		margins, predict(`local_ie`i'')			/// add corresponding formula for elasticity `i' given the coefficients
+		elas[`i'] = e(b)
+		se[`i'] = sqrt(e(sd))
+		return elas se
+	}
 end
 
 /// UNCOMPENSATED PRICE ELASTICITY
@@ -55,6 +61,16 @@ program DoUncomp, rclass
 
 /// WRITE HERE THE LOOP FOR THE MARGINS COMMAND INTO TWO MATRICES (elas, se) AND RETURN AS e()
 
+	for i=1(1)`J' {
+		for j=1(1)`J' {
+			margins, predict(`local_ue`i'`j'')			/// add corresponding formula for uncompensated elasticity `i'`j' given the coefficients
+			elas[`i',`j'] = e(b)
+			se[`i',`j'] = sqrt(e(sd))
+			return elas se
+		}
+	}	
+end
+
 end
 
 /// COMPENSATED PRICE ELASTICITY
@@ -66,9 +82,32 @@ program DoComp, rclass
 	marksample touse
 
 /// WRITE HERE THE IF/ELSE WITH THE CORRESPONDING FORMULA FOR THE SHARES USING LOCALS SO WE CAN PREDICT USING MARGINS
-/// NOTE THAT HERE YOU SHOULD CALL THE TWO PROGRAMS ABOVE
 
 /// WRITE HERE THE LOOP FOR THE MARGINS COMMAND INTO TWO MATRICES (elas, se) AND RETURN AS e()
+
+	for i=1(1)`J' {
+		margins, predict(`local_ie`i'')			/// add corresponding formula for income elasticity `i' given the coefficients
+		elasi[`i'] = e(b)
+		sei[`i'] = sqrt(e(sd))
+	}
+
+	for i=1(1)`J' {
+		for j=1(1)`J' {
+			margins, predict(`local_ue`i'`j'')			/// add corresponding formula for uncompensated elasticity `i'`j' given the coefficients
+			elasu[`i',`j'] = e(b)
+			seu[`i',`j'] = sqrt(e(sd))
+		}
+	}	
+	
+	for i=1(1)`J' {
+		for j=1(1)`J' {
+			margins, predict(`local_ce`i'`j'')			/// add corresponding formula for compensated elasticity `i'`j' given the coefficients
+			elas[`i',`j'] = e(b)
+			se[`i',`j'] = sqrt(e(sd))
+			return elas se
+		}
+	}	
+
 
 end
 

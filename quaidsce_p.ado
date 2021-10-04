@@ -14,8 +14,6 @@ program quaidsce_p
 
 	_stubstar2names `vlist', nvars(`=e(ngoods)')
 	local vars `s(varlist)'
-	local typs `s(typelist)'
-			// make our own names vlist_i instead of vlisti
 	if `s(stub)' {	
 		local vars ""
 		local vlist : subinstr local vlist "*" ""
@@ -25,10 +23,10 @@ program quaidsce_p
 	}
 	forvalues i = 1/`=e(ngoods)' {
 		local v : word `i' of `vars'
-		local t : word `i' of `types'
-		qui gen `t' `v' = .
 		lab var `v' "Predicted expenditure share: good `i'"
 	}
+
+	/// CHECK THE ELEMENTS NOT NEEDED BELOW (SINCE ALREADY AVAILABLE IN e())
 	
 	if "`e(lnprices)'" != "" {
 		local lnp `e(lnprices)'
@@ -59,12 +57,16 @@ program quaidsce_p
 	tempname betas
 	mat `betas' = e(b)
 	
-/// CHECK THE ELEMENTS NOT NEEDED ABOVE (SINCE ALREADY AVAILABLE IN e())
 
 /// WRITE HERE THE IF/ELSE WITH THE CORRESPONDING FORMULA FOR THE SHARES USING LOCALS SO WE CAN PREDICT USING MARGINS
 	
-/// GEN VARIABLES FROM PREDICTIONS BASED ON THE STUBS `t' `v'
+/// GEN VARIABLES FROM PREDICTIONS BASED ON THE STUBS `v'
 
+	forvalues i = 1/`=e(ngoods)' {
+		local v : word `i' of `vars'
+		predict `v' , `local_w`i''		/// local is the corresponding formula for the predicted share in each case
+	}
+	
 end
 
 exit
