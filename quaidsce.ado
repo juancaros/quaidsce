@@ -173,7 +173,7 @@ program Estimate, eclass
 		else {
 			local estimator method(`method')
 		}
-	}
+
 	
 	// GM: Check whether censoring exists & Probit
 		local pdf
