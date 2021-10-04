@@ -168,7 +168,7 @@ program Estimate, eclass
 	}
 	
 	if "`method'" == "" {
-		local estimator = ifgnls
+		local estimator "ifgnls"
 		}
 		else {
 			local estimator method(`method')
