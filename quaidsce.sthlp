@@ -7,7 +7,7 @@
 {title:Title}
 
 {p2colset 5 15 17 2}{...}
-{p2col :{cmd:quaidsce} {hline 2}}Estimate almost-ideal demand systems{p_end}
+{p2col :{cmd:quaidsce} {hline 2}}Estimate censored almost-ideal demand systems{p_end}
 {p2colreset}{...}
 
 
@@ -36,9 +36,11 @@ not omit one of the shares to avoid a singular covariance matrix;
 {p2coldent :+ {opt lnexp:enditure(varlist_lnexp)}}variable representing the natural logarithm of total expenditure{p_end}
 {synopt :{opt demo:graphics(varlist_demo)}}demographic variables to include{p_end}
 {synopt :{opt noqu:adratic}}do not include quadratic expenditure term{p_end}
+{synopt :{opt noce:nsor}}do not include censoring correction{p_end}
 {synopt :{opt nolo:g}}suppress the iteration log{p_end}
 {synopt :{cmd:vce(}{it:{help quaidsce##vcetype:vcetype}}{cmd:)}}{it:vcetype} may be {opt gnr}, {opt r:obust}, {opt cl:uster} {it:clustvar}, {opt boot:strap}, or {opt jack:knife}{p_end}
 {synopt :{opt l:evel(#)}}set confidence level; default is {cmd:level(95)}{p_end}
+{synopt :{opt m:ethod(#)}}NLSUR estimator; default is {ifgnls}{p_end}
 {synoptline}
 {p2colreset}{...}
 {p 4 6 2}# {opt anot(#)} is required.{p_end}
@@ -53,8 +55,9 @@ not omit one of the shares to avoid a singular covariance matrix;
 (1980) almost-ideal demand system (AIDS) and Banks, Blundell, and
 Lewbel's (1997) quadratic AIDS model.  Demographic variables can be
 included in the model based on Ray's (1983) expenditure function scaling
-technique.  See Poi (2012) for the formulas used.
-
+technique.  Censoring is accounted for based on the method proposed by
+Shonkwiler and Yen (1999). This command extends over the {cmd:quaids} 
+command, as described in Poi (2012).
 
 {title:Options}
 
@@ -99,6 +102,11 @@ requests Deaton and Muellbauer's (1980) AIDS model.  The default is to
 include the quadratic income term, yielding Banks, Blundell, and
 Lewbel's (1997) quadratic AIDS model.
 
+
+{phang}
+{opt nocensor} requests to avoid the censoring correction two-step approach.
+The default is to conduct the two-step as proposed by Shonkwiler and Yen (1999).
+
 {phang}
 {opt nolog} requests that the iteration log be suppressed.
 
@@ -112,7 +120,11 @@ works just as it does for {cmd:nlsur}; see {manhelp nlsur R}.
 
 {pmore}{cmd:vce(gnr)}, the default, uses the conventionally derived
 variance estimator for nonlinear models fit by using Gauss-Newton
-regression.
+regression. For final output, use {cmd:vce(bootstrap)}
+
+{phang}
+{opt method(#)}; nlsur estimator method; see {manhelp nlsur R}. Default is ifgnls.
+Other methods can be used to conduct faster model selection.
 
 {phang}
 {opt level(#)}; see {helpb estimation options##level():[R] estimation options}.
@@ -121,7 +133,7 @@ regression.
 {title:Examples}
 
 {pstd}
-Fit a 5-good quadratic AIDS model with alpha_0 = 10:{p_end}
+Fit a 5-good quadratic censored AIDS model with alpha_0 = 10:{p_end}
 {phang2}{cmd:. quaidsce w1-w5, anot(10) prices(p1-p5) expenditure(totalexp)}
 {p_end}
 
@@ -129,13 +141,6 @@ Fit a 5-good quadratic AIDS model with alpha_0 = 10:{p_end}
 Same as above, but including household-size variable {opt hhsize}:{p_end}
 {phang2}{cmd:. quaidsce w1-w5, anot(10) prices(p1-p5) expenditure(totalexp)}
             {cmd:demographics(hhsize)}{p_end}
-
-{pstd} Fit a 4-good AIDS model using a dataset for which the price and
-expenditure variables are already in natural logarithms with alpha_0 =
-5:{p_end}
-{phang2}{cmd:. quaidsce w1-w4, anot(5) lnprices(lnp1-lnp4) lnexpenditure(lnexp)}
-             {cmd:noquadratic}{p_end}
-
 
 {title:Saved results}
 
@@ -179,6 +184,7 @@ expenditure variables are already in natural logarithms with alpha_0 =
 {synopt:{cmd:e(lambda)}}lambda vector{p_end}
 {synopt:{cmd:e(eta)}}eta matrix{p_end}
 {synopt:{cmd:e(rho)}}rho vector{p_end}
+{synopt:{cmd:e(rho)}}delta vector{p_end}
 
 {p2col 5 15 17 2: Functions}{p_end}
 {synopt:{cmd:e(sample)}}marks estimation sample{p_end}
@@ -201,21 +207,21 @@ Poi, B. P.  2012.  Easy demand system estimation with quaids.
 {it:Stata Journal} 12: 433-446.
 
 {phang}
+Shonkwiler, J and Yen, Steven T., (1999), Two-Step estimation of a censored system of equations, 
+{it:American Journal of Agricultural Economics}, 81, issue 4, p. 972-982, 
+
+{phang}
 Ray, R.  1983.  Measuring the costs of children: An alternative approach.
 {it:Journal of Public Economics} 22: 89-102.
 
 
-{title:Author}
+{title:Corresponding author}
 
-{pstd}Brian P. Poi{p_end}
-{pstd}StataCorp LP{p_end}
-{pstd}College Station, TX{p_end}
-{pstd}bpoi@stata.com{p_end}
+{pstd}Juan C. Caro{p_end}
+{pstd}University of Luxembourg{p_end}
+{pstd}juan.caro@uni.lu{p_end}
 
 
 {title:Also see}
-
-{p 4 14 2}Article:  {it:Stata Journal}, volume 13, number 3: {browse "http://www.stata-journal.com/article.html?article=up0041":st0268_1},{break}
-                    {it:Stata Journal}, volume 12, number 3: {browse "http://www.stata-journal.com/article.html?article=st0268":st0268}
 
 {p 7 14 2}Help:  {help quaidsce postestimation}{p_end}
