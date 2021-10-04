@@ -1,6 +1,6 @@
 {smcl}
-{* *! version 1.1.0  24jul2013}{...}
-{cmd:help quaidsce}{right: ({browse "http://www.stata-journal.com/article.html?article=up0041":SJ13-3: st0268_1})}
+{* *! version 1.1.0  Sep 2021}{...}
+{cmd:help quaidsce}
 {right:also see:  {help quaidsce postestimation}}
 {hline}
 
@@ -171,6 +171,8 @@ Same as above, but including household-size variable {opt hhsize}:{p_end}
 {synopt:{cmd:e(prices)}}price variables{p_end}
 {synopt:{cmd:e(lnprices)}}log-price variables{p_end}
 {synopt:{cmd:e(quadratic)}}{cmd:noquadratic}{p_end}
+{synopt:{cmd:e(censor)}}{cmd:nocensor}{p_end}
+{synopt:{cmd:e(method)}} specified in {cmd:method()}{p_end}
 {synopt:{cmd:e(properties)}}{cmd:b V}{p_end}
 
 {p2col 5 15 17 2: Matrices}{p_end}
