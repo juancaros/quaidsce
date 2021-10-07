@@ -375,16 +375,16 @@ program Display
 	syntax , [Level(cilevel)]
 	
 	di
-	if "`quadratic'" == "" {
+	if "`censor'" == "" & "`quadratic'" == "" {
+		di in smcl as text "Censored Quadratic AIDS model"
+		di in smcl as text "{hline 20}"
+	}
+	else if "`quadratic'" == "" {
 		di in smcl as text "Quadratic AIDS model"
 		di in smcl as text "{hline 20}"
 	}
 	else if "`censor'" == "" {
 		di in smcl as text "Censored AIDS model"
-		di in smcl as text "{hline 20}"
-	}
-	else if "`censor'" == "" & "`quadratic'" == "" {
-		di in smcl as text "Censored Quadratic AIDS model"
 		di in smcl as text "{hline 20}"
 	}
 	else {

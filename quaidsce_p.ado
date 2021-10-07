@@ -12,6 +12,8 @@ program quaidsce_p
 	
 	marksample touse
 
+	/// MAKING MACROS OF e() AS LOCALS
+	
 	_stubstar2names `vlist', nvars(`=e(ngoods)')
 	local vars `s(varlist)'
 	if `s(stub)' {	
@@ -21,25 +23,31 @@ program quaidsce_p
 			local vars `vars' `vlist'_`i'
 		}
 	}
+	
 	forvalues i = 1/`=e(ngoods)' {
 		local v : word `i' of `vars'
+		tempvar vlist_`i'
+		qui gen `v' =.
 		lab var `v' "Predicted expenditure share: good `i'"
 	}
 
-	/// CHECK THE ELEMENTS NOT NEEDED BELOW (SINCE ALREADY AVAILABLE IN e())
-	
+	*there are misisng inputs here (pdf, cdf, du, w)
 	if "`e(lnprices)'" != "" {
-		local lnp `e(lnprices)'
+		local i 1
+		foreach var of varlist `e(lnprices)' {
+			local lnp`i' `var'
+			local `++i'
+		}
 	}
 	else {
 		local i 1
 		foreach var of varlist `e(prices)' {
-			tempvar vv`i'
-			qui gen double `vv`i'' = ln(`var')
-			local lnp `lnp' `vv`i''
+			tempvar lnp`i'
+			qui gen double `lnp`i'' = ln(`var')
 			local `++i'
 		}
 	}
+	
 	if "`e(lnexpenditure)'" != "" {
 		local lnexp `e(lnexpenditure)'
 	}
@@ -51,20 +59,36 @@ program quaidsce_p
 
 	local ndemo = `e(ndemos)'
 	if `ndemo' > 0 {
-		local demos `e(demographics)'
+		local i 1 
+		foreach var of varlist `e(demographics)' {
+			local d_`i' `var'
+		local `++i'	
+		}
 	}
 
-	tempname betas
-	mat `betas' = e(b)
-	
-
 /// WRITE HERE THE IF/ELSE WITH THE CORRESPONDING FORMULA FOR THE SHARES USING LOCALS SO WE CAN PREDICT USING MARGINS
+
+	*this elements only have location, so alpha[i] will be easier than using e(b), use ifs as appropiate
+	tempname alpha beta gamma lambda delta eta rho
+	mat alpha = e(alpha)
+	mat beta = e(beta)
+	mat gamma = e(gamma)
+	mat lambda = e(lambda)
+	mat delta = e(delta)
+	mat eta = e(eta)
+	mat rho = e(rho)
 	
-/// GEN VARIABLES FROM PREDICTIONS BASED ON THE STUBS `v'
+	forvalues i = 1/`=e(ngoods)' {
+		local v : word `i' of `vars'
+		local pw`i' = alpha[.,`i']*`lnexp'
+	} 
+		
+/// REPLACE VARIABLES FROM PREDICTIONS BASED ON THE STUBS `v'
 
 	forvalues i = 1/`=e(ngoods)' {
 		local v : word `i' of `vars'
-		predict `v' , `local_w`i''		/// local is the corresponding formula for the predicted share in each case
+		qui replace `v' = `pw`i''+1	
+		/// something is wrong with the local above but it works
 	}
 	
 end

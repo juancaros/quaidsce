@@ -5,6 +5,7 @@ set maxvar 10000
 
 *do utils__quaidsce.mata //run mata to update libraries
 *lmbuild lquaidsce.mlib, replace dir(C:\Users\juan.caro\ado\plus)
+net install quaidsce, replace force from("https://juancaros.github.io/quaidsce")
 
 log using  "C:\Users\jccaro\quaidsce\quaidsce\test.log", replace
 webuse food, clear
@@ -32,9 +33,9 @@ gen nkids = int(runiform()*4)
 gen rural = (runiform() > 0.2)
 gen income = exp(rnormal())+exp(rnormal())
 
-quaids w1 w2 w3 w4, anot(10) prices(p1 p2 p3 p4 p5) expenditure(expfd) demographics(nkids rural income) nolog 
+quaids w1 w2 w3 w4 w5, anot(10) prices(p1 p2 p3 p4 p5) expenditure(expfd) demographics(nkids income) nolog 
 quaidsce w1 w2 w3 w4, anot(10) prices(p1 p2 p3 p4) expenditure(expfd) demographics(nkids income) nolog nocensor
-quaidsce w1 w2 w3 w4 w5, anot(10) prices(p1 p2 p3 p4 p5) expenditure(expfd) demographics(nkids income) nolog method(nls)
+quaidsce w1 w2 w3 w4 w5, anot(10) prices(p1 p2 p3 p4 p5) expenditure(expfd) demographics(nkids income) nolog  method(nls)
 
 log close
 

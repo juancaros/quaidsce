@@ -35,6 +35,41 @@ program DoExp, rclass
 	syntax [if] [in] 
 	
 	marksample touse
+	
+	*there are misisng inputs here (pdf, cdf, du, w)
+	if "`e(lnprices)'" != "" {
+		local i 1
+		foreach var of varlist `e(lnprices)' {
+			local lnp`i' `var'
+			local `++i'
+		}
+	}
+	else {
+		local i 1
+		foreach var of varlist `e(prices)' {
+			tempvar lnp`i'
+			qui gen double `lnp`i'' = ln(`var')
+			local `++i'
+		}
+	}
+	
+	if "`e(lnexpenditure)'" != "" {
+		local lnexp `e(lnexpenditure)'
+	}
+	else {
+		tempvar exp
+		qui gen double `exp' = ln(`e(expenditure)')
+		local lnexp `exp'
+	}
+
+	local ndemo = `e(ndemos)'
+	if `ndemo' > 0 {
+		local i 1 
+		foreach var of varlist `e(demographics)' {
+			local d_`i' `var'
+		local `++i'	
+		}
+	}
 
 /// WRITE HERE THE IF/ELSE WITH THE CORRESPONDING FORMULA FOR THE SHARES USING LOCALS SO WE CAN PREDICT USING MARGINS
 
@@ -56,6 +91,40 @@ program DoUncomp, rclass
 	
 	marksample touse
 
+	*there are misisng inputs here (pdf, cdf, du, w)
+	if "`e(lnprices)'" != "" {
+		local i 1
+		foreach var of varlist `e(lnprices)' {
+			local lnp`i' `var'
+			local `++i'
+		}
+	}
+	else {
+		local i 1
+		foreach var of varlist `e(prices)' {
+			tempvar lnp`i'
+			qui gen double `lnp`i'' = ln(`var')
+			local `++i'
+		}
+	}
+	
+	if "`e(lnexpenditure)'" != "" {
+		local lnexp `e(lnexpenditure)'
+	}
+	else {
+		tempvar exp
+		qui gen double `exp' = ln(`e(expenditure)')
+		local lnexp `exp'
+	}
+
+	local ndemo = `e(ndemos)'
+	if `ndemo' > 0 {
+		local i 1 
+		foreach var of varlist `e(demographics)' {
+			local d_`i' `var'
+		local `++i'	
+		}
+	}
 	
 /// WRITE HERE THE IF/ELSE WITH THE CORRESPONDING FORMULA FOR THE SHARES USING LOCALS SO WE CAN PREDICT USING MARGINS
 
@@ -80,6 +149,41 @@ program DoComp, rclass
 	syntax [if] [in] 
 
 	marksample touse
+	
+	*there are misisng inputs here (pdf, cdf, du, w)
+	if "`e(lnprices)'" != "" {
+		local i 1
+		foreach var of varlist `e(lnprices)' {
+			local lnp`i' `var'
+			local `++i'
+		}
+	}
+	else {
+		local i 1
+		foreach var of varlist `e(prices)' {
+			tempvar lnp`i'
+			qui gen double `lnp`i'' = ln(`var')
+			local `++i'
+		}
+	}
+	
+	if "`e(lnexpenditure)'" != "" {
+		local lnexp `e(lnexpenditure)'
+	}
+	else {
+		tempvar exp
+		qui gen double `exp' = ln(`e(expenditure)')
+		local lnexp `exp'
+	}
+
+	local ndemo = `e(ndemos)'
+	if `ndemo' > 0 {
+		local i 1 
+		foreach var of varlist `e(demographics)' {
+			local d_`i' `var'
+		local `++i'	
+		}
+	}
 
 /// WRITE HERE THE IF/ELSE WITH THE CORRESPONDING FORMULA FOR THE SHARES USING LOCALS SO WE CAN PREDICT USING MARGINS
 
