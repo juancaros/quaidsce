@@ -36,7 +36,7 @@ program DoExp, rclass
 	
 	marksample touse
 	
-	*there are misisng inputs here (pdf, cdf, du, w)
+	*there are misisng inputs here (pdf, cdf, du, tau, setau)
 	if "`e(lnprices)'" != "" {
 		local i 1
 		foreach var of varlist `e(lnprices)' {
@@ -73,14 +73,18 @@ program DoExp, rclass
 
 /// WRITE HERE THE IF/ELSE WITH THE CORRESPONDING FORMULA FOR THE SHARES USING LOCALS SO WE CAN PREDICT USING MARGINS
 
+
+
 /// WRITE HERE THE LOOP FOR THE MARGINS COMMAND INTO TWO MATRICES (elas, se) AND RETURN AS e()
 
 	for i=1(1)`J' {
 		margins, predict(`local_ie`i'')			/// add corresponding formula for elasticity `i' given the coefficients
-		elas[`i'] = e(b)
-		se[`i'] = sqrt(e(sd))
-		return elas se
+		elasi[`i'] = e(b)
+		sei[`i'] = sqrt(e(sd))
 	}
+	
+	return post elasi sei
+	
 end
 
 /// UNCOMPENSATED PRICE ELASTICITY
@@ -133,11 +137,13 @@ program DoUncomp, rclass
 	for i=1(1)`J' {
 		for j=1(1)`J' {
 			margins, predict(`local_ue`i'`j'')			/// add corresponding formula for uncompensated elasticity `i'`j' given the coefficients
-			elas[`i',`j'] = e(b)
-			se[`i',`j'] = sqrt(e(sd))
-			return elas se
+			elasu[`i',`j'] = e(b)
+			seu[`i',`j'] = sqrt(e(sd))
 		}
 	}	
+	
+	return post elasu seu
+	
 end
 
 end
@@ -206,12 +212,12 @@ program DoComp, rclass
 	for i=1(1)`J' {
 		for j=1(1)`J' {
 			margins, predict(`local_ce`i'`j'')			/// add corresponding formula for compensated elasticity `i'`j' given the coefficients
-			elas[`i',`j'] = e(b)
-			se[`i',`j'] = sqrt(e(sd))
-			return elas se
+			elase[`i',`j'] = e(b)
+			sec[`i',`j'] = sqrt(e(sd))
 		}
 	}	
 
+	return post elasc sec
 
 end
 

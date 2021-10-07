@@ -174,17 +174,17 @@ program Estimate, eclass
 			local estimator `method'
 		}
 
-	
-	// GM: Check whether censoring exists & Probit
+		//JCS
+		//First stage
+		capture drop cdf* pdf* du*
 		local pdf
 		local cdf
 		if "`censor'" == "nocensor" {
 		foreach x of varlist `shares2' {
-		tempvar pdf`x' cdf`x'
-		gen `pdf`x''=0
-		gen `cdf`x''=1
-		local pdf `pdf' `pdf`x''
-		local cdf `cdf' `cdf`x''
+		qui gen pdf`x'=0
+		qui gen cdf`x'=1
+		local pdf `pdf' pdf`x'
+		local cdf `cdf' cdf`x'
 		}
 		}
 		else {
@@ -192,41 +192,39 @@ program Estimate, eclass
 		mat c=J(1,`np_prob',.)
 		foreach x of varlist `shares' {
 			summ `x' if `touse', mean
-			*if r(min) > 0 {
-			*	di as error "noncensoring for `x' found"
-			*	exit 499
-			*}
-			// GM: Probit	
-			tempvar z`x' pdf`x' cdf`x' du`x' tmp`x' tau
+			if r(min) > 0 {
+				di as error "noncensoring for `x' found"
+				exit 499
+			}
+			tempvar z`x' 
+			local pdf`x' 
+			local cdf`x'
+			local du`x'
 			qui gen double `z`x'' = 1 if `x' > 0  & `touse'
 			qui replace `z`x'' = 0 if `x' == 0  & `touse'
-			qui gen `pdf`x''=0
-			qui gen `cdf`x''=1
-			/*make check for probit*/
+			qui gen pdf`x'=0
+			qui gen cdf`x'=1
+			
 			summ `z`x'' if `touse', mean
 			if r(min) == 0 {
 			qui probit `z`x'' `lnprices' `lnexp'  `demographics'
-			matrix `tmp`x''=e(b)
-			mat c=c \ `tmp`x''
-			quietly predict `du`x''
+			tempname tmp`x'
+			mat `tmp`x''=e(b)
+			// crear matrix de s.e. para cada tau
+			mat tau=tau \ `tmp`x''
+			// append solo s.e. dela diagonal e(V)
+			quietly predict du`x'
 			if e(N) < _N {
-				di as error "at least one variable completely predicts probit outcome, check your data"
+			di as error "at least one variable completely predicts probit outcome, check your data"
 				exit 499
 			}
-			qui replace `pdf`x''= normalden(`du`x'')
-			qui replace `cdf`x''= normal(`du`x'')
 			}
-			else {
-			}
+			local pdf `pdf' pdf`x'
+			local cdf `cdf' cdf`x'
+			local du `du' `du`x''
+		}
+		}
 			
-			local pdf `pdf' `pdf`x''
-			local cdf `cdf' `cdf`x''
-		}
-	
-		*delete the first row
-		mata st_matrix("tau",select(st_matrix("c"),st_matrix("c")[.,2]:~=.))
-		
-		}
 		
 		if "`censor'" == "nocensor" {
 		local shares `shares2' 
@@ -254,6 +252,9 @@ nlsur __quaidsce @ `shares' if `touse',				///
 	mata:_quaidsce__fullvector("`b'", `neqn', "`quadratic'", `ndemos', "`bfull'", "`censor'")
 	mata:_quaidsce__delta(`neqn', "`quadratic'", "`censor'", `ndemos', "`Delta'")
 	mat `Vfull' = `Delta'*`V'*`Delta''
+	
+	//JCS
+	// append tau y setau a bfull y Vfull tal que quede los vectores y matrix final
 	
 	forvalues i = 1/`neqn' {
 		local namestripe `namestripe' alpha:alpha_`i'
@@ -307,6 +308,9 @@ nlsur __quaidsce @ `shares' if `touse',				///
 
 	qui count if `touse'
 	local capn = r(N)
+	
+	//JCS
+	//sacar con eret para tau y setau como matrix y cdf, pdf y du como macro
 	
 	eret post 		`bfull' `Vfull', esample(`touse')	
 	eret matrix alpha	= `alpha'

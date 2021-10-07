@@ -12,7 +12,7 @@ program quaidsce_p
 	
 	marksample touse
 
-	/// MAKING MACROS OF e() AS LOCALS
+	// MAKING MACROS OF e() AS LOCALS
 	
 	_stubstar2names `vlist', nvars(`=e(ngoods)')
 	local vars `s(varlist)'
@@ -30,8 +30,10 @@ program quaidsce_p
 		qui gen `v' =.
 		lab var `v' "Predicted expenditure share: good `i'"
 	}
-
-	*there are misisng inputs here (pdf, cdf, du, w)
+	
+	//JCS
+	//there are misisng inputs here (pdf, cdf, du, tau, setau)
+	
 	if "`e(lnprices)'" != "" {
 		local i 1
 		foreach var of varlist `e(lnprices)' {
@@ -59,37 +61,30 @@ program quaidsce_p
 
 	local ndemo = `e(ndemos)'
 	if `ndemo' > 0 {
-		local i 1 
 		foreach var of varlist `e(demographics)' {
-			local d_`i' `var'
-		local `++i'	
+			tempvar d_`var'
+			qui gen double `d_`var'' = `var'
 		}
 	}
 
 /// WRITE HERE THE IF/ELSE WITH THE CORRESPONDING FORMULA FOR THE SHARES USING LOCALS SO WE CAN PREDICT USING MARGINS
 
-	*this elements only have location, so alpha[i] will be easier than using e(b), use ifs as appropiate
-	tempname alpha beta gamma lambda delta eta rho
+	tempname alpha beta gamma lambda delta eta rho tau
 	mat alpha = e(alpha)
 	mat beta = e(beta)
 	mat gamma = e(gamma)
+	
 	mat lambda = e(lambda)
 	mat delta = e(delta)
 	mat eta = e(eta)
 	mat rho = e(rho)
-	
-	forvalues i = 1/`=e(ngoods)' {
-		local v : word `i' of `vars'
-		local pw`i' = alpha[.,`i']*`lnexp'
-	} 
 		
-/// REPLACE VARIABLES FROM PREDICTIONS BASED ON THE STUBS `v'
+/// REPLACE VARIABLES FROM PREDICTIONS BASED ON THE STUBS `v' and the right formula
 
-	forvalues i = 1/`=e(ngoods)' {
-		local v : word `i' of `vars'
-		qui replace `v' = `pw`i''+1	
-		/// something is wrong with the local above but it works
-	}
+	forvalues j = 1/`=e(ngoods)' {
+		local v : word `j' of `vars'
+		qui replace `v' = alpha[1,`j']*`lnexp'		//this works but idk why it doest with a local expression	
+		}
 	
 end
 
