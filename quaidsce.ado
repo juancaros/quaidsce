@@ -176,9 +176,12 @@ program Estimate, eclass
 
 		//JCS
 		//First stage
-		capture drop cdf* pdf* du*
 		local pdf
 		local cdf
+		capture drop cdf?? 
+		capture drop pdf?? 
+		capture drop du??
+		
 		if "`censor'" == "nocensor" {
 		foreach x of varlist `shares2' {
 		qui gen pdf`x'=0
@@ -189,7 +192,7 @@ program Estimate, eclass
 		}
 		else {
 		local np_prob : word count `lnprices' `lnexp'  `demographics' intercept
-		mat c=J(1,`np_prob',.)
+		mat tau=J(1,`np_prob',.)
 		foreach x of varlist `shares' {
 			summ `x' if `touse', mean
 			if r(min) > 0 {
@@ -208,9 +211,10 @@ program Estimate, eclass
 			summ `z`x'' if `touse', mean
 			if r(min) == 0 {
 			qui probit `z`x'' `lnprices' `lnexp'  `demographics'
-			tempname tmp`x'
+			
+			tempname tmp`x' 
 			mat `tmp`x''=e(b)
-			// crear matrix de s.e. para cada tau
+			// crear matrix de s.e. para cada tmp`x'
 			mat tau=tau \ `tmp`x''
 			// append solo s.e. dela diagonal e(V)
 			quietly predict du`x'
