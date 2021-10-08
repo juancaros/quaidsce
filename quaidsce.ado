@@ -322,12 +322,14 @@ nlsur __quaidsce @ `shares' if `touse',				///
 	eret matrix gamma	= `gamma'
 	if "`quadratic'" == "" {
 		eret matrix lambda = `lambda'
+		eret local quadratic	"quadratic"
 	}
 	else {
 		eret local quadratic	"noquadratic"
 	}	
 	if "`censor'" == "" {
 		eret matrix delta = `delta'
+		eret local censor	"censor"
 	}
 	else {
 		eret local censor	"nocensor"
