@@ -67,6 +67,15 @@ program quaidsce_p
 		}
 	}
 
+	//JCSH temporal para poder correr abajo las elasticidads
+	if "`e(lhs)'" != "" {
+		local i 1
+		foreach var of varlist `e(lhs)' {
+			local w`i' `var'
+			local `++i'
+		}
+	}
+	
 /// WRITE HERE THE IF/ELSE WITH THE CORRESPONDING FORMULA FOR THE SHARES USING LOCALS SO WE CAN PREDICT USING MARGINS
 
 	tempname alpha beta gamma lambda delta eta rho tau
@@ -79,13 +88,67 @@ program quaidsce_p
 	mat eta = e(eta)
 	mat rho = e(rho)
 		
-/// REPLACE VARIABLES FROM PREDICTIONS BASED ON THE STUBS `v' and the right formula
-
-	forvalues j = 1/`=e(ngoods)' {
-		local v : word `j' of `vars'
-		qui replace `v' = alpha[1,`j']*`lnexp'		//this works but idk why it doest with a local expression	
-		}
+/// REPLACE VARIABLES FROM PREDICTIONS BASED ON THE STUBS `v' and the right formula	
+	//JCSH salvar variables temporales como double
 	
+	//When quadratics
+	if "`e(quadratic)'" == "quadratic" {
+		tempvar bofp lnpindex
+		
+			gen `bofp'= beta[1,1]*`lnp1' 		
+		forvalues i = 2/`=e(ngoods)' {		
+		replace `bofp'= `bofp' + beta[1,`i']*`lnp`i''
+									}
+		replace `bofp'= exp(`bofp')
+		
+
+		local alpha0=   `e(anot)' 
+		gen `lnpindex'= `alpha0'
+		forvalue i=1/`=e(ngoods)' {	
+			quiet replace `lnpindex'= `lnpindex' + alpha[1,`i']*`lnp`i''
+			local j=`i' 
+			forvalue ii=`j'/`=e(ngoods)' {
+				quiet replace `lnpindex'=  `lnpindex' + 0.5*(gamma[`ii',`i']*(`lnp`i''*`lnp`ii''))
+				//JCSH verificar que el 0.5 multiplica cada combinacion 	
+				}
+		}	
+	}	
+	
+	//When demographics
+	local ndemo = `e(ndemos)'
+	if `ndemo' > 0 {			
+		tempvar cofp mbar
+			
+			gen `cofp'= 1 //It is OK to set 1 because below we set a multiplication
+			gen double `mbar'= 1 //It is OK because I need to add a "1"
+			
+			foreach var of varlist `e(demographics)' {	
+			local n_demo= 1
+			forvalue i=1/`=e(ngoods)' {
+				
+				replace `cofp'= `cofp'*(`d_`var''*eta[`n_demo',`i']*`lnp`i'') 
+				//JCSH verificar que sea una multiplicacion de todo
+				
+				tempvar betanz`i'
+					gen `betanz`i''=.
+				replace `betanz`i''=beta[1,`i']+(`d_`var''*eta[`n_demo',`i'])												
+								}
+								
+		replace `mbar'= `mbar' + (rho[1,`n_demo']*`d_`var'') 					
+			local n_demo= `n_demo' + 1							
+		}										
+		replace `cofp' = exp(`cofp')
+		
+	
+	}
+		
+	//Uncompensated prices elasticities	
+		forvalues j = 1/`=e(ngoods)' {
+		local v : word `j' of `vars'
+		qui replace `v' = -1 + (1/`w`j'')*(gamma[1,1])
+		//JCSH necesito w observada o latente
+		}
+				
 end
 
 exit
