@@ -8,11 +8,13 @@ clear all
 *lmbuild lquaidsce.mlib, replace dir(C:\Users\juan.caro\ado\plus)
 
 quiet do "C:\Users\juanp\OneDrive\Documentos\GitHub\quaidsce\utils__quaidsce.mata" //run mata to update libraries
-lmbuild lquaidsce.mlib, replace dir(C:\ado\plus\l)
+*lmbuild lquaidsce.mlib, replace dir(C:\ado\plus\l)
 
 *log using  "C:\Users\jccaro\quaidsce\quaidsce\test.log", replace
 webuse food, clear
 program drop _all
+
+keep if _n<1001
 
 ***debugginb tools
 *set trace on
@@ -40,8 +42,10 @@ gen income = exp(rnormal())+exp(rnormal())
 *quaidsce w1 w2 w3 w4, anot(10) prices(p1 p2 p3 p4) expenditure(expfd) demographics(nkids income) nolog nocensor
 quaidsce w1 w2 w3 w4 w5, anot(10) prices(p1 p2 p3 p4 p5) expenditure(expfd) demographics(nkids income) nolog  method(nls)
 
+predict orale*
+sum orale*
+drop orale*
+
 *log close
-
-
 
 
