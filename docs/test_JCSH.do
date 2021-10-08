@@ -3,7 +3,7 @@ clear all
 *set maxvar 10000
 *cd "C:\ado\plus\u"  //set path
 
-net install quaidsce, replace force from("https://juancaros.github.io/quaidsce")
+*net install quaidsce, replace force from("https://juancaros.github.io/quaidsce")
 *do utils__quaidsce.mata //run mata to update libraries
 *lmbuild lquaidsce.mlib, replace dir(C:\Users\juan.caro\ado\plus)
 
