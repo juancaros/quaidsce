@@ -31,9 +31,6 @@ program quaidsce_p
 		lab var `v' "Predicted expenditure share: good `i'"
 	}
 	
-	//JCS
-	//there are misisng inputs here (pdf, cdf, du, tau, setau)
-	
 	if "`e(lnprices)'" != "" {
 		local i 1
 		foreach var of varlist `e(lnprices)' {
@@ -87,6 +84,7 @@ program quaidsce_p
 	mat delta = e(delta)
 	mat eta = e(eta)
 	mat rho = e(rho)
+	*mat tau = e(b)[1,1...]
 		
 /// REPLACE VARIABLES FROM PREDICTIONS BASED ON THE STUBS `v' and the right formula	
 	//JCSH salvar variables temporales como double

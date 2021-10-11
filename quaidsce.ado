@@ -174,7 +174,6 @@ program Estimate, eclass
 			local estimator `method'
 		}
 
-		//JCS
 		//First stage
 		local pdf
 		local cdf
@@ -192,7 +191,14 @@ program Estimate, eclass
 		}
 		else {
 		local np_prob : word count `lnprices' `lnexp'  `demographics' intercept
-		mat tau=J(1,`np_prob',.)
+		local nprob `lnprices' `lnexp'  `demographics' cons
+		tempvar cons
+		qui gen cons=1
+		// para los coefs de los tau van precios primero (2-J) y luego exp (J+1)
+		// JCS np_prob te da el orden de las variables para luego hacer la elasticidad
+		
+		mat tau=J(1,`np_prob',0)
+		mat setau=J(`np_prob'*`neqn',`np_prob'*`neqn',0)		
 		foreach x of varlist `shares' {
 			summ `x' if `touse', mean
 			if r(min) > 0 {
@@ -212,16 +218,25 @@ program Estimate, eclass
 			if r(min) == 0 {
 			qui probit `z`x'' `lnprices' `lnexp'  `demographics'
 			
-			tempname tmp`x' 
-			mat `tmp`x''=e(b)
-			// crear matrix de s.e. para cada tmp`x'
-			mat tau=tau \ `tmp`x''
-			// append solo s.e. dela diagonal e(V)
+			tempname xn loc lof
+			local xn = substr("`x'",2,1)
+			if `xn'==1 {
+				mat tau= e(b)'
+				mat setau[1,1]= e(V)
+			}
+			else {
+				mat tau=tau \ e(b)'
+				local loc = `np_prob'*(`xn'-1)+1
+				mat setau[`loc',`loc'] = e(V)
+			}
 			quietly predict du`x'
+			
 			if e(N) < _N {
 			di as error "at least one variable completely predicts probit outcome, check your data"
 				exit 499
 			}
+			qui replace pdf`x'= normalden(du`x')
+			qui replace cdf`x'= normal(du`x')
 			}
 			local pdf `pdf' pdf`x'
 			local cdf `cdf' cdf`x'
@@ -249,7 +264,7 @@ nlsur __quaidsce @ `shares' if `touse',				///
 
 	// do delta method to get cov matrix
 
-	tempname b bfull V Vfull Delta
+	tempname b bfull V Vfull Delta aux auxt Vfullc bfullc
 	mat `b' = e(b)
 	mat `V' = e(V)
 
@@ -257,8 +272,13 @@ nlsur __quaidsce @ `shares' if `touse',				///
 	mata:_quaidsce__delta(`neqn', "`quadratic'", "`censor'", `ndemos', "`Delta'")
 	mat `Vfull' = `Delta'*`V'*`Delta''
 	
-	//JCS
-	// append tau y setau a bfull y Vfull tal que quede los vectores y matrix final
+	mat `bfullc' = `bfull' , tau'
+	
+	mat `aux' = J(rowsof(`Vfull'),rowsof(setau),0)
+	mat `auxt' = J(rowsof(setau),rowsof(`Vfull'),0)
+	mat `auxt' = `auxt' , setau
+	mat `aux' = `Vfull' , `aux'
+	mat `Vfullc' = `aux' \ `auxt'
 	
 	forvalues i = 1/`neqn' {
 		local namestripe `namestripe' alpha:alpha_`i'
@@ -294,10 +314,17 @@ nlsur __quaidsce @ `shares' if `touse',				///
 			local namestripe `namestripe' rho:rho_`var'
 		}
 	}
-	
-	mat colnames `bfull' = `namestripe'
-	mat colnames `Vfull' = `namestripe'
-	mat rownames `Vfull' = `namestripe'
+	if "`censor'" == "" {
+		foreach var of varlist `nprob' {
+			forvalues i = 1/`neqn' {
+			local namestripe `namestripe' tau:`var'_`i'
+		}
+	}
+	}
+
+	mat colnames `bfullc' = `namestripe'
+	mat colnames `Vfullc' = `namestripe'
+	mat rownames `Vfullc' = `namestripe'
 	
 	tempname alpha beta gamma lambda delta eta rho ll
 	mata:_quaidsce__getcoefs("`b'", `neqn', "`quadratic'", "`censor'", `ndemos', 	///
@@ -313,10 +340,8 @@ nlsur __quaidsce @ `shares' if `touse',				///
 	qui count if `touse'
 	local capn = r(N)
 	
-	//JCS
-	//sacar con eret para tau y setau como matrix y cdf, pdf y du como macro
+	eret post `bfullc' `Vfullc', esample(`touse')	
 	
-	eret post 		`bfull' `Vfull', esample(`touse')	
 	eret matrix alpha	= `alpha'
 	eret matrix beta	= `beta'
 	eret matrix gamma	= `gamma'
