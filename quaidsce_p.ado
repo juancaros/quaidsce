@@ -64,7 +64,6 @@ program quaidsce_p
 		}
 	}
 
-	//JCSH temporal para poder correr abajo las elasticidads
 	if "`e(lhs)'" != "" {
 		local i 1
 		foreach var of varlist `e(lhs)' {
@@ -73,19 +72,23 @@ program quaidsce_p
 		}
 	}
 	
-/// WRITE HERE THE IF/ELSE WITH THE CORRESPONDING FORMULA FOR THE SHARES USING LOCALS SO WE CAN PREDICT USING MARGINS
-
 	tempname alpha beta gamma lambda delta eta rho tau
 	mat alpha = e(alpha)
 	mat beta = e(beta)
 	mat gamma = e(gamma)
-	
+	if "`e(quadratic)'" == "quadratic" {
 	mat lambda = e(lambda)
-	mat delta = e(delta)
+	}
+	local ndemo = `e(ndemos)'
+	if `ndemo' > 0 {
 	mat eta = e(eta)
 	mat rho = e(rho)
-	*mat tau = e(b)[1,1...]
-		
+	}
+	if "`e(censor)'" == "censor" {
+	mat delta = e(delta)
+	mat tau = e(tau)
+	}
+	
 /// REPLACE VARIABLES FROM PREDICTIONS BASED ON THE STUBS `v' and the right formula	
 	//JCSH salvar variables temporales como double
 	
@@ -113,7 +116,6 @@ program quaidsce_p
 	}	
 	
 	//When demographics
-	local ndemo = `e(ndemos)'
 	if `ndemo' > 0 {			
 		tempvar cofp mbar
 			

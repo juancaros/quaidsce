@@ -9,6 +9,7 @@ net install quaidsce, replace force from("https://juancaros.github.io/quaidsce")
 
 log using  "C:\Users\jccaro\quaidsce\quaidsce\test.log", replace
 webuse food, clear
+keep if _n<1000
 program drop _all
 
 ***debugginb tools
@@ -35,7 +36,7 @@ gen income = exp(rnormal())+exp(rnormal())
 
 quaids w1 w2 w3 w4 w5, anot(10) prices(p1 p2 p3 p4 p5) expenditure(expfd) demographics(nkids income) nolog 
 quaidsce w1 w2 w3 w4 w5, anot(10) prices(p1 p2 p3 p4 p5) expenditure(expfd) demographics(nkids income) nolog 
-quaidsce w1 w2 w3 w4 w5, anot(10) prices(p1 p2 p3 p4 p5) expenditure(expfd) demographics(nkids income) nolog  method(nls)
+quaidsce w1 w2 w3 w4 w5, anot(10) prices(p1 p2 p3 p4 p5) expenditure(expfd) demographics(nkids income) nolog  method(nls) 
 
 log close
 

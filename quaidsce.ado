@@ -191,11 +191,7 @@ program Estimate, eclass
 		}
 		else {
 		local np_prob : word count `lnprices' `lnexp'  `demographics' intercept
-		local nprob `lnprices' `lnexp'  `demographics' cons
-		tempvar cons
-		qui gen cons=1
-		// para los coefs de los tau van precios primero (2-J) y luego exp (J+1)
-		// JCS np_prob te da el orden de las variables para luego hacer la elasticidad
+		local nprob M `demographics' cons
 		
 		mat tau=J(1,`np_prob',0)
 		mat setau=J(`np_prob'*`neqn',`np_prob'*`neqn',0)		
@@ -261,6 +257,9 @@ nlsur __quaidsce @ `shares' if `touse',				///
 		nparam(`np2') neq(`neqn2') `estimator' noeqtab nocoeftab	///
 		`quadratic' `options' `censor' `demoopt'  `initialopt' `log' `vce' 
 
+		if "`censor'" == "nocensor" {
+		capture drop cdf?? pdf?? 
+		}
 
 	// do delta method to get cov matrix
 
@@ -272,13 +271,18 @@ nlsur __quaidsce @ `shares' if `touse',				///
 	mata:_quaidsce__delta(`neqn', "`quadratic'", "`censor'", `ndemos', "`Delta'")
 	mat `Vfull' = `Delta'*`V'*`Delta''
 	
+	if "`censor'" == "" {
 	mat `bfullc' = `bfull' , tau'
-	
 	mat `aux' = J(rowsof(`Vfull'),rowsof(setau),0)
 	mat `auxt' = J(rowsof(setau),rowsof(`Vfull'),0)
 	mat `auxt' = `auxt' , setau
 	mat `aux' = `Vfull' , `aux'
 	mat `Vfullc' = `aux' \ `auxt'
+	}
+	else {
+	mat `bfullc' = `bfull'
+	mat `Vfullc' = `Vfull'
+	}
 	
 	forvalues i = 1/`neqn' {
 		local namestripe `namestripe' alpha:alpha_`i'
@@ -315,11 +319,14 @@ nlsur __quaidsce @ `shares' if `touse',				///
 		}
 	}
 	if "`censor'" == "" {
-		foreach var of varlist `nprob' {
-			forvalues i = 1/`neqn' {
-			local namestripe `namestripe' tau:`var'_`i'
+		forvalues i = 1/`neqn' {
+			forvalues j = 1/`neqn' {
+				local namestripe `namestripe' tau:p`j'_`i'
+			}
+			foreach x in `nprob' {
+				local namestripe `namestripe' tau:`x'_`i'
+			}
 		}
-	}
 	}
 
 	mat colnames `bfullc' = `namestripe'
@@ -354,6 +361,7 @@ nlsur __quaidsce @ `shares' if `touse',				///
 	}	
 	if "`censor'" == "" {
 		eret matrix delta = `delta'
+		eret matrix tau tau
 		eret local censor	"censor"
 	}
 	else {
@@ -414,7 +422,7 @@ program Display
 		di in smcl as text "Censored Quadratic AIDS model"
 		di in smcl as text "{hline 20}"
 	}
-	else if "`quadratic'" == "" {
+	else if "`quadratic'" == "" & "`censor'" == "nocensor" {
 		di in smcl as text "Quadratic AIDS model"
 		di in smcl as text "{hline 20}"
 	}
