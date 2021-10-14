@@ -361,6 +361,7 @@ nlsur __quaidsce @ `shares' if `touse',				///
 	}	
 	if "`censor'" == "" {
 		eret matrix delta = `delta'
+		mat tau = tau'
 		eret matrix tau tau
 		eret local censor	"censor"
 	}

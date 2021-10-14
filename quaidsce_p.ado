@@ -27,7 +27,7 @@ program quaidsce_p
 	forvalues i = 1/`=e(ngoods)' {
 		local v : word `i' of `vars'
 		tempvar vlist_`i'
-		qui gen `v' =.
+		 gen `v' =0
 		lab var `v' "Predicted expenditure share: good `i'"
 	}
 	
@@ -42,7 +42,7 @@ program quaidsce_p
 		local i 1
 		foreach var of varlist `e(prices)' {
 			tempvar lnp`i'
-			qui gen double `lnp`i'' = ln(`var')
+			gen double `lnp`i'' = ln(`var')
 			local `++i'
 		}
 	}
@@ -52,7 +52,7 @@ program quaidsce_p
 	}
 	else {
 		tempvar exp
-		qui gen double `exp' = ln(`e(expenditure)')
+		gen double `exp' = ln(`e(expenditure)')
 		local lnexp `exp'
 	}
 
@@ -60,7 +60,7 @@ program quaidsce_p
 	if `ndemo' > 0 {
 		foreach var of varlist `e(demographics)' {
 			tempvar d_`var'
-			qui gen double `d_`var'' = `var'
+			 gen double `d_`var'' = `var'
 		}
 	}
 
@@ -88,67 +88,76 @@ program quaidsce_p
 	mat delta = e(delta)
 	mat tau = e(tau)
 	}
-	
-/// REPLACE VARIABLES FROM PREDICTIONS BASED ON THE STUBS `v' and the right formula	
-	//JCSH salvar variables temporales como double
-	
+
+	//AIDS
+	tempname lnpindex
+	gen `lnpindex'= `e(anot)'
+	forvalue i=1/`=e(ngoods)' {	
+		replace `lnpindex'= `lnpindex' + alpha[1,`i']*`lnp`i''
+		forvalue j=1/`e(ngoods)' {
+			if `j'>=`i' {
+				replace `lnpindex'= `lnpindex' + 0.5*(gamma[`j',`i']*(`lnp`i''*`lnp`j''))
+			}
+			 else {
+				replace `lnpindex'= `lnpindex' + 0.5*(gamma[`i',`j']*(`lnp`i''*`lnp`j''))
+			}
+		}
+	}
+			
 	//When quadratics
 	if "`e(quadratic)'" == "quadratic" {
-		tempvar bofp lnpindex
-		
-			gen `bofp'= beta[1,1]*`lnp1' 		
+		tempvar bofp 
+		 gen `bofp'= beta[1,1]*`lnp1' 		
 		forvalues i = 2/`=e(ngoods)' {		
-		replace `bofp'= `bofp' + beta[1,`i']*`lnp`i''
-									}
-		replace `bofp'= exp(`bofp')
-		
+			 replace `bofp'= `bofp' + beta[1,`i']*`lnp`i''
+		}
+		*replace `bofp'= exp(`bofp')
+	}
 
-		local alpha0=   `e(anot)' 
-		gen `lnpindex'= `alpha0'
-		forvalue i=1/`=e(ngoods)' {	
-			quiet replace `lnpindex'= `lnpindex' + alpha[1,`i']*`lnp`i''
-			local j=`i' 
-			forvalue ii=`j'/`=e(ngoods)' {
-				quiet replace `lnpindex'=  `lnpindex' + 0.5*(gamma[`ii',`i']*(`lnp`i''*`lnp`ii''))
-				//JCSH verificar que el 0.5 multiplica cada combinacion 	
-				}
-		}	
-	}	
 	
 	//When demographics
 	if `ndemo' > 0 {			
 		tempvar cofp mbar
-			
-			gen `cofp'= 1 //It is OK to set 1 because below we set a multiplication
-			gen double `mbar'= 1 //It is OK because I need to add a "1"
-			
-			foreach var of varlist `e(demographics)' {	
+		 gen `cofp'= 1 //It is OK to set 1 because below we set a multiplication
+		 gen double `mbar'= 1 //It is OK because I need to add a "1"
+		foreach var of varlist `e(demographics)' {	
 			local n_demo= 1
 			forvalue i=1/`=e(ngoods)' {
-				
-				replace `cofp'= `cofp'*(`d_`var''*eta[`n_demo',`i']*`lnp`i'') 
-				//JCSH verificar que sea una multiplicacion de todo
-				
-				tempvar betanz`i'
-					gen `betanz`i''=.
-				replace `betanz`i''=beta[1,`i']+(`d_`var''*eta[`n_demo',`i'])												
-								}
-								
+				 replace `cofp'= `cofp'*(`d_`var''*eta[`n_demo',`i']*`lnp`i'') 
+				 tempvar betanz`i'
+				 gen `betanz`i''=0
+				 replace `betanz`i''=beta[1,`i']+(`d_`var''*eta[`n_demo',`i'])								
+			}			
 		replace `mbar'= `mbar' + (rho[1,`n_demo']*`d_`var'') 					
-			local n_demo= `n_demo' + 1							
+		local n_demo= `n_demo' + 1							
 		}										
-		replace `cofp' = exp(`cofp')
-		
-	
+		*replace `cofp' = exp(`cofp')
 	}
-		
-	//Uncompensated prices elasticities	
+
+	//FUNCTION EVALUATOR
+	forvalues i = 1/`=e(ngoods)' {
 		forvalues j = 1/`=e(ngoods)' {
-		local v : word `j' of `vars'
-		qui replace `v' = -1 + (1/`w`j'')*(gamma[1,1])
-		//JCSH necesito w observada o latente
+			local v : word `i' of `vars'
+			if `ndemo' == 0 {
+				 replace `v' = alpha[1,`i']+beta[1,`i']*(`lnexp'-`lnpindex')+gamma[`i',`j']*`lnp`i''
+				if "`e(quadratic)'" == "quadratic" {
+					 replace `v' = `v'+ (lambda[1,`i']/exp(`bofp'))*(`lnexp'-`lnpindex')^2
+				}
+			}
+			else {
+				 replace `v' = alpha[1,`i']+`betanz`i''*(`lnexp'-`lnpindex'-ln(`mbar'))+gamma[`i',`j']*`lnp`i''
+				if "`e(quadratic)'" == "quadratic" {
+					 replace `v' = `v'+ (lambda[1,`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'-`lnpindex'-ln(`mbar'))^2
+					}
+				}
+			//When censor
+			if "`e(censor)'" == "censor" {
+			 replace `v' = `v'*cdfw`i' + delta[1,`i']*pdfw`i'
+			 replace `v' = 0 if `w`i'' == 0
+			}			 
 		}
-				
+	}
+
 end
 
 exit

@@ -309,8 +309,8 @@ forv i=1(1)`J' {
 }
 
 matrix `vv'=0*I(`bsize')
-local cn: colnames `vv'
-matrix rownames `vv' = `cn'
+mat colnames `vv'
+mat rownames `vv' 
 ereturn post `bb' `vv'
 
 end
