@@ -179,9 +179,9 @@ program Estimate, eclass
 		//First stage
 		local pdf
 		local cdf
-		capture drop cdf?? 
-		capture drop pdf?? 
-		capture drop du??
+		capture drop cdf* 
+		capture drop pdf* 
+		capture drop du*
 		
 		if "`censor'" == "nocensor" {
 		foreach x of varlist `shares2' {
