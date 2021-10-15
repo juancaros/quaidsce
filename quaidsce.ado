@@ -95,12 +95,14 @@ program Estimate, eclass
 	}
 	
 	// Check whether variables make sense
-	tempvar sumw
-	egen double `sumw' = rsum(`shares') if `touse'
-	cap assert reldif(`sumw', 1) < 1e-4 if `touse'
-	if _rc {
-		di as error "expenditure shares do not sum to one"
-		exit 499
+	if "`censor'" == "nocensor" {
+		tempvar sumw
+		egen double `sumw' = rsum(`shares') if `touse'
+		cap assert reldif(`sumw', 1) < 1e-4 if `touse'
+		if _rc {
+			di as error "expenditure shares do not sum to one"
+			exit 499
+		}	
 	}
 
 	if "`prices'" != "" {

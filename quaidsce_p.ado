@@ -154,7 +154,8 @@ program quaidsce_p
 			if "`e(censor)'" == "censor" {
 			 replace `v' = `v'*cdfw`i' + delta[1,`i']*pdfw`i'
 			 replace `v' = 0 if `w`i'' == 0
-			}			 
+			}
+		replace `v' = 0 if `v' < 0			
 		}
 	}
 
