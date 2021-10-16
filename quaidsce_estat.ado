@@ -80,13 +80,13 @@ program DoExp, rclass
 	local ndemo = `e(ndemos)'
 	quietly {
 		if "`e(censor)'" == "censor" {
-		foreach x of varlist w* `lnpr' cdfw* pdfw* lnexp duw* `e(demographics)' {
+		foreach x of varlist w* `lnpr' cdfw* pdfw* `lnexp' duw* `e(demographics)' {
 		sum `x'
 		scalar `x'm=r(mean)
 		}
 		}
 		else {
-		foreach x of varlist w* `lnpr' lnexp `e(demographics)' {
+		foreach x of varlist w* `lnpr' `lnexp' `e(demographics)' {
 		sum `x'
 		scalar `x'm=r(mean)
 		}
@@ -255,13 +255,13 @@ program DoUncomp, rclass
 	local ndemo = `e(ndemos)'
 	quietly {
 		if "`e(censor)'" == "censor" {
-		foreach x of varlist w* `lnpr' cdfw* pdfw* lnexp duw* `e(demographics)' {
+		foreach x of varlist w* `lnpr' cdfw* pdfw* `lnexp' duw* `e(demographics)' {
 		sum `x'
 		scalar `x'm=r(mean)
 		}
 		}
 		else {
-		foreach x of varlist w* `lnpr' lnexp `e(demographics)' {
+		foreach x of varlist w* `lnpr' `lnexp' `e(demographics)' {
 		sum `x'
 		scalar `x'm=r(mean)
 		}
@@ -456,13 +456,13 @@ program DoComp, rclass
 	local ndemo = `e(ndemos)'
 	quietly {
 		if "`e(censor)'" == "censor" {
-		foreach x of varlist w* `lnpr' cdfw* pdfw* lnexp duw* `e(demographics)' {
+		foreach x of varlist w* `lnpr' cdfw* pdfw* `lnexp' duw* `e(demographics)' {
 		sum `x'
 		scalar `x'm=r(mean)
 		}
 		}
 		else {
-		foreach x of varlist w* `lnpr' lnexp `e(demographics)' {
+		foreach x of varlist w* `lnpr' `lnexp' `e(demographics)' {
 		sum `x'
 		scalar `x'm=r(mean)
 		}

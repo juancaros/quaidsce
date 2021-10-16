@@ -169,7 +169,7 @@ program Estimate, eclass
 		}
 	}
 	
-	if "`method'" == "" {
+		if "`method'" == "" {
 		local estimator "ifgnls"
 		}
 		else {
@@ -177,11 +177,11 @@ program Estimate, eclass
 		}
 
 		//First stage
+		capture drop cdf* 
+		capture drop pdf*
+		capture drop du*
 		local pdf
 		local cdf
-		capture drop cdf?? 
-		capture drop pdf?? 
-		capture drop du??
 		
 		if "`censor'" == "nocensor" {
 		foreach x of varlist `shares2' {
@@ -216,8 +216,8 @@ program Estimate, eclass
 			if r(min) == 0 {
 			qui probit `z`x'' `lnprices' `lnexp'  `demographics'
 			
-			tempname xn loc lof
-			local xn = substr("`x'",2,1)
+			tempname xn loc
+			local xn = substr("`x'",2,.)
 			if `xn'==1 {
 				mat tau= e(b)'
 				mat setau[1,1]= e(V)
@@ -241,7 +241,6 @@ program Estimate, eclass
 			local du `du' `du`x''
 		}
 		}
-			
 		
 		if "`censor'" == "nocensor" {
 		local shares `shares2' 
@@ -260,7 +259,7 @@ nlsur __quaidsce @ `shares' if `touse',				///
 		`quadratic' `options' `censor' `demoopt'  `initialopt' `log' `vce' 
 
 		if "`censor'" == "nocensor" {
-		capture drop cdf?? pdf?? 
+		capture drop cdf* pdf*
 		}
 
 	// do delta method to get cov matrix
@@ -330,7 +329,7 @@ nlsur __quaidsce @ `shares' if `touse',				///
 			}
 		}
 	}
-
+	
 	mat colnames `bfullc' = `namestripe'
 	mat colnames `Vfullc' = `namestripe'
 	mat rownames `Vfullc' = `namestripe'
