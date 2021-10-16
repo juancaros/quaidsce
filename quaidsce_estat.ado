@@ -150,15 +150,15 @@ program DoExp, rclass
 	//FUNCTION EVALUATOR (PREDICTED SHARE)
 	forvalues i = 1/`=e(ngoods)' {
 		if `ndemo' == 0 {
-		scalar we`i' = _b[alpha:alpha_`i']+_b[beta:beta_`i']*(lnexpm-`lnpindex') + `gsum`i''
+		scalar we`i' = _b[alpha:alpha_`i']+_b[beta:beta_`i']*(`lnexp'm-`lnpindex') + `gsum`i''
 			if "`e(quadratic)'" == "quadratic" {
-				 scalar we`i' = we`i' + (lambda[1,`i']/exp(`bofp'))*(lnexpm-`lnpindex')^2
+				 scalar we`i' = we`i' + (lambda[1,`i']/exp(`bofp'))*(`lnexp'm-`lnpindex')^2
 			}
 		}
 		else {
-		scalar we`i' = _b[alpha:alpha_`i']+`betanz`i''*(lnexpm-`lnpindex'-ln(`mbar')) + `gsum`i''
+		scalar we`i' = _b[alpha:alpha_`i']+`betanz`i''*(`lnexp'm-`lnpindex'-ln(`mbar')) + `gsum`i''
 			if "`e(quadratic)'" == "quadratic" {
-				 scalar we`i' = we`i' + (_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(lnexpm-`lnpindex'-ln(`mbar'))^2
+				 scalar we`i' = we`i' + (_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))^2
 				}
 			}
 		//When censor
@@ -172,13 +172,13 @@ program DoExp, rclass
 		if `ndemo' == 0 {
 			global ie`i' "(1+_b[beta:beta_`i']/we`i')"
 			if "`e(quadratic)'" == "quadratic" {
-				 global ie`i' "(1+(1/we`i')*(_b[beta:beta_`i']+(2*_b[lambda:lambda_`i']/exp(`bofp'))*(lnexpm-`lnpindex')))"
+				 global ie`i' "(1+(1/we`i')*(_b[beta:beta_`i']+(2*_b[lambda:lambda_`i']/exp(`bofp'))*(`lnexp'm-`lnpindex')))"
 			}
 		}
 		else {
 			global ie`i' "(1+`betanz`i''/we`i')"
 			if "`e(quadratic)'" == "quadratic" {
-				 global ie`i' "(1+(1/we`i')*(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(lnexpm-`lnpindex'-ln(`mbar'))))"
+				 global ie`i' "(1+(1/we`i')*(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))))"
 			}
 		}
 			//When censor
@@ -325,15 +325,15 @@ program DoUncomp, rclass
 	//FUNCTION EVALUATOR (PREDICTED SHARE)
 	forvalues i = 1/`=e(ngoods)' {
 		if `ndemo' == 0 {
-		scalar we`i' = _b[alpha:alpha_`i']+_b[beta:beta_`i']*(lnexpm-`lnpindex') + `gsum`i''
+		scalar we`i' = _b[alpha:alpha_`i']+_b[beta:beta_`i']*(`lnexp'm-`lnpindex') + `gsum`i''
 			if "`e(quadratic)'" == "quadratic" {
-				 scalar we`i' = we`i' + (lambda[1,`i']/exp(`bofp'))*(lnexpm-`lnpindex')^2
+				 scalar we`i' = we`i' + (lambda[1,`i']/exp(`bofp'))*(`lnexp'm-`lnpindex')^2
 			}
 		}
 		else {
-		scalar we`i' = _b[alpha:alpha_`i']+`betanz`i''*(lnexpm-`lnpindex'-ln(`mbar')) + `gsum`i''
+		scalar we`i' = _b[alpha:alpha_`i']+`betanz`i''*(`lnexp'm-`lnpindex'-ln(`mbar')) + `gsum`i''
 			if "`e(quadratic)'" == "quadratic" {
-				 scalar we`i' = we`i' + (_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(lnexpm-`lnpindex'-ln(`mbar'))^2
+				 scalar we`i' = we`i' + (_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))^2
 				}
 			}
 		//When censor
@@ -356,10 +356,10 @@ program DoUncomp, rclass
 			}
 			if "`e(quadratic)'" == "quadratic" {
 				if `j'>=`i' {	
-					global ue`i'`j' "(-`de'+(1/we`i')*(_b[gamma:gamma_`j'_`i']-(_b[beta:beta_`i']+(2*_b[lambda:lambda_`i']/exp(`bofp')*(lnexpm-`lnpindex'))*(_b[alpha:alpha_`i']+`gsum`i''))-(_b[beta:beta_`i']*_b[lambda:lambda_`i']/exp(`bofp'))*(lnexpm-`lnpindex')^2)))"
+					global ue`i'`j' "(-`de'+(1/we`i')*(_b[gamma:gamma_`j'_`i']-(_b[beta:beta_`i']+(2*_b[lambda:lambda_`i']/exp(`bofp')*(`lnexp'm-`lnpindex'))*(_b[alpha:alpha_`i']+`gsum`i''))-(_b[beta:beta_`i']*_b[lambda:lambda_`i']/exp(`bofp'))*(`lnexp'm-`lnpindex')^2)))"
 				}
 				else {
-					global ue`i'`j'"(-`de'+(1/we`i')*(_b[gamma:gamma_`i'_`j']-(_b[beta:beta_`i']+(2*_b[lambda:lambda_`i']/exp(`bofp')*(lnexpm-`lnpindex'))*(_b[alpha:alpha_`i']+`gsum`i''))-(_b[beta:beta_`i']*_b[lambda:lambda_`i']/exp(`bofp'))*(lnexpm-`lnpindex')^2)))"
+					global ue`i'`j'"(-`de'+(1/we`i')*(_b[gamma:gamma_`i'_`j']-(_b[beta:beta_`i']+(2*_b[lambda:lambda_`i']/exp(`bofp')*(`lnexp'm-`lnpindex'))*(_b[alpha:alpha_`i']+`gsum`i''))-(_b[beta:beta_`i']*_b[lambda:lambda_`i']/exp(`bofp'))*(`lnexp'm-`lnpindex')^2)))"
 				}
 			}
 		}
@@ -372,10 +372,10 @@ program DoUncomp, rclass
 			}
 			if "`e(quadratic)'" == "quadratic" {
 				if `j'>=`i' {	
-				 global ue`i'`j' "(-`de'+(1/we`i')*(_b[gamma:gamma_`j'_`i']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(lnexpm-`lnpindex'-ln(`mbar'))*(_b[alpha:alpha_`i']+`gsum`i''))-(`betanz`i''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(lnexpm-`lnpindex'-ln(`mbar'))^2))"
+				 global ue`i'`j' "(-`de'+(1/we`i')*(_b[gamma:gamma_`j'_`i']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))*(_b[alpha:alpha_`i']+`gsum`i''))-(`betanz`i''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))^2))"
 				}
 				else {
-				global ue`i'`j' "(-`de'+(1/we`i')*(_b[gamma:gamma_`i'_`j']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(lnexpm-`lnpindex'-ln(`mbar'))*(_b[alpha:alpha_`i']+`gsum`i''))-(`betanz`i''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(lnexpm-`lnpindex'-ln(`mbar'))^2))"				
+				global ue`i'`j' "(-`de'+(1/we`i')*(_b[gamma:gamma_`i'_`j']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))*(_b[alpha:alpha_`i']+`gsum`i''))-(`betanz`i''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))^2))"				
 				}
 			}	
 		}
@@ -526,15 +526,15 @@ program DoComp, rclass
 	//FUNCTION EVALUATOR (PREDICTED SHARE)
 	forvalues i = 1/`=e(ngoods)' {
 		if `ndemo' == 0 {
-		scalar we`i' = _b[alpha:alpha_`i']+_b[beta:beta_`i']*(lnexpm-`lnpindex') + `gsum`i''
+		scalar we`i' = _b[alpha:alpha_`i']+_b[beta:beta_`i']*(`lnexp'm-`lnpindex') + `gsum`i''
 			if "`e(quadratic)'" == "quadratic" {
-				 scalar we`i' = we`i' + (lambda[1,`i']/exp(`bofp'))*(lnexpm-`lnpindex')^2
+				 scalar we`i' = we`i' + (lambda[1,`i']/exp(`bofp'))*(`lnexp'm-`lnpindex')^2
 			}
 		}
 		else {
-		scalar we`i' = _b[alpha:alpha_`i']+`betanz`i''*(lnexpm-`lnpindex'-ln(`mbar')) + `gsum`i''
+		scalar we`i' = _b[alpha:alpha_`i']+`betanz`i''*(`lnexp'm-`lnpindex'-ln(`mbar')) + `gsum`i''
 			if "`e(quadratic)'" == "quadratic" {
-				 scalar we`i' = we`i' + (_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(lnexpm-`lnpindex'-ln(`mbar'))^2
+				 scalar we`i' = we`i' + (_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))^2
 				}
 			}
 		//When censor
@@ -548,13 +548,13 @@ program DoComp, rclass
 		if `ndemo' == 0 {
 			global ie`i' "(1+_b[beta:beta_`i']/we`i')"
 			if "`e(quadratic)'" == "quadratic" {
-				 global ie`i' "(1+(1/we`i')*(_b[beta:beta_`i']+(2*_b[lambda:lambda_`i']/exp(`bofp'))*(lnexpm-`lnpindex')))"
+				 global ie`i' "(1+(1/we`i')*(_b[beta:beta_`i']+(2*_b[lambda:lambda_`i']/exp(`bofp'))*(`lnexp'm-`lnpindex')))"
 			}
 		}
 		else {
 			global ie`i' "(1+`betanz`i''/we`i')"
 			if "`e(quadratic)'" == "quadratic" {
-				 global ie`i' "(1+(1/we`i')*(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(lnexpm-`lnpindex'-ln(`mbar'))))"
+				 global ie`i' "(1+(1/we`i')*(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))))"
 			}
 		}
 			//When censor
@@ -578,10 +578,10 @@ program DoComp, rclass
 			}
 			if "`e(quadratic)'" == "quadratic" {
 				if `j'>=`i' {	
-					global ue`i'`j' "(-`de'+(1/we`i')*(_b[gamma:gamma_`j'_`i']-(_b[beta:beta_`i']+(2*_b[lambda:lambda_`i']/exp(`bofp')*(lnexpm-`lnpindex'))*(_b[alpha:alpha_`i']+`gsum`i''))-(_b[beta:beta_`i']*_b[lambda:lambda_`i']/exp(`bofp'))*(lnexpm-`lnpindex')^2)))"
+					global ue`i'`j' "(-`de'+(1/we`i')*(_b[gamma:gamma_`j'_`i']-(_b[beta:beta_`i']+(2*_b[lambda:lambda_`i']/exp(`bofp')*(`lnexp'm-`lnpindex'))*(_b[alpha:alpha_`i']+`gsum`i''))-(_b[beta:beta_`i']*_b[lambda:lambda_`i']/exp(`bofp'))*(`lnexp'm-`lnpindex')^2)))"
 				}
 				else {
-					global ue`i'`j'"(-`de'+(1/we`i')*(_b[gamma:gamma_`i'_`j']-(_b[beta:beta_`i']+(2*_b[lambda:lambda_`i']/exp(`bofp')*(lnexpm-`lnpindex'))*(_b[alpha:alpha_`i']+`gsum`i''))-(_b[beta:beta_`i']*_b[lambda:lambda_`i']/exp(`bofp'))*(lnexpm-`lnpindex')^2)))"
+					global ue`i'`j'"(-`de'+(1/we`i')*(_b[gamma:gamma_`i'_`j']-(_b[beta:beta_`i']+(2*_b[lambda:lambda_`i']/exp(`bofp')*(`lnexp'm-`lnpindex'))*(_b[alpha:alpha_`i']+`gsum`i''))-(_b[beta:beta_`i']*_b[lambda:lambda_`i']/exp(`bofp'))*(`lnexp'm-`lnpindex')^2)))"
 				}
 			}
 		}
@@ -594,10 +594,10 @@ program DoComp, rclass
 			}
 			if "`e(quadratic)'" == "quadratic" {
 				if `j'>=`i' {	
-				 global ue`i'`j' "(-`de'+(1/we`i')*(_b[gamma:gamma_`j'_`i']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(lnexpm-`lnpindex'-ln(`mbar'))*(_b[alpha:alpha_`i']+`gsum`i''))-(`betanz`i''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(lnexpm-`lnpindex'-ln(`mbar'))^2))"
+				 global ue`i'`j' "(-`de'+(1/we`i')*(_b[gamma:gamma_`j'_`i']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))*(_b[alpha:alpha_`i']+`gsum`i''))-(`betanz`i''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))^2))"
 				}
 				else {
-				global ue`i'`j' "(-`de'+(1/we`i')*(_b[gamma:gamma_`i'_`j']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(lnexpm-`lnpindex'-ln(`mbar'))*(_b[alpha:alpha_`i']+`gsum`i''))-(`betanz`i''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(lnexpm-`lnpindex'-ln(`mbar'))^2))"				
+				global ue`i'`j' "(-`de'+(1/we`i')*(_b[gamma:gamma_`i'_`j']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))*(_b[alpha:alpha_`i']+`gsum`i''))-(`betanz`i''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))^2))"				
 				}
 			}	
 		}
