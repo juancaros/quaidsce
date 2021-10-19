@@ -6,7 +6,6 @@ clear all
 *net install quaidsce, replace force from("https://juancaros.github.io/quaidsce")
 *do utils__quaidsce.mata //run mata to update libraries
 *lmbuild lquaidsce.mlib, replace dir(C:\Users\juan.caro\ado\plus)
-
 quiet do "C:\Users\juanp\OneDrive\Documentos\GitHub\quaidsce\utils__quaidsce.mata" //run mata to update libraries
 *lmbuild lquaidsce.mlib, replace dir(C:\ado\plus\l)
 
@@ -41,6 +40,19 @@ gen income = exp(rnormal())+exp(rnormal())
 *quaids w1 w2 w3 w4 w5, anot(10) prices(p1 p2 p3 p4 p5) expenditure(expfd) demographics(nkids income) nolog 
 *quaidsce w1 w2 w3 w4, anot(10) prices(p1 p2 p3 p4) expenditure(expfd) demographics(nkids income) nolog nocensor
 quaidsce w1 w2 w3 w4 w5, anot(10) prices(p1 p2 p3 p4 p5) expenditure(expfd) demographics(nkids income) nolog  method(nls)
+
+
+
+estat uncomp
+return list
+
+mat define orale=  r(elas_u)
+mat list orale
+
+
+mat define orale_se=  r(se_elas_u)
+mat list orale_se
+
 
 predict orale*
 sum orale*

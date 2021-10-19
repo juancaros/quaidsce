@@ -242,6 +242,7 @@ program DoUncomp, rclass
 		local lnexp `exp'
 	}
 
+	
 	if "`e(lhs)'" != "" { // This doesnt work if there is no censoring (what is it for?)
 		local i 1
 		foreach var of varlist `e(lhs)' {
@@ -381,7 +382,12 @@ program DoUncomp, rclass
 		}
 			//When censor
 		if "`e(censor)'" == "censor" {
-			global ue`i'`j' "(${ue`i'`j'}*cdfw`i'm + (_b[tau:p`i'_`j']*pdfw`i'm*(w`i'm-_b[delta:delta_`i']*duw`i'm))/we`i')"
+			//Explain component ${ue`i'`j'}+`de')*we`i'
+			// "${ue`i'`j'}+`de'" --> to remove lower delta from original formula
+			// "we`i'" --> to revert 1/we`i' from the original formula
+	
+			*global ue`i'`j' "(${ue`i'`j'}*cdfw`i'm + (_b[tau:p`i'_`j']*pdfw`i'm*(w`i'm-_b[delta:delta_`i']*duw`i'm))/we`i')"
+			global ue`i'`j' "(-`de'+(1/we`i')*(cdfw`i'm*((${ue`i'`j'}+`de')*we`i') + _b[tau:p`i'_`j']*pdfw`i'm*(w`i'm-_b[delta:delta_`i']*duw`i'm)))"			
 		}			 
 	}
 	}
