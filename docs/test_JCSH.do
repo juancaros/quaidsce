@@ -53,6 +53,7 @@ gen income = exp(rnormal())+exp(rnormal())
 
 quaidsce w1 w2 w3 w4 w5, anot(10) prices(p1 p2 p3 p4 p5) expenditure(expfd) demographics(nkids income) nolog nocensor
 estat uncomp
+
 mat define orale2=  r(elas_u)
 mat list orale2
 
