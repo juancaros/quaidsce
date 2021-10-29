@@ -33,7 +33,7 @@ replace w5=0 if w5<0.0001
 gen p5=0.5*p1+0.5*p3+exp(rnormal())
 gen lnp5=ln(p5)
 
-set seed 1
+
 gen nkids = int(runiform()*4)
 gen rural = (runiform() > 0.2)
 gen income = exp(rnormal())+exp(rnormal())
@@ -45,14 +45,16 @@ predict we*
 estat uncompensated, atmeans
 mat define orale=  r(uncompelas)
 mat list orale
+/*
+            c1          c2          c3          c4          c5
+r1  -.65402369  -.15466283  -.09667678  -.09535059  -.04164129
+r2  -.21527343  -.65645026   .03375876   .00593423   -.0215072
+r3  -.38990361   .05398783  -.62667958  -.10153493   .07453049
+r4  -.14469442  -.02361435  -.04087145  -.84323998   .04214077
+r5  -.08273809  -.06005829   .02626937   .03599686  -.98202648
+*/
 
-*orale[5,5]
-*            c1          c2          c3          c4          c5
-*r1   -.6217292  -.12679962   -.1195767  -.07070947  -.00187313
-*r2  -.25042946  -.70313731   .05739774  -.03900571  -.06771602
-*r3  -.50544677   .14207981  -.62689343  -.03422957   .06902285
-*r4  -.11840447  -.02686985  -.01353957  -.84422253    .0451797
-*r5  -.08565155  -.09800259    .0138488   .00852168  -1.0088073
+
 
 mat define parametros= e(b)
 mat list parametros
@@ -122,24 +124,74 @@ sum bofp //It's OK
 		*replace cofp = exp(cofp)
 		
 		 
-		*drop cofp
-		*gen  double cofp= 1 //It is OK to set 1 because below we set a multiplication
-		*forvalue i=1/5 {
-		*replace cofp= cofp*((nkidsm*eta[1,`i']+incomem*eta[2,`i'])*lnp`i'm) 
-		*}
+		drop cofp
+		gen  double cofp= 1 //It is OK to set 1 because below we set a multiplication
+		forvalue i=1/5 {
+		replace cofp= cofp*((nkidsm*eta[1,`i']+incomem*eta[2,`i'])*lnp`i'm) 
+		}
 		*gen double exp_cofp = exp(cofp)
 	
 	
 			forvalue i=1/5 {	
-			gen gsum`i'= 0	
+			gen double gsum`i'= 0	
 			local j=`i' 
 			forvalue ii=`j'/5 {
-				quiet replace gsum`i'=  gamma[`ii',`i' ]*lnp`i'm
-				*quiet replace gsum`i'= gsum`i' + gamma[`ii',`i' ]*lnp`i'm //Deberia ser esta
+				*quiet replace gsum`i'=  gamma[`ii',`i' ]*lnp`i'm
+				quiet replace gsum`i'= gsum`i' + gamma[`ii',`i' ]*lnp`i'm //Deberia ser esta
 				}
 				}
 
+forvalue i=1/5 {	
+	gen ue`i'= -1+1/w`i'm*(gamma[`i',`i']-	///
+			(betanz`i'+(2*lambda[1,`i']/exp(bofp)/exp(cofp))* ///
+			(lnexpm-lnpindex-ln(mbar)))*	///
+			(alpha[1,`i']+gsum`i')- 	///
+			(betanz`i'*lambda[1,`i']/exp(bofp)/exp(cofp)*	///
+			(lnexpm-lnpindex-ln(mbar))^2))
+			}	
+				
+sum ue*
+
+forvalue i=1/5 {
+#delimit; 
+	gen ue`i'= -1+1/w`i'm*(gamma[`i',`i']-	
+			(betanz`i'+(2*lambda[1,`i']/exp(bofp)/exp(cofp))* 
+			(lnexpm-lnpindex-ln(mbar)))*	
+			(alpha[1,`i']+gsum`i')- 	
+			(betanz`i'*lambda[1,`i']/exp(bofp)/exp(cofp)*	
+			(lnexpm-lnpindex-ln(mbar))^2));
+			#delimit cr
+			}	
+
+
+			
+		-`de'+1/w`i'm*(_b[gamma:gamma_`j'_`i']-
+		(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*
+		(`lnexp'm-`lnpindex'-ln(`mbar')))*
+		(_b[alpha:alpha_`i']+`gsum`i'')-
+		(`betanz`i''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp')*
+		(`lnexp'm-`lnpindex'-ln(`mbar'))^2))
 	
+	
+	
+		
+
+	
+			
+/*
+sum ue*
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+         ue1 |      1,000   -.6455342           0  -.6455342  -.6455342
+         ue2 |      1,000   -.6523123           0  -.6523123  -.6523123
+         ue3 |      1,000   -.6269533           0  -.6269533  -.6269533
+         ue4 |      1,000   -.8437712           0  -.8437712  -.8437712
+         ue5 |      1,000   -.9848697           0  -.9848697  -.9848697
+
+*/
+
+/*				
 gen ue1= -1+1/we_1m*(gamma[1,1]-	///
 		(betanz1+(2*lambda[1,1]/exp(bofp)/exp(cofp))* ///
 		(lnexpm-lnpindex-ln(mbar)))*	///

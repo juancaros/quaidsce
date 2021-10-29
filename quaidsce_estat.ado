@@ -306,7 +306,10 @@ program DoUncomp, rclass
 		}
 	}
 	
-	forvalues i = 1/`=e(ngoods)' {
+	*gen jcsh_lnpindex= `lnpindex'
+	
+	//JCSH I rewrite this below
+	/*forvalues i = 1/`=e(ngoods)' {
 		tempname gsum`i'
 		local gsum`i' = 0	
 		forvalues j = 1/`=e(ngoods)' {
@@ -317,7 +320,19 @@ program DoUncomp, rclass
 			local gsum`i' = `gsum`i''+_b[gamma:gamma_`i'_`j']*`lnp`i''m 	
 			}
 		}
-	}
+	}*/
+	
+	forvalue i=1/`=e(ngoods)' {	
+			tempname gsum`i'	
+			scalar `gsum`i''= 0
+			local j=`i' 
+			forvalue ii=`j'/`=e(ngoods)' {
+				scalar `gsum`i''= `gsum`i'' + _b[gamma: gamma_`ii'_`i']*`lnp`i''m 
+				}
+			*gen jcsh_gsum`i'= `gsum`i''
+				}
+				
+		
 
 	//When quadratics
 	if "`e(quadratic)'" == "quadratic" {
@@ -326,6 +341,7 @@ program DoUncomp, rclass
 		forvalues i = 2/`=e(ngoods)' {		
 			 scalar `bofp'= `bofp' + _b[beta:beta_`i']*`lnp`i''m
 		}
+		*gen jcsh_bofp=`bofp' 
 		*replace `bofp'= exp(`bofp')
 	}
 	
@@ -351,10 +367,15 @@ program DoUncomp, rclass
 				 *scalar `betanz`i''=_b[beta:beta_`i']+(`var'm*_b[eta:eta_`var'_`i']) //JCSH temporary						
 				 scalar `cofp`i''= `cofp`i''+(`var'm*_b[eta:eta_`var'_`i']) 
 				 scalar `betanz`i''=`betanz`i''+(`var'm*_b[eta:eta_`var'_`i']) //JCSH temporary						
-
+				 
 			}			
 		scalar `mbar'= `mbar' + (_b[rho:rho_`var']*`var'm)
-		}										
+		}
+		
+		forvalue i=1/`=e(ngoods)' {
+		*gen jcsh_betanz`i'= `betanz`i''
+		}
+		*gen jcsh_mbar= `mbar'
 		*replace `cofp' = exp(`cofp')
 		
 			//JCSH temporary
@@ -365,6 +386,7 @@ program DoUncomp, rclass
 	forvalue i=1/`=e(ngoods)' {
 	scalar `cofp'= `cofp'*`cofp`i''
 	}
+	*gen jcsh_cofp= `cofp'
 	}
 
 	//FUNCTION EVALUATOR (PREDICTED SHARE)
@@ -425,11 +447,14 @@ program DoUncomp, rclass
 			if "`e(quadratic)'" == "quadratic" {
 				if `j'>=`i' {	
 				 *global ue`i'`j' "(-`de'+(1/we`i')*(_b[gamma:gamma_`j'_`i']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))*(_b[alpha:alpha_`i']+`gsum`i''))-(`betanz`i''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))^2))"
-				 global ue`i'`j' "(-`de'+(1/w`i'm)*(_b[gamma:gamma_`j'_`i']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))*(_b[alpha:alpha_`i']+`gsum`i''))-(`betanz`i''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))^2))"
+				 *global ue`i'`j' "(-`de'+(1/w`i'm)*(_b[gamma:gamma_`j'_`i']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))*(_b[alpha:alpha_`i']+`gsum`i''))-(`betanz`i''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))^2))"
+				 global ue`i'`j' "-`de'+1/w`i'm*(_b[gamma:gamma_`j'_`i']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar')))*(_b[alpha:alpha_`i']+`gsum`i'')-(`betanz`i''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp')*(`lnexp'm-`lnpindex'-ln(`mbar'))^2))"
 				}
 				else {
 				*global ue`i'`j' "(-`de'+(1/we`i')*(_b[gamma:gamma_`i'_`j']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))*(_b[alpha:alpha_`i']+`gsum`i''))-(`betanz`i''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))^2))"				
-				global ue`i'`j' "(-`de'+(1/w`i'm)*(_b[gamma:gamma_`i'_`j']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))*(_b[alpha:alpha_`i']+`gsum`i''))-(`betanz`i''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))^2))"				
+				*global ue`i'`j' "(-`de'+(1/w`i'm)*(_b[gamma:gamma_`i'_`j']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))*(_b[alpha:alpha_`i']+`gsum`i''))-(`betanz`i''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))^2))"				
+				global ue`i'`j' "-`de'+1/w`i'm*(_b[gamma:gamma_`i'_`j']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar')))*(_b[alpha:alpha_`j']+`gsum`j'')-(`betanz`j''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp')*(`lnexp'm-`lnpindex'-ln(`mbar'))^2))"
+				//JCSH actualizo `betanz`j'', alpha_`j'], `gsum`j'' en vez de su contraparte `i'
 				}
 			}	
 		}
