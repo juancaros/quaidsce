@@ -2,11 +2,11 @@ clear all
 capture log close
 set maxvar 10000
 *lmbuild lquaidsce.mlib, replace dir(C:\ado\plus)
-*net install quaidsce, replace force from("https://juancaros.github.io/quaidsce")
-*webuse food, clear
+net install quaidsce, replace force from("https://juancaros.github.io/quaidsce")
+webuse food, clear
 program drop _all
 
-use "C:\Users\jccaro\quaidsce\docs\DS_STATA_3_2__pci2sls_.dta"
+*use "C:\Users\jccaro\quaidsce\docs\DS_STATA_3_2__pci2sls_.dta"
 
 foreach i of numlist 1/4 {
 gen aux = cond(runiform() < 0.2, 0, 1)
@@ -25,7 +25,7 @@ gen rural = (runiform() > 0.2)
 gen income = exp(rnormal())+exp(rnormal())
 
 quaids w1 w2 w3 w4, anot(10) prices(p1 p2 p3 p4) expenditure(expfd) demographics(nkids income) nolog 
-quaidsce w1 w2 w3 w4, anot(10) prices(p1 p2 p3 p4) expenditure(expfd) nolog demographics(income) method(nls) 
+quaidsce w1 w2 w3 w4, anot(10) prices(p1 p2 p3 p4) expenditure(expfd) nolog demographics(income nkids) nocensor
 quaidsce w1-w17, anot(10) prices(p1-p17) expenditure(total_exp) nolog demographics(x1 x3-x8) method(nls) 
 
 log close
