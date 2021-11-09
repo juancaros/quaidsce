@@ -39,8 +39,7 @@ quaidsce w1 w2 w3 w4 w5, anot(10) prices(p1 p2 p3 p4 p5) expenditure(expfd) nolo
 *****************************************************************************************
 
 
-use "C:\Users\grace.meloguerrero\OneDrive - Texas A&M AgriLife\Dell\Documents\EPF\VIII EPF\stata\DS_STATA_3_2__pci2sls_", clear
-
+use "C:\Users\grace.meloguerrero\OneDrive - Texas A&M AgriLife\Documents\GitHub\quaidsce\data\DS_STATA_3_2_0_pci2sls_", clear
 egen total=rowtotal(hh_shill1-hh_shill17)
 
 
@@ -52,13 +51,13 @@ drop if missing(w`i')
 
 
 
-log using  "C:\Users\grace.meloguerrero\Documents\GitHub\quaidsce\log\censor.log", replace
+log using  "C:\Users\grace.meloguerrero\OneDrive - Texas A&M AgriLife\Documents\GitHub\quaidsce\log\censor.log", replace
 quaidsce w1-w17, anot(10) prices(p1-p17) expenditure(total) nolog demographics(x1-x3) method(nls) 
 
 
 log close
 
-log using  "C:\Users\grace.meloguerrero\Documents\GitHub\quaidsce\log\censor_elast.log", replace
+log using  "C:\Users\grace.meloguerrero\OneDrive - Texas A&M AgriLife\Documents\GitHub\quaidsce\log\censor_elast.log", replace
 
 estat uncomp
 mat define unce_quaidsce=  r(elas_u)
