@@ -79,12 +79,13 @@ log using  "C:\Users\grace.meloguerrero\OneDrive - Texas A&M AgriLife\Documents\
 quaidsce w1-w17, anot(10) prices(p1-p17) expenditure(total) nolog demographics(x1-x3) 
 log close
 
-log using  "C:\Users\grace.meloguerrero\OneDrive - Texas A&M AgriLife\Documents\GitHub\quaidsce\log\censor_exp_elast_v`vr'.log", replac
+local vr 2
+log using  "C:\Users\grace.meloguerrero\OneDrive - Texas A&M AgriLife\Documents\GitHub\quaidsce\log\censor_exp_elast_v`vr'.log", replace 
 estat exp
 mat define ee_quaidsce=  r(elas_i)
 mat list ee_quaidsce
 
-log using  "C:\Users\grace.meloguerrero\OneDrive - Texas A&M AgriLife\Documents\GitHub\quaidsce\log\censor_comp_elast_v`vr'.log", repl
+log using  "C:\Users\grace.meloguerrero\OneDrive - Texas A&M AgriLife\Documents\GitHub\quaidsce\log\censor_comp_elast_v`vr'.log", replace
 estat comp
 mat define ce_quaidsce=  r(elas_c)
 mat list ce_quaidsce
