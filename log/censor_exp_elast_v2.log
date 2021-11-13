@@ -4,3 +4,34 @@
   log type:  text
  opened on:  11 Nov 2021, 12:42:40
 
+. estat exp
+
+. mat define ee_quaidsce=  r(elas_i)
+
+. mat list ee_quaidsce
+
+ee_quaidsce[1,17]
+            c1          c2          c3          c4          c5          c6          c7          c8          c9         c10         c11         c12         c13         c14         c15         c16
+r1   .79267702  -1.4219842   .98089887   1.1938626   .99543462   1.1719737   .91151421   .96786194   .64109021   .93336076   2.1297699    1.048747   .80642044   1.0548648   1.2537046   1.4390305
+
+           c17
+r1   1.0727732
+
+. 
+. log using  "C:\Users\grace.meloguerrero\OneDrive - Texas A&M AgriLife\Documents\GitHub\quaidsce\log\censor_comp_elast_v`vr'.log", replace
+log file already open
+r(604);
+
+end of do-file
+
+r(604);
+
+. do "C:\Users\GRACE~1.MEL\AppData\Local\Temp\STD1378_000000.tmp"
+
+. 
+. log close
+      name:  <unnamed>
+       log:  C:\Users\grace.meloguerrero\OneDrive - Texas A&M AgriLife\Documents\GitHub\quaidsce\log\censor_exp_elast_v2.log
+  log type:  text
+ closed on:  11 Nov 2021, 13:09:58
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
