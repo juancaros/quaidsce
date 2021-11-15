@@ -130,18 +130,6 @@ Other methods can be used to conduct faster model selection.
 {opt level(#)}; see {helpb estimation options##level():[R] estimation options}.
 
 
-{title:Examples}
-
-{pstd}
-Fit a 5-good quadratic censored AIDS model with alpha_0 = 10:{p_end}
-{phang2}{cmd:. quaidsce w1-w5, anot(10) prices(p1-p5) expenditure(totalexp)}
-{p_end}
-
-{pstd}
-Same as above, but including household-size variable {opt hhsize}:{p_end}
-{phang2}{cmd:. quaidsce w1-w5, anot(10) prices(p1-p5) expenditure(totalexp)}
-            {cmd:demographics(hhsize)}{p_end}
-
 {title:Saved results}
 
 {pstd}
