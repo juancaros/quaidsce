@@ -85,22 +85,6 @@ The command computes the {it:k} x {it:k} matrix of uncompensated price elasticit
 calculated when all the variables in the model are set to their sample means.
 Standard errors are based on the delta method (as a wrapper from {cmd:margins}).
 
-{title:Examples}
-
-{pstd}Setup{p_end}
-{phang2}{cmd:. webuse food}{p_end}
-{phang2}{cmd:. quaidsce w1-w4, anot(10) lnprices(lnp1-lnp4) expenditure(expfd)}{p_end}
-
-{pstd}
-Calculate observation-level predicted expenditure shares{p_end}
-{phang2}{cmd:. predict what*}{p_end}
-
-{pstd}
-Calculate elasticities and standard errors at variable means{p_end}
-{phang2}{cmd:. estat expenditure}{p_end}
-{phang2}{cmd:. estat compensated}{p_end}
-{phang2}{cmd:. estat uncompensated}{p_end}
-
 
 {title:Stored results}
 
@@ -108,37 +92,37 @@ Calculate elasticities and standard errors at variable means{p_end}
 {cmd:estat expenditure} stores the following:{p_end}
 
 {synoptset 18 tabbed}{...}
-{synopt:{cmd:r(expelas)}}vector of expenditure elasticities{p_end}
+{synopt:{cmd:r(elas_i)}}vector of expenditure elasticities{p_end}
 
-{synopt:{cmd:r(sd)}}vector of standard errors of expenditure
+{synopt:{cmd:r(se_elas_i)}}vector of standard errors of expenditure
 elasticities{p_end}
 
 {pstd}
 {cmd:estat compensated} stores the following:{p_end}
 
 {synoptset 18 tabbed}{...}
-{synopt:{cmd:r(compelas)}}matrix of compensated price elasticities{p_end}
+{synopt:{cmd:r(elas_c)}}matrix of compensated price elasticities{p_end}
 
 {phang2}
 The element in row {it:i}, column {it:j} of {cmd:r(compelas)} contains the 
 compensated price elasticity of good {it:i} with respect to the price of
 good {it:j}.
 
-{synopt:{cmd:r(sd)}}matrix of standard errors of compensated price
+{synopt:{cmd:r(se_elas_c)}}matrix of standard errors of compensated price
 elasticities{p_end}
 
 {pstd}
 {cmd:estat uncompensated} stores the following:{p_end}
 
 {synoptset 18 tabbed}{...}
-{synopt:{cmd:r(uncompelas)}}matrix of uncompensated price elasticities{p_end}
+{synopt:{cmd:r(elas_u)}}matrix of uncompensated price elasticities{p_end}
 
 {phang2}
 The element in row {it:i}, column {it:j} of {cmd:r(uncompelas)} contains the 
 uncompensated price elasticity of good {it:i} with respect to the price of good
 {it:j}.
 
-{synopt:{cmd:r(sd)}}matrix of standard errors of uncompensated price
+{synopt:{cmd:r(se_elas_u)}}matrix of standard errors of uncompensated price
 elasticities{p_end}
 
 
