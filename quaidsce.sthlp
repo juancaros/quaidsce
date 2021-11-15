@@ -40,7 +40,7 @@ not omit one of the shares to avoid a singular covariance matrix;
 {synopt :{opt nolo:g}}suppress the iteration log{p_end}
 {synopt :{cmd:vce(}{it:{help quaidsce##vcetype:vcetype}}{cmd:)}}{it:vcetype} may be {opt gnr}, {opt r:obust}, {opt cl:uster} {it:clustvar}, {opt boot:strap}, or {opt jack:knife}{p_end}
 {synopt :{opt l:evel(#)}}set confidence level; default is {cmd:level(95)}{p_end}
-{synopt :{opt m:ethod(#)}}NLSUR estimator; default is {ifgnls}{p_end}
+{synopt :{opt m:ethod(method_name)}}NLSUR estimator; default is {ifgnls}{p_end}
 {synoptline}
 {p2colreset}{...}
 {p 4 6 2}# {opt anot(#)} is required.{p_end}
@@ -123,8 +123,8 @@ variance estimator for nonlinear models fit by using Gauss-Newton
 regression. For final output, use {cmd:vce(bootstrap)}
 
 {phang}
-{opt method(#)}; nlsur estimator method; see {manhelp nlsur R}. Default is ifgnls.
-Other methods can be used to conduct faster model selection.
+{opt method(method_name)}; nlsur estimator method; see {manhelp nlsur R}. Default is ifgnls.
+Other methods can be used to conduct faster model selection (at your own risk).
 
 {phang}
 {opt level(#)}; see {helpb estimation options##level():[R] estimation options}.
