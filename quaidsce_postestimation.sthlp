@@ -104,7 +104,7 @@ elasticities{p_end}
 {synopt:{cmd:r(elas_c)}}matrix of compensated price elasticities{p_end}
 
 {phang2}
-The element in row {it:i}, column {it:j} of {cmd:r(compelas)} contains the 
+The element in row {it:i}, column {it:j} of {cmd:r(elas_c)} contains the 
 compensated price elasticity of good {it:i} with respect to the price of
 good {it:j}.
 
@@ -118,7 +118,7 @@ elasticities{p_end}
 {synopt:{cmd:r(elas_u)}}matrix of uncompensated price elasticities{p_end}
 
 {phang2}
-The element in row {it:i}, column {it:j} of {cmd:r(uncompelas)} contains the 
+The element in row {it:i}, column {it:j} of {cmd:r(elas_u)} contains the 
 uncompensated price elasticity of good {it:i} with respect to the price of good
 {it:j}.
 
