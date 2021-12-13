@@ -52,7 +52,7 @@ drop if missing(w`i')
 
 
 log using  "C:\Users\grace.meloguerrero\OneDrive - Texas A&M AgriLife\Documents\GitHub\quaidsce\log\nocensor.log", replace
-quaidsce w1-w17, anot(10) prices(p1-p17) expenditure(total) nolog demographics(x1-x3) method(nls) 
+quaidsce w1-w17, anot(10) prices(p1-p17) expenditure(total) nolog demographics(x1-x3) 
 
 
 log close
