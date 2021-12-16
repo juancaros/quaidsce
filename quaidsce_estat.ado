@@ -1,9 +1,5 @@
 *! version 1.1.0  Sep 2021
 
-//JCSH sin censoring utilizo w observado para el calculo de las elasticidades
-//JCSH con censoring utilizo w estimado para el calculo de las elasticidades
-//JCSH Abajo todavia hay algunos comentarios de cosas por corroborar
-//
 
 
 program quaidsce_estat
@@ -73,7 +69,7 @@ program DoExp, rclass
 		local lnexp `exp'
 	}
 
-	if "`e(lhs)'" != "" { // This doesnt work if there is no censoring (what is it for?) JCSH confirmar
+	if "`e(lhs)'" != "" { 
 		local i 1
 		foreach var of varlist `e(lhs)' {
 			local w`i' `var'
@@ -148,7 +144,6 @@ program DoExp, rclass
 		
 		foreach var of varlist `e(demographics)' {	
 			forvalue i=1/`=e(ngoods)' {
-				 *scalar `cofp'= `cofp'*(`var'm*_b[eta:eta_`var'_`i']*`lnp`i''m) //JCSH Pendiente confirmar formula de cofpi u cofg
 				 scalar `cofp`i''= `cofp`i''+(`var'm*_b[eta:eta_`var'_`i']) 
 				 scalar `betanz`i''=`betanz`i''+(`var'm*_b[eta:eta_`var'_`i']) 
 									}			
@@ -156,7 +151,7 @@ program DoExp, rclass
 		}
 		
 				
-			//JCSH Pendiente confirmar formula de cofpi y cofp
+
 			forvalue i=1/`=e(ngoods)' {
 				scalar `cofp`i''= `cofp`i''*`lnp`i''m
 				scalar `cofp'= `cofp'*`cofp`i''
@@ -336,7 +331,6 @@ program DoUncomp, rclass
 		
 		foreach var of varlist `e(demographics)' {	
 			forvalue i=1/`=e(ngoods)' {
-				 *scalar `cofp'= `cofp'*(`var'm*_b[eta:eta_`var'_`i']*`lnp`i''m) //JCSH Pendiente confirmar formula de cofpi u cofg
 				 scalar `cofp`i''= `cofp`i''+(`var'm*_b[eta:eta_`var'_`i']) 
 				 scalar `betanz`i''=`betanz`i''+(`var'm*_b[eta:eta_`var'_`i']) 
 									}			
@@ -344,7 +338,7 @@ program DoUncomp, rclass
 		}
 		
 				
-			//JCSH Pendiente confirmar formula de cofpi u cofg
+			
 			forvalue i=1/`=e(ngoods)' {
 				scalar `cofp`i''= `cofp`i''*`lnp`i''m
 				scalar `cofp'= `cofp'*`cofp`i''
@@ -426,7 +420,6 @@ program DoUncomp, rclass
 		}
 			//When censor
 		if "`e(censor)'" == "censor" {	
-			//JCSH corroborar si es p`j'_`i' o p`i'_`j'
 			global ue`i'`j' "(-`de'+1/we`i'*(cdfw`i'm*((${ue`i'`j'}+`de')*w`i'm) + _b[tau:p`j'_`i']*pdfw`i'm*(w`i'm-_b[delta:delta_`i']*duw`i'm)))"			
 				// "${ue`i'`j'}+`de'" --> to remove lower delta from original formula
 				// "w`i'm" --> to revert 1/w`i'm from the original formula
@@ -491,7 +484,7 @@ program DoComp, rclass
 		local lnexp `exp'
 	}
 
-	if "`e(lhs)'" != "" { // This doesnt work if there is no censoring (what is it for?) JCSH confirmar
+	if "`e(lhs)'" != "" { 
 		local i 1
 		foreach var of varlist `e(lhs)' {
 			local w`i' `var'
@@ -565,7 +558,6 @@ program DoComp, rclass
 		
 		foreach var of varlist `e(demographics)' {	
 			forvalue i=1/`=e(ngoods)' {
-				 *scalar `cofp'= `cofp'*(`var'm*_b[eta:eta_`var'_`i']*`lnp`i''m) //JCSH Pendiente confirmar formula de cofpi u cofg
 				 scalar `cofp`i''= `cofp`i''+(`var'm*_b[eta:eta_`var'_`i']) 
 				 scalar `betanz`i''=`betanz`i''+(`var'm*_b[eta:eta_`var'_`i']) 
 									}			
@@ -573,7 +565,6 @@ program DoComp, rclass
 		}
 		
 				
-			//JCSH Pendiente confirmar formula de cofpi y cofp
 			forvalue i=1/`=e(ngoods)' {
 				scalar `cofp`i''= `cofp`i''*`lnp`i''m
 				scalar `cofp'= `cofp'*`cofp`i''
@@ -662,7 +653,6 @@ program DoComp, rclass
 		
 			//When censor
 		if "`e(censor)'" == "censor" {
-			//JCSH corroborar si es p`j'_`i' o p`i'_`j'
 			global ue`i'`j' "(-`de'+1/we`i'*(cdfw`i'm*((${ue`i'`j'}+`de')*w`i'm) + _b[tau:p`j'_`i']*pdfw`i'm*(w`i'm-_b[delta:delta_`i']*duw`i'm)))"			
 				// "${ue`i'`j'}+`de'" --> to remove lower delta from original formula
 				// "w`i'm" --> to revert 1/w`i'm from the original formula
