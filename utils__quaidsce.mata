@@ -30,7 +30,7 @@ void _quaidsce__fullvector(string scalar ins,
 		alpha, beta, gamma, lambda, delta, eta, rho)
 	
 	
-	//JCSH: Rescribo todas las posible combinaciones	
+
 	//Censoring, quadratics, and demographics
 	if (censor == "" & quadratics == ""  &  ndemo >  0) st_matrix(outs, (alpha, beta, (vech(gamma)'), lambda, delta, (vec(eta')'), rho))
 	//Censoring and quadratics

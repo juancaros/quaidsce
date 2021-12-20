@@ -27,3 +27,15 @@ Descripcion de los archivos en la carpeta **quaidsce** (WIP):
 *quaidsce_estat.ado*: elasticidades.  
 *quaidsce_p.ado*: predicciones.  
 *quaidsce.hlp*: ayuda.  
+
+JCSH: 20/12/2022
+Comparto los documentos más recientes en nuestra carpeta de Github 
+Comparto estos dcumentos como una carpeta comprimida vía correo con Alberto con el nombre de "quaidsce_Dec2022"
+La carpeta incluye:
+nlsur__quaidsce.ado
+quaidsce.ado
+quaidsce.sthlp
+quaidsce_estat.ado
+quaidsce_p.ado
+quaidsce_postestimation.sthlp
+utils_quaidsce.mata
