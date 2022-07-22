@@ -27,7 +27,7 @@ program quaidsce_p
 	forvalues i = 1/`=e(ngoods)' {
 		local v : word `i' of `vars'
 		tempvar vlist_`i'
-		 gen `v' =0
+		gen `v' =0
 		lab var `v' "Predicted expenditure share: good `i'"
 	}
 	

@@ -184,62 +184,67 @@ program Estimate, eclass
 		local cdf
 		
 		if "`censor'" == "nocensor" {
-		foreach x of varlist `shares2' {
-		qui gen pdf`x'=0
-		qui gen cdf`x'=1
-		local pdf `pdf' pdf`x'
-		local cdf `cdf' cdf`x'
-		}
+			foreach x of varlist `shares2' {
+				qui gen pdf`x'=0
+				qui gen cdf`x'=1
+				local pdf `pdf' pdf`x'
+				local cdf `cdf' cdf`x'
+			}
 		}
 		else {
-		local np_prob : word count `lnprices' `lnexp'  `demographics' intercept
-		local nprob M `demographics' cons
+			local np_prob : word count `lnprices' `lnexp' `demographics' intercept
+			local zvar `lnprices' `lnexp' `demographics' 
+			local nprob M `demographics' cons
 		
-		mat tau=J(1,`np_prob',0)
-		mat setau=J(`np_prob'*`neqn',`np_prob'*`neqn',0)		
-		foreach x of varlist `shares' {
-			summ `x' if `touse', mean
-			if r(min) > 0 {
-				di as error "noncensoring for `x' found"
+			local p_shares 
+			foreach x of varlist `shares' {
+				tempvar p_`x'
+				local p_shares `p_shares' p_`x'
+			}
+				
+			mat tau=J(1,`np_prob',0)
+			mat setau=J(`np_prob'*`neqn',`np_prob'*`neqn',0)
+			local i=1
+			foreach x of varlist `shares' {
+				summ `x' if `touse', mean
+				if r(min) > 0 {
+				di as error "no censoring for `x' found"
 				exit 499
-			}
-			tempvar z`x' 
-			local pdf`x' 
-			local cdf`x'
-			local du`x'
-			qui gen double `z`x'' = 1 if `x' > 0  & `touse'
-			qui replace `z`x'' = 0 if `x' == 0  & `touse'
-			qui gen pdf`x'=0
-			qui gen cdf`x'=1
+				}
+				tempvar z`x' 
+				qui gen double `z`x'' = 1 if `x' > 0  & `touse'
+				qui replace `z`x'' = 0 if `x' == 0  & `touse'
+				qui gen pdf`x'=0
+				qui gen cdf`x'=1
 			
-			summ `z`x'' if `touse', mean
-			if r(min) == 0 {
-			qui probit `z`x'' `lnprices' `lnexp'  `demographics'
+				summ `z`x'' if `touse', mean
+				if r(min) == 0 {
+				qui probit `z`x'' `zvar'
 			
-			tempname xn loc
-			local xn = substr("`x'",2,.)
-			if `xn'==1 {
-				mat tau= e(b)'
-				mat setau[1,1]= e(V)
-			}
-			else {
-				mat tau=tau \ e(b)'
-				local loc = `np_prob'*(`xn'-1)+1
-				mat setau[`loc',`loc'] = e(V)
-			}
-			quietly predict du`x'
+				tempname loc
+				if `i'==1 {
+					mat tau= e(b)'
+					mat setau[1,1]= e(V)
+				}
+				else {
+					mat tau=tau \ e(b)'
+					local loc = `np_prob'*(`i'-1)+1
+					mat setau[`loc',`loc'] = e(V)
+				}
+				quietly predict du`x'
 			
-			if e(N) < _N {
-			di as error "at least one variable completely predicts probit outcome, check your data"
+				if e(N) < _N {
+				di as error "at least one variable completely predicts probit outcome, check your data"
 				exit 499
+				}
+				qui replace pdf`x'= normalden(du`x')
+				qui replace cdf`x'= normal(du`x')
+				}
+				local pdf `pdf' pdf`x'
+				local cdf `cdf' cdf`x'
+				local du `du' `du`x''
+				local i=`i'+1
 			}
-			qui replace pdf`x'= normalden(du`x')
-			qui replace cdf`x'= normal(du`x')
-			}
-			local pdf `pdf' pdf`x'
-			local cdf `cdf' cdf`x'
-			local du `du' `du`x''
-		}
 		}
 		
 		if "`censor'" == "nocensor" {
@@ -248,12 +253,12 @@ program Estimate, eclass
 		local neqn2=`=`neqn'-1'
 		}
 		else {
-		local np2= `np2' + `neqn' //add deltas
+		local np2= `np2' + `neqn' //adding n deltas
 		local neqn2 `neqn'
 		}
 		
 		
-nlsur __quaidsce @ `shares' if `touse',				///
+	nlsur __quaidsce @ `shares' if `touse',				///
 		lnp(`lnprices') lnexp(`lnexpenditure') cdfi(`cdf') pdfi(`pdf') a0(`anot')	///
 		nparam(`np2') neq(`neqn2') `estimator' noeqtab nocoeftab	///
 		`quadratic' `options' `censor' `demoopt'  `initialopt' `log' `vce' 
@@ -261,16 +266,117 @@ nlsur __quaidsce @ `shares' if `touse',				///
 		if "`censor'" == "nocensor" {
 		capture drop cdf* pdf*
 		}
+		else {
+		qui predict `p_shares'
+		local i=1
+			foreach x of varlist `lnprices' {
+				tempvar lp`i'
+				gen lp`i' = `x'
+				local i=`i'+1
+			}
+		}
 
 	// do delta method to get cov matrix
 
-	tempname b bfull V Vfull Delta aux auxt Vfullc bfullc
+	tempname b bfull V Vfull Vn Delta aux auxt Vfullc bfullc
 	mat `b' = e(b)
 	mat `V' = e(V)
 
 	mata:_quaidsce__fullvector("`b'", `neqn', "`quadratic'", `ndemos', "`bfull'", "`censor'")
 	mata:_quaidsce__delta(`neqn', "`quadratic'", "`censor'", `ndemos', "`Delta'")
-	mat `Vfull' = `Delta'*`V'*`Delta''
+	mat `Vn' = `Delta'*`V'*`Delta''
+	
+	tempname alpha beta gamma lambda delta eta rho ll
+	mata:_quaidsce__getcoefs("`b'", `neqn', "`quadratic'", "`censor'", `ndemos', 	///
+			"`alpha'", "`beta'", "`gamma'", "`lambda'", "`delta'",	///
+			"`eta'", "`rho'")		
+	
+	*Murphy-Topel*
+		
+	if "`censor'" == "" {
+		local i=1
+		tempname C R S
+		local aR
+		local aC
+		mat `C' = J(rowsof(`Vfull'),rowsof(setau),0)
+		mat `R' = J(rowsof(`Vfull'),rowsof(setau),0)
+		mat `S' = setau
+		
+		*tau section (except demos) and temp delta 
+		foreach x of varlist `shares' {
+			tempvar a1_`x' a2_`x' a_`x'	
+			qui gen a_`x' = pdf`x'/p_`x'
+			qui gen a1_`x' = (pdf`x'*(du`x'-cdf`x'))/(cdf`x'*(1-cdf`x'))
+			qui gen a2_`x' = a_`x'*(`x'-`delta'[i]))
+			local i=`i'+1			
+		}
+					 
+		*alpha section
+		local i=1
+		local j= `neqn'
+		foreach x of varlist `shares' {
+			tempvar ac_`x' ar_`x'
+			qui gen ac_`x' = a2_`x'*a_`x'*(1-()*lp`i')
+			qui gen ar_`x' = a1_`x'*a_`x'*()
+			local aR `aR' ac_`x'
+			local aC `aC' ar_`x'		
+			local i=`i'+1	
+		}		
+		mat accum `aux' = `aC' `zvar'
+		mat accum `auxt' = `aR' `zvar'		 
+		mat `C'[`ja'..`j',.] = `aux'[`np_prob'..`i',1..`neqn']
+		mat `R'[`ja'..`j',.] = `auxt'[..,..]
+		
+		*beta section
+		local i=`np_prob'+`neqn'
+		local j= `j'+`neqn'
+		local ja= `j'+`neqn'
+		foreach x of varlist `shares' {
+			tempvar ac_`x' ar_`x'
+			qui gen ac_`x' = a2_`x'*a_`x'
+			qui gen ar_`x' = a1_`x'*a_`x'
+			local aR `aR' ac_`x'
+			local aC `aC' ar_`x'			
+		}		
+		mat accum `aux' = `aC' `zvar'
+		mat accum `auxt' = `aR' `zvar'		 
+		mat `C'[`ja'..`j',.] = `aux'[`np_prob'..`i',1..`neqn']
+		mat `R'[`ja'..`j',.] = `auxt'[..,..]
+		
+		*gamma section
+		
+		*lambda section
+		
+		*delta section
+		local i=`np_prob'+`neqn'
+		local j= `j'+`neqn'
+		local ja= `j'+`neqn'
+		foreach x of varlist `shares' {
+			tempvar ac_`x' ar_`x'
+			qui gen ac_`x' = a2_`x'*a_`x'
+			qui gen ar_`x' = a1_`x'*a_`x'
+			local aR `aR' ac_`x'
+			local aC `aC' ar_`x'			
+		}		
+		mat accum `aux' = `aC' `zvar'
+		mat accum `auxt' = `aR' `zvar'		 
+		mat `C'[`ja'..`j',.] = `aux'[`np_prob'..`i',1..`neqn']
+		mat `R'[`ja'..`j',.] = `auxt'[..,..]
+		
+		*eta section
+		
+		*rho section
+		
+		mat `Vfull' = `Vn'+`Vn'*(C*S*C'-R*S*C'-C*S*R')*`Vn'
+		
+		*drop `aR' `aC' a_* a1_* a2_* `p_shares' lp*
+	}
+	else {
+		mat `Vfull' = `Vn'
+	}
+	
+	**************
+	
 	
 	if "`censor'" == "" {
 	mat `bfullc' = `bfull' , tau'
@@ -334,10 +440,6 @@ nlsur __quaidsce @ `shares' if `touse',				///
 	mat colnames `Vfullc' = `namestripe'
 	mat rownames `Vfullc' = `namestripe'
 	
-	tempname alpha beta gamma lambda delta eta rho ll
-	mata:_quaidsce__getcoefs("`b'", `neqn', "`quadratic'", "`censor'", `ndemos', 	///
-			"`alpha'", "`beta'", "`gamma'", "`lambda'", "`delta'",	///
-			"`eta'", "`rho'")	
 			
 	scalar `ll' = e(ll)
 	local vcetype	`e(vcetype)'
