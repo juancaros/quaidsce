@@ -82,6 +82,8 @@ program Estimate, eclass
 		exit 498
 	}
 
+	***SALIDA DE ERROR SI HAY CENSOR SIN DEMOS
+	
 	marksample touse
 	markout `touse' `prices' `lnprices' `demographics'
 	markout `touse' `expenditure' `lnexpenditure'
@@ -322,7 +324,7 @@ program Estimate, eclass
 			local aC `aC' ar_`x'		
 			local i=`i'+1	
 		}		
-		mat accum `aux' = `aC' `zvar'
+		mat accum `aux' = `aC' `zvar' // pasar de variables a suma en matriz
 		mat accum `auxt' = `aR' `zvar'		 
 		mat `C'[`ja'..`j',.] = `aux'[`np_prob'..`i',1..`neqn']
 		mat `R'[`ja'..`j',.] = `auxt'[..,..]
@@ -367,6 +369,8 @@ program Estimate, eclass
 		
 		*rho section
 		
+		
+		*final correction
 		mat `Vfull' = `Vn'+`Vn'*(C*S*C'-R*S*C'-C*S*R')*`Vn'
 		
 		*drop `aR' `aC' a_* a1_* a2_* `p_shares' lp*
