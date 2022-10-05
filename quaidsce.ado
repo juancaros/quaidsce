@@ -197,13 +197,7 @@ program Estimate, eclass
 			local np_prob : word count `lnprices' `lnexp' `demographics' intercept
 			local zvar `lnprices' `lnexp' `demographics' 
 			local nprob M `demographics' cons
-		
-			local p_shares 
-			foreach x of varlist `shares' {
-				tempvar p_`x'
-				local p_shares `p_shares' p_`x'
-			}
-				
+
 			mat tau=J(1,`np_prob',0)
 			mat setau=J(`np_prob'*`neqn',`np_prob'*`neqn',0)
 			local i=1
@@ -265,18 +259,6 @@ program Estimate, eclass
 		nparam(`np2') neq(`neqn2') `estimator' noeqtab nocoeftab	///
 		`quadratic' `options' `censor' `demoopt'  `initialopt' `log' `vce' 
 
-		if "`censor'" == "nocensor" {
-		capture drop cdf* pdf*
-		}
-		else {
-		qui predict `p_shares'
-		local i=1
-			foreach x of varlist `lnprices' {
-				tempvar lp`i'
-				gen lp`i' = `x'
-				local i=`i'+1
-			}
-		}
 
 	// do delta method to get cov matrix
 
@@ -293,6 +275,24 @@ program Estimate, eclass
 			"`alpha'", "`beta'", "`gamma'", "`lambda'", "`delta'",	///
 			"`eta'", "`rho'")		
 	
+	if "`censor'" == "nocensor" {
+		capture drop cdf* pdf* du*
+		}
+		else {
+		local i=1
+			foreach x of varlist `shares' {
+				tempvar p_`x'
+				gen p_`x' = cdf`x'*`x'+`delta'[1,`i']*pdf`x'
+				local i=`i'+1
+			}
+		local i=1
+			foreach x of varlist `lnprices' {
+				tempvar lp_`i'
+				gen lp_`i' = `x'
+				local i=`i'+1
+			}
+		}
+	
 	*Murphy-Topel*
 		
 	if "`censor'" == "" {
@@ -300,8 +300,8 @@ program Estimate, eclass
 		tempname C R S
 		local aR
 		local aC
-		mat `C' = J(rowsof(`Vfull'),rowsof(setau),0)
-		mat `R' = J(rowsof(`Vfull'),rowsof(setau),0)
+		mat `C' = J(rowsof(`Vn'),rowsof(setau),0)
+		mat `R' = J(rowsof(`Vn'),rowsof(setau),0)
 		mat `S' = setau
 		
 		*tau section (except demos) and temp delta 
@@ -309,17 +309,17 @@ program Estimate, eclass
 			tempvar a1_`x' a2_`x' a_`x'	
 			qui gen a_`x' = pdf`x'/p_`x'
 			qui gen a1_`x' = (pdf`x'*(du`x'-cdf`x'))/(cdf`x'*(1-cdf`x'))
-			qui gen a2_`x' = a_`x'*(`x'-`delta'[i]))
+			qui gen a2_`x' = a_`x'*(`x'-`delta'[1,`i'])
 			local i=`i'+1			
 		}
 					 
-		*alpha section
+		/*alpha section
 		local i=1
 		local j= `neqn'
 		foreach x of varlist `shares' {
 			tempvar ac_`x' ar_`x'
-			qui gen ac_`x' = a2_`x'*a_`x'*(1-()*lp`i')
-			qui gen ar_`x' = a1_`x'*a_`x'*()
+			qui gen ac_`x' = a2_`x'*a_`x'*(1-()*lp_`i')
+			qui gen ar_`x' = a1_`x'*a_`x'
 			local aR `aR' ac_`x'
 			local aC `aC' ar_`x'		
 			local i=`i'+1	
@@ -371,8 +371,9 @@ program Estimate, eclass
 		
 		
 		*final correction
-		mat `Vfull' = `Vn'+`Vn'*(C*S*C'-R*S*C'-C*S*R')*`Vn'
-		
+		*mat `Vfull' = `Vn'+`Vn'*(C*S*C'-R*S*C'-C*S*R')*`Vn'
+		*/
+		mat `Vfull' = `Vn'
 		*drop `aR' `aC' a_* a1_* a2_* `p_shares' lp*
 	}
 	else {

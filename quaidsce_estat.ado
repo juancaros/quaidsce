@@ -71,8 +71,20 @@ program DoExp, rclass
 
 	if "`e(lhs)'" != "" { 
 		local i 1
+		tempname w_ cdf_ pdf_ duw_
+		local w_ ""
+		local cdf_ ""
+		local pdf_ ""
+		local du_ ""
 		foreach var of varlist `e(lhs)' {
 			local w`i' `var'
+			local w_ `w_' `w`i''
+			local cdf`i' cdf`var'
+			local cdf_ `cdf_' `cdf`i''
+			local pdf`i' pdf`var'
+			local pdf_ `pdf_' `pdf`i''
+			local du`i' du`var'
+			local du_ `du_' `du`i''
 			local `++i'
 		}
 	}
@@ -82,13 +94,13 @@ program DoExp, rclass
 	local ndemo = `e(ndemos)'
 	quietly {
 		if "`e(censor)'" == "censor" {
-		foreach x of varlist w* `lnpr' cdfw* pdfw* `lnexp' duw* `e(demographics)' {
+		foreach x of varlist `w_' `lnpr' `lnexp' `e(demographics)' `cdf_' `pdf_' `du_' {
 		sum `x'
 		scalar `x'm=r(mean)
 		}
 		}
 		else {
-		foreach x of varlist w* `lnpr' `lnexp' `e(demographics)' {
+		foreach x of varlist `w_' `lnpr' `lnexp' `e(demographics)' {
 		sum `x'
 		scalar `x'm=r(mean)
 		}
@@ -174,27 +186,27 @@ program DoExp, rclass
 			}
 		//When censor
 		if "`e(censor)'" == "censor" {
-		 scalar we`i' = we`i'*cdfw`i'm + _b[delta:delta_`i']*pdfw`i'm
+		 scalar we`i' = we`i'*`cdf`i''m + _b[delta:delta_`i']*`pdf`i''m
 		}			 
 	}
 		
 	//FUNCTION EVALUATOR (ELASTICITY)
 	forvalues i = 1/`=e(ngoods)' {
 		if `ndemo' == 0 {
-			global ie`i' "(1+_b[beta:beta_`i']/w`i'm)"
+			global ie`i' "(1+_b[beta:beta_`i']/`w`i''m)"
 			if "`e(quadratic)'" == "quadratic" {
-				 global ie`i' "(1+1/w`i'm*(_b[beta:beta_`i']+2*_b[lambda:lambda_`i']/exp(`bofp')*(`lnexp'm-`lnpindex')))"
+				 global ie`i' "(1+1/`w`i''m*(_b[beta:beta_`i']+2*_b[lambda:lambda_`i']/exp(`bofp')*(`lnexp'm-`lnpindex')))"
 			}
 		}
 		else {
-			global ie`i' "1+`betanz`i''/w`i'm"
+			global ie`i' "1+`betanz`i''/`w`i''m"
 			if "`e(quadratic)'" == "quadratic" {
-				 global ie`i' "(1+1/w`i'm*(`betanz`i''+2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp')*(`lnexp'm-`lnpindex'-ln(`mbar'))))"
+				 global ie`i' "(1+1/`w`i''m*(`betanz`i''+2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp')*(`lnexp'm-`lnpindex'-ln(`mbar'))))"
 			}
 		}
 			//When censor
 		if "`e(censor)'" == "censor" {
-			global ie`i' "(1+1/we`i'*((cdfw`i'm*((${ie`i'}-1)*w`i'm))+_b[tau:M_`i']*pdfw`i'm*(w`i'm-_b[delta:delta_`i']*duw`i'm)))"			
+			global ie`i' "(1+1/we`i'*((`cdf`i''m*((${ie`i'}-1)*`w`i''m))+_b[tau:M_`i']*`pdf`i''m*(`w`i''m-_b[delta:delta_`i']*`du`i''m)))"			
 				// "${ie`i'}-1" --> to remove the "+1" from original formula
 				// "*w`i'm" --> to revert 1/w`i'm from the original formula		
 		}			 
@@ -255,11 +267,22 @@ program DoUncomp, rclass
 		local lnexp `exp'
 	}
 
-	
-	if "`e(lhs)'" != "" { // This doesnt work if there is no censoring (what is it for?)
+	if "`e(lhs)'" != "" { 
 		local i 1
+		tempname w_ cdf_ pdf_ duw_
+		local w_ ""
+		local cdf_ ""
+		local pdf_ ""
+		local du_ ""
 		foreach var of varlist `e(lhs)' {
 			local w`i' `var'
+			local w_ `w_' `w`i''
+			local cdf`i' cdf`var'
+			local cdf_ `cdf_' `cdf`i''
+			local pdf`i' pdf`var'
+			local pdf_ `pdf_' `pdf`i''
+			local du`i' du`var'
+			local du_ `du_' `du`i''
 			local `++i'
 		}
 	}
@@ -269,13 +292,13 @@ program DoUncomp, rclass
 	local ndemo = `e(ndemos)'
 	quietly {
 		if "`e(censor)'" == "censor" {
-		foreach x of varlist w* `lnpr' cdfw* pdfw* `lnexp' duw* `e(demographics)' {
+		foreach x of varlist `w_' `lnpr' `lnexp' `e(demographics)' `cdf_' `pdf_' `du_' {
 		sum `x'
 		scalar `x'm=r(mean)
 		}
 		}
 		else {
-		foreach x of varlist w* `lnpr' `lnexp' `e(demographics)' {
+		foreach x of varlist `w_' `lnpr' `lnexp' `e(demographics)' {
 		sum `x'
 		scalar `x'm=r(mean)
 		}
@@ -297,7 +320,6 @@ program DoUncomp, rclass
 		}
 	}
 	
-	
 	forvalue i=1/`=e(ngoods)' {	
 			tempname gsum`i'	
 			scalar `gsum`i''= 0
@@ -306,7 +328,8 @@ program DoUncomp, rclass
 				scalar `gsum`i''= `gsum`i'' + _b[gamma: gamma_`ii'_`i']*`lnp`i''m 
 				}
 				}
-				
+	
+
 	//When quadratics
 	if "`e(quadratic)'" == "quadratic" {
 		tempname bofp 
@@ -338,14 +361,13 @@ program DoUncomp, rclass
 		}
 		
 				
-			
+
 			forvalue i=1/`=e(ngoods)' {
 				scalar `cofp`i''= `cofp`i''*`lnp`i''m
 				scalar `cofp'= `cofp'*`cofp`i''
 			}
-
 	}
-
+	
 	//FUNCTION EVALUATOR (PREDICTED SHARE)
 	forvalues i = 1/`=e(ngoods)' {
 		if `ndemo' == 0 {
@@ -362,7 +384,7 @@ program DoUncomp, rclass
 			}
 		//When censor
 		if "`e(censor)'" == "censor" {
-		 scalar we`i' = we`i'*cdfw`i'm + _b[delta:delta_`i']*pdfw`i'm
+		 scalar we`i' = we`i'*`cdf`i''m + _b[delta:delta_`i']*`pdf`i''m
 		}			 
 	}
 
@@ -373,54 +395,54 @@ program DoUncomp, rclass
 		local de=cond(`i'==`j',1,0)
 		if `ndemo' == 0 {
 			if `j'==`i' {
-			global ue`i'`j' "(-`de'+1/w`i'm*(_b[gamma:gamma_`j'_`i']-(_b[beta:beta_`i']*(_b[alpha:alpha_`i']+`gsum`i''))))"
+			global ue`i'`j' "(-`de'+1/`w`i''m*(_b[gamma:gamma_`j'_`i']-(_b[beta:beta_`i']*(_b[alpha:alpha_`i']+`gsum`i''))))"
 			}
 			if `j'>`i' {	
-			global ue`i'`j' "(-`de'+1/w`i'm*(_b[gamma:gamma_`j'_`i']-(_b[beta:beta_`i']*(_b[alpha:alpha_`j']+`gsum`j''))))"
+			global ue`i'`j' "(-`de'+1/`w`i''m*(_b[gamma:gamma_`j'_`i']-(_b[beta:beta_`i']*(_b[alpha:alpha_`j']+`gsum`j''))))"
 			}
 			else {
-			global ue`i'`j' "(-`de'+1/w`i'm*(_b[gamma:gamma_`i'_`j']-(_b[beta:beta_`i']*(_b[alpha:alpha_`j']+`gsum`j''))))"
+			global ue`i'`j' "(-`de'+1/`w`i''m*(_b[gamma:gamma_`i'_`j']-(_b[beta:beta_`i']*(_b[alpha:alpha_`j']+`gsum`j''))))"
 			}
 			
 			if "`e(quadratic)'" == "quadratic" {
 				if `j'==`i' {	
-					global ue`i'`j' "(-`de'+1/w`i'm*(_b[gamma:gamma_`j'_`i']-(_b[beta:beta_`i']+(2*_b[lambda:lambda_`i']/exp(`bofp'))*(`lnexp'm-`lnpindex'))*(_b[alpha:alpha_`i']+`gsum`i'')-(_b[beta:beta_`i']*_b[lambda:lambda_`i']/exp(`bofp')*(`lnexp'm-`lnpindex')^2)))"
+					global ue`i'`j' "(-`de'+1/`w`i''m*(_b[gamma:gamma_`j'_`i']-(_b[beta:beta_`i']+(2*_b[lambda:lambda_`i']/exp(`bofp'))*(`lnexp'm-`lnpindex'))*(_b[alpha:alpha_`i']+`gsum`i'')-(_b[beta:beta_`i']*_b[lambda:lambda_`i']/exp(`bofp')*(`lnexp'm-`lnpindex')^2)))"
 				}
 				if `j'>`i' {	
-					global ue`i'`j' "(-`de'+1/w`i'm*(_b[gamma:gamma_`j'_`i']-(_b[beta:beta_`i']+(2*_b[lambda:lambda_`i']/exp(`bofp'))*(`lnexp'm-`lnpindex'))*(_b[alpha:alpha_`j']+`gsum`j'')-(_b[beta:beta_`j']*_b[lambda:lambda_`i']/exp(`bofp')*(`lnexp'm-`lnpindex')^2)))"				
+					global ue`i'`j' "(-`de'+1/`w`i''m*(_b[gamma:gamma_`j'_`i']-(_b[beta:beta_`i']+(2*_b[lambda:lambda_`i']/exp(`bofp'))*(`lnexp'm-`lnpindex'))*(_b[alpha:alpha_`j']+`gsum`j'')-(_b[beta:beta_`j']*_b[lambda:lambda_`i']/exp(`bofp')*(`lnexp'm-`lnpindex')^2)))"				
 				}
 				else {
-					global ue`i'`j' "(-`de'+1/w`i'm*(_b[gamma:gamma_`i'_`j']-(_b[beta:beta_`i']+(2*_b[lambda:lambda_`i']/exp(`bofp'))*(`lnexp'm-`lnpindex'))*(_b[alpha:alpha_`j']+`gsum`j'')-(_b[beta:beta_`j']*_b[lambda:lambda_`i']/exp(`bofp')*(`lnexp'm-`lnpindex')^2)))"
+					global ue`i'`j' "(-`de'+1/`w`i''m*(_b[gamma:gamma_`i'_`j']-(_b[beta:beta_`i']+(2*_b[lambda:lambda_`i']/exp(`bofp'))*(`lnexp'm-`lnpindex'))*(_b[alpha:alpha_`j']+`gsum`j'')-(_b[beta:beta_`j']*_b[lambda:lambda_`i']/exp(`bofp')*(`lnexp'm-`lnpindex')^2)))"
 				}
 			}
 		}
 		else {
 			if `j'==`i' {
-			global ue`i'`j' "(-`de'+1/w`i'm*(_b[gamma:gamma_`j'_`i']-(`betanz`i'')*(_b[alpha:alpha_`i']+`gsum`i'')))"
+			global ue`i'`j' "(-`de'+1/`w`i''m*(_b[gamma:gamma_`j'_`i']-(`betanz`i'')*(_b[alpha:alpha_`i']+`gsum`i'')))"
 			}
 			if `j'>`i' {
-			global ue`i'`j' "(-`de'+1/w`i'm*(_b[gamma:gamma_`j'_`i']-(`betanz`i'')*(_b[alpha:alpha_`j']+`gsum`j'')))"	
+			global ue`i'`j' "(-`de'+1/`w`i''m*(_b[gamma:gamma_`j'_`i']-(`betanz`i'')*(_b[alpha:alpha_`j']+`gsum`j'')))"	
 			}
 			else {
-			global ue`i'`j' "(-`de'+1/w`i'm*(_b[gamma:gamma_`i'_`j']-(`betanz`i'')*(_b[alpha:alpha_`j']+`gsum`j'')))"	
+			global ue`i'`j' "(-`de'+1/`w`i''m*(_b[gamma:gamma_`i'_`j']-(`betanz`i'')*(_b[alpha:alpha_`j']+`gsum`j'')))"	
 			}
 			
 			if "`e(quadratic)'" == "quadratic" {
 				if `j'==`i' {	
-				 global ue`i'`j' "(-`de'+1/w`i'm*(_b[gamma:gamma_`j'_`i']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar')))*(_b[alpha:alpha_`i']+`gsum`i'')-(`betanz`i''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp')*(`lnexp'm-`lnpindex'-ln(`mbar'))^2)))"
+				 global ue`i'`j' "(-`de'+1/`w`i''m*(_b[gamma:gamma_`j'_`i']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar')))*(_b[alpha:alpha_`i']+`gsum`i'')-(`betanz`i''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp')*(`lnexp'm-`lnpindex'-ln(`mbar'))^2)))"
 				}
 				if `j'>`i' {	
-				global ue`i'`j' "(-`de'+1/w`i'm*(_b[gamma:gamma_`j'_`i']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar')))*(_b[alpha:alpha_`j']+`gsum`j'')-(`betanz`j''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp')*(`lnexp'm-`lnpindex'-ln(`mbar'))^2)))"
+				global ue`i'`j' "(-`de'+1/`w`i''m*(_b[gamma:gamma_`j'_`i']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar')))*(_b[alpha:alpha_`j']+`gsum`j'')-(`betanz`j''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp')*(`lnexp'm-`lnpindex'-ln(`mbar'))^2)))"
 				}
 				
 				else {
-				global ue`i'`j' "(-`de'+1/w`i'm*(_b[gamma:gamma_`i'_`j']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar')))*(_b[alpha:alpha_`j']+`gsum`j'')-(`betanz`j''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp')*(`lnexp'm-`lnpindex'-ln(`mbar'))^2)))"
+				global ue`i'`j' "(-`de'+1/`w`i''m*(_b[gamma:gamma_`i'_`j']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar')))*(_b[alpha:alpha_`j']+`gsum`j'')-(`betanz`j''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp')*(`lnexp'm-`lnpindex'-ln(`mbar'))^2)))"
 				}
 			}	
 		}
 			//When censor
 		if "`e(censor)'" == "censor" {	
-			global ue`i'`j' "(-`de'+1/we`i'*(cdfw`i'm*((${ue`i'`j'}+`de')*w`i'm) + _b[tau:p`j'_`i']*pdfw`i'm*(w`i'm-_b[delta:delta_`i']*duw`i'm)))"			
+			global ue`i'`j' "(-`de'+1/we`i'*(`cdf`i''m*((${ue`i'`j'}+`de')*`w`i''m) + _b[tau:p`j'_`i']*`pdf`i''m*(`w`i''m-_b[delta:delta_`i']*`du`i''m)))"			
 				// "${ue`i'`j'}+`de'" --> to remove lower delta from original formula
 				// "w`i'm" --> to revert 1/w`i'm from the original formula
 		}			 
@@ -486,8 +508,20 @@ program DoComp, rclass
 
 	if "`e(lhs)'" != "" { 
 		local i 1
+		tempname w_ cdf_ pdf_ duw_
+		local w_ ""
+		local cdf_ ""
+		local pdf_ ""
+		local du_ ""
 		foreach var of varlist `e(lhs)' {
 			local w`i' `var'
+			local w_ `w_' `w`i''
+			local cdf`i' cdf`var'
+			local cdf_ `cdf_' `cdf`i''
+			local pdf`i' pdf`var'
+			local pdf_ `pdf_' `pdf`i''
+			local du`i' du`var'
+			local du_ `du_' `du`i''
 			local `++i'
 		}
 	}
@@ -497,13 +531,13 @@ program DoComp, rclass
 	local ndemo = `e(ndemos)'
 	quietly {
 		if "`e(censor)'" == "censor" {
-		foreach x of varlist w* `lnpr' cdfw* pdfw* `lnexp' duw* `e(demographics)' {
+		foreach x of varlist `w_' `lnpr' `lnexp' `e(demographics)' `cdf_' `pdf_' `du_' {
 		sum `x'
 		scalar `x'm=r(mean)
 		}
 		}
 		else {
-		foreach x of varlist w* `lnpr' `lnexp' `e(demographics)' {
+		foreach x of varlist `w_' `lnpr' `lnexp' `e(demographics)' {
 		sum `x'
 		scalar `x'm=r(mean)
 		}
@@ -533,6 +567,7 @@ program DoComp, rclass
 				scalar `gsum`i''= `gsum`i'' + _b[gamma: gamma_`ii'_`i']*`lnp`i''m 
 				}
 				}
+	
 
 	//When quadratics
 	if "`e(quadratic)'" == "quadratic" {
@@ -545,7 +580,7 @@ program DoComp, rclass
 	
 	//When demographics
 	if `ndemo' > 0 {			
-			tempname cofp mbar
+		tempname cofp mbar
 		scalar `cofp'= 1 //It is OK to set 1 because below we set a multiplication
 		scalar `mbar'= 1 //It is OK because I need to add a "1"
 		
@@ -565,12 +600,13 @@ program DoComp, rclass
 		}
 		
 				
+
 			forvalue i=1/`=e(ngoods)' {
 				scalar `cofp`i''= `cofp`i''*`lnp`i''m
 				scalar `cofp'= `cofp'*`cofp`i''
-			}		
+			}
 	}
-
+	
 	//FUNCTION EVALUATOR (PREDICTED SHARE)
 	forvalues i = 1/`=e(ngoods)' {
 		if `ndemo' == 0 {
@@ -587,10 +623,8 @@ program DoComp, rclass
 			}
 		//When censor
 		if "`e(censor)'" == "censor" {
-		 scalar we`i' = we`i'*cdfw`i'm + _b[delta:delta_`i']*pdfw`i'm
-		}
-		
-	
+		 scalar we`i' = we`i'*`cdf`i''m + _b[delta:delta_`i']*`pdf`i''m
+		}			 
 	}
 	
 
@@ -599,65 +633,65 @@ program DoComp, rclass
 	forvalues j = 1/`=e(ngoods)' {
 		local de=cond(`i'==`j',1,0)
 		if `ndemo' == 0 {
-			global ie`i' "(1+_b[beta:beta_`i']/w`i'm)"
+			global ie`i' "(1+_b[beta:beta_`i']/`w`i''m)"
 			if `j'==`i' {
-			global ue`i'`j' "(-`de'+1/w`i'm*(_b[gamma:gamma_`j'_`i']-(_b[beta:beta_`i']*(_b[alpha:alpha_`i']+`gsum`i''))))"			
+			global ue`i'`j' "(-`de'+1/`w`i''m*(_b[gamma:gamma_`j'_`i']-(_b[beta:beta_`i']*(_b[alpha:alpha_`i']+`gsum`i''))))"			
 			}
 			if `j'>`i' {	
-			global ue`i'`j' "(-`de'+1/w`i'm*(_b[gamma:gamma_`j'_`i']-(_b[beta:beta_`i']*(_b[alpha:alpha_`j']+`gsum`j''))))"
+			global ue`i'`j' "(-`de'+1/`w`i''m*(_b[gamma:gamma_`j'_`i']-(_b[beta:beta_`i']*(_b[alpha:alpha_`j']+`gsum`j''))))"
 			}
 			else {
-			global ue`i'`j' "(-`de'+1/w`i'm*(_b[gamma:gamma_`i'_`j']-(_b[beta:beta_`i']*(_b[alpha:alpha_`j']+`gsum`j''))))"
+			global ue`i'`j' "(-`de'+1/`w`i''m*(_b[gamma:gamma_`i'_`j']-(_b[beta:beta_`i']*(_b[alpha:alpha_`j']+`gsum`j''))))"
 			}
 			
 			if "`e(quadratic)'" == "quadratic" {
-				global ie`i' "(1+1/w`i'm*(_b[beta:beta_`i']+2*_b[lambda:lambda_`i']/exp(`bofp')*(`lnexp'm-`lnpindex')))"
+				global ie`i' "(1+1/`w`i''m*(_b[beta:beta_`i']+2*_b[lambda:lambda_`i']/exp(`bofp')*(`lnexp'm-`lnpindex')))"
 				if `j'==`i' {	
-					global ue`i'`j' "(-`de'+1/w`i'm*(_b[gamma:gamma_`j'_`i']-(_b[beta:beta_`i']+(2*_b[lambda:lambda_`i']/exp(`bofp'))*(`lnexp'm-`lnpindex'))*(_b[alpha:alpha_`i']+`gsum`i'')-(_b[beta:beta_`i']*_b[lambda:lambda_`i']/exp(`bofp')*(`lnexp'm-`lnpindex')^2)))"
+					global ue`i'`j' "(-`de'+1/`w`i''m*(_b[gamma:gamma_`j'_`i']-(_b[beta:beta_`i']+(2*_b[lambda:lambda_`i']/exp(`bofp'))*(`lnexp'm-`lnpindex'))*(_b[alpha:alpha_`i']+`gsum`i'')-(_b[beta:beta_`i']*_b[lambda:lambda_`i']/exp(`bofp')*(`lnexp'm-`lnpindex')^2)))"
 				}
 				if `j'>`i' {	
-					global ue`i'`j' "(-`de'+1/w`i'm*(_b[gamma:gamma_`j'_`i']-(_b[beta:beta_`i']+(2*_b[lambda:lambda_`i']/exp(`bofp'))*(`lnexp'm-`lnpindex'))*(_b[alpha:alpha_`j']+`gsum`j'')-(_b[beta:beta_`j']*_b[lambda:lambda_`i']/exp(`bofp')*(`lnexp'm-`lnpindex')^2)))"				
+					global ue`i'`j' "(-`de'+1/`w`i''m*(_b[gamma:gamma_`j'_`i']-(_b[beta:beta_`i']+(2*_b[lambda:lambda_`i']/exp(`bofp'))*(`lnexp'm-`lnpindex'))*(_b[alpha:alpha_`j']+`gsum`j'')-(_b[beta:beta_`j']*_b[lambda:lambda_`i']/exp(`bofp')*(`lnexp'm-`lnpindex')^2)))"				
 				}
 				else {
-					global ue`i'`j' "(-`de'+1/w`i'm*(_b[gamma:gamma_`i'_`j']-(_b[beta:beta_`i']+(2*_b[lambda:lambda_`i']/exp(`bofp'))*(`lnexp'm-`lnpindex'))*(_b[alpha:alpha_`j']+`gsum`j'')-(_b[beta:beta_`j']*_b[lambda:lambda_`i']/exp(`bofp')*(`lnexp'm-`lnpindex')^2)))"
+					global ue`i'`j' "(-`de'+1/`w`i''m*(_b[gamma:gamma_`i'_`j']-(_b[beta:beta_`i']+(2*_b[lambda:lambda_`i']/exp(`bofp'))*(`lnexp'm-`lnpindex'))*(_b[alpha:alpha_`j']+`gsum`j'')-(_b[beta:beta_`j']*_b[lambda:lambda_`i']/exp(`bofp')*(`lnexp'm-`lnpindex')^2)))"
 				}
 			}
 		}
 		else {
-			global ie`i' "(1+`betanz`i''/w`i'm)"
+			global ie`i' "(1+`betanz`i''/`w`i''m)"
 			if `j'==`i' {
-				global ue`i'`j' "(-`de'+1/w`i'm*(_b[gamma:gamma_`j'_`i']-(`betanz`i'')*(_b[alpha:alpha_`i']+`gsum`i'')))"
+				global ue`i'`j' "(-`de'+1/`w`i''m*(_b[gamma:gamma_`j'_`i']-(`betanz`i'')*(_b[alpha:alpha_`i']+`gsum`i'')))"
 			}
 			if `j'>`i' {
-				global ue`i'`j' "(-`de'+1/w`i'm*(_b[gamma:gamma_`j'_`i']-(`betanz`i'')*(_b[alpha:alpha_`j']+`gsum`j'')))"	
+				global ue`i'`j' "(-`de'+1/`w`i''m*(_b[gamma:gamma_`j'_`i']-(`betanz`i'')*(_b[alpha:alpha_`j']+`gsum`j'')))"	
 			}
 			else {
-				global ue`i'`j' "(-`de'+1/w`i'm*(_b[gamma:gamma_`i'_`j']-(`betanz`i'')*(_b[alpha:alpha_`j']+`gsum`j'')))"	
+				global ue`i'`j' "(-`de'+1/`w`i''m*(_b[gamma:gamma_`i'_`j']-(`betanz`i'')*(_b[alpha:alpha_`j']+`gsum`j'')))"	
 			}
 					
 			if "`e(quadratic)'" == "quadratic" {
-			global ie`i' "(1+1/w`i'm*(`betanz`i''+2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp')*(`lnexp'm-`lnpindex'-ln(`mbar'))))"
+			global ie`i' "(1+1/`w`i''m*(`betanz`i''+2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp')*(`lnexp'm-`lnpindex'-ln(`mbar'))))"
 				if `j'==`i' {	
-				 global ue`i'`j' "(-`de'+1/w`i'm*(_b[gamma:gamma_`j'_`i']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar')))*(_b[alpha:alpha_`i']+`gsum`i'')-(`betanz`i''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp')*(`lnexp'm-`lnpindex'-ln(`mbar'))^2)))"
+				 global ue`i'`j' "(-`de'+1/`w`i''m*(_b[gamma:gamma_`j'_`i']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar')))*(_b[alpha:alpha_`i']+`gsum`i'')-(`betanz`i''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp')*(`lnexp'm-`lnpindex'-ln(`mbar'))^2)))"
 				}
 				if `j'>`i' {	
-				global ue`i'`j' "(-`de'+1/w`i'm*(_b[gamma:gamma_`j'_`i']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar')))*(_b[alpha:alpha_`j']+`gsum`j'')-(`betanz`j''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp')*(`lnexp'm-`lnpindex'-ln(`mbar'))^2)))"
+				global ue`i'`j' "(-`de'+1/`w`i''m*(_b[gamma:gamma_`j'_`i']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar')))*(_b[alpha:alpha_`j']+`gsum`j'')-(`betanz`j''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp')*(`lnexp'm-`lnpindex'-ln(`mbar'))^2)))"
 				}
 				else {
-				global ue`i'`j' "(-`de'+1/w`i'm*(_b[gamma:gamma_`i'_`j']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar')))*(_b[alpha:alpha_`j']+`gsum`j'')-(`betanz`j''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp')*(`lnexp'm-`lnpindex'-ln(`mbar'))^2)))"
+				global ue`i'`j' "(-`de'+1/`w`i''m*(_b[gamma:gamma_`i'_`j']-(`betanz`i''+(2*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar')))*(_b[alpha:alpha_`j']+`gsum`j'')-(`betanz`j''*_b[lambda:lambda_`i']/exp(`bofp')/exp(`cofp')*(`lnexp'm-`lnpindex'-ln(`mbar'))^2)))"
 				}
 			}
 		}
 		
-		global ce`i'`j' "${ue`i'`j'}+${ie`i'}*w`j'm" 
+		global ce`i'`j' "${ue`i'`j'}+${ie`i'}*`w`j''m" 
 		
 			//When censor
 		if "`e(censor)'" == "censor" {
-			global ue`i'`j' "(-`de'+1/we`i'*(cdfw`i'm*((${ue`i'`j'}+`de')*w`i'm) + _b[tau:p`j'_`i']*pdfw`i'm*(w`i'm-_b[delta:delta_`i']*duw`i'm)))"			
+			global ue`i'`j' "(-`de'+1/we`i'*(`cdf`i''m*((${ue`i'`j'}+`de')*`w`i''m) + _b[tau:p`j'_`i']*`pdf`i''m*(`w`i''m-_b[delta:delta_`i']*`du`i''m)))"			
 				// "${ue`i'`j'}+`de'" --> to remove lower delta from original formula
 				// "w`i'm" --> to revert 1/w`i'm from the original formula
 				
-			global ie`i' "(1+1/we`i'*((cdfw`i'm*((${ie`i'}-1)*w`i'm))+_b[tau:M_`i']*pdfw`i'm*(w`i'm-_b[delta:delta_`i']*duw`i'm)))"			
+			global ie`i' "(1+1/we`i'*((`cdf`i''m*((${ie`i'}-1)*`w`i''m))+_b[tau:M_`i']*`pdf`i''m*(`w`i''m-_b[delta:delta_`i']*`du`i''m)))"			
 				// "${ie`i'}-1" --> to remove the "+1" from original formula
 				// "*w`i'm" --> to revert 1/w`i'm from the original formula		
 				
