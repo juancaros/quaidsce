@@ -61,7 +61,8 @@ program Estimate, eclass
 "must specify {cmd:expenditure()} or {cmd:lnexpenditure()}"
 		exit 198
 	}
-		
+	
+	local allshares `shares'
 	local neqn : word count `shares'
 	if `neqn' < 3 {
 		di as error "must specify at least 3 expenditure shares"
@@ -103,6 +104,13 @@ program Estimate, eclass
 		cap assert reldif(`sumw', 1) < 1e-4 if `touse'
 		if _rc {
 			di as error "expenditure shares do not sum to one"
+			exit 499
+		}	
+	}
+	
+	if "`censor'" == "" {
+		if "`demographics'" == "" {
+			di as error "at least one demographic variable is needed for censoring correction"
 			exit 499
 		}	
 	}
@@ -179,16 +187,16 @@ program Estimate, eclass
 		}
 
 		//First stage
-		capture drop cdf* 
-		capture drop pdf*
-		capture drop du*
+		capture drop cdf* pdf* du*
 		local pdf
 		local cdf
+		local du
 		
 		if "`censor'" == "nocensor" {
-			foreach x of varlist `shares2' {
+			foreach x of varlist `shares' {
 				qui gen pdf`x'=0
 				qui gen cdf`x'=1
+				qui gen du`x'=1
 				local pdf `pdf' pdf`x'
 				local cdf `cdf' cdf`x'
 			}
@@ -275,10 +283,8 @@ program Estimate, eclass
 			"`alpha'", "`beta'", "`gamma'", "`lambda'", "`delta'",	///
 			"`eta'", "`rho'")		
 	
-	if "`censor'" == "nocensor" {
-		capture drop cdf* pdf* du*
-		}
-		else {
+	if "`censor'" == "" {
+		capture drop p_* lp_*
 		local i=1
 			foreach x of varlist `shares' {
 				tempvar p_`x'
@@ -298,87 +304,291 @@ program Estimate, eclass
 	if "`censor'" == "" {
 		local i=1
 		tempname C R S
-		local aR
-		local aC
-		mat `C' = J(rowsof(`Vn'),rowsof(setau),0)
-		mat `R' = J(rowsof(`Vn'),rowsof(setau),0)
 		mat `S' = setau
-		
-		*tau section (except demos) and temp delta 
+		tempvar acon
+		gen `acon'=1
+		local aC
+		local aR
+		local Com
+
+		//tau section (except demos) and temp delta 
+		local i=1 
 		foreach x of varlist `shares' {
-			tempvar a1_`x' a2_`x' a_`x'	
-			qui gen a_`x' = pdf`x'/p_`x'
-			qui gen a1_`x' = (pdf`x'*(du`x'-cdf`x'))/(cdf`x'*(1-cdf`x'))
-			qui gen a2_`x' = a_`x'*(`x'-`delta'[1,`i'])
-			local i=`i'+1			
+		tempvar a_`x'
+		qui gen `a_`x''= pdf`x'/p_`x' 
+		foreach w of varlist `zvar' `acon' {
+			tempvar a1_`x'`w' a2_`x'`w'	
+			qui gen `a1_`x'`w''= (pdf`x'*(du`x'-cdf`x'))/(cdf`x'*(1-cdf`x'))*`w'
+			qui gen `a2_`x'`w'' = `a_`x''*(`x'-`delta'[1,`i'])*`w'
+			local aC `aC' `a1_`x'`w''
+			local aR `aR' `a2_`x'`w''
+		}	
+		local ++i
 		}
-					 
-		/*alpha section
+				
+			//Create variables we need for different components of ac and ar	
+			//Create ln a(p)
+			tempvar lnpindex 
+			gen `lnpindex'=`anot'
+			
+			forvalue i=1/`neqn' {	
+					qui	replace `lnpindex'= `lnpindex' + `lnpindex'[`i']*lp_`i' 
+				forvalue j=1/`neqn' { 
+					if `j'>=`i' {
+					qui replace `lnpindex'= `lnpindex' + 0.5*`gamma'[`j',`i']*(lp_`i'*lp_`j') 
+								}
+			 else {
+					qui replace `lnpindex'= `lnpindex' + 0.5*`gamma'[`i',`j']*(lp_`i'*lp_`j')
+					}
+				}
+			}
+			
+			//Create mbar and cofp
+			tempvar cofp mbar
+			gen `cofp'= 1 //It is OK to set 1 because below we set a multiplication
+			gen `mbar'= 1 //It is OK because I need to add a "1"
+			if `ndemos' > 0 {			
+				forvalue i=1/`neqn' 	{
+					tempvar cofp`i'
+					qui gen `cofp`i''= 0
+					}
+		
+				local i=1
+				foreach var of varlist `demographics' {	
+					forvalue ii=1/`neqn'	{
+					qui	replace `cofp`ii''= `cofp`ii''+(`var'*`eta'[`i',`ii']) 	 
+					}			
+					qui replace `mbar'= `mbar' + (`rho'[1,`i']*`var')
+					local ++i
+				}
+
+				forvalue i=1/`neqn' {
+					qui replace `cofp`i''= `cofp`i''*lp_`i'
+					qui replace `cofp'= `cofp'*`cofp`i''
+				}		
+			}
+			
+			
+			//Create bofp 
+			//When quadratics
+			if "`quadratic'" == "" {
+			tempvar bofp 
+			gen `bofp'= 0
+			forvalues i = 1/`neqn' {		
+				qui replace `bofp'= `bofp' + `beta'[1,`i']*lp_`i'
+				}
+			}
+			else {
+			tempvar bofp 
+			gen `bofp'= 1
+			}
+			
+			tempvar M_h
+			qui gen `M_h'= (`lnexpenditure'-`lnpindex'-ln(`mbar'))*(1/(exp(`bofp')/exp(`cofp'))) 			
+ 		
+			forvalue i=1/`neqn'	{
+					tempvar eta_dem`i'
+					qui gen `eta_dem`i''= 0
+										}
+			
+			local i=1
+			foreach var of varlist `demographics' {	
+				forvalue ii=1/`neqn' 	{
+					qui replace `eta_dem`ii''=`eta_dem`ii''+(`var'*`eta'[`i',`ii'])
+ 	 			}			
+				local ++i
+			}
+		
+				
+		//alpha section
 		local i=1
-		local j= `neqn'
 		foreach x of varlist `shares' {
-			tempvar ac_`x' ar_`x'
-			qui gen ac_`x' = a2_`x'*a_`x'*(1-()*lp_`i')
-			qui gen ar_`x' = a1_`x'*a_`x'
-			local aR `aR' ac_`x'
-			local aC `aC' ar_`x'		
-			local i=`i'+1	
-		}		
-		mat accum `aux' = `aC' `zvar' // pasar de variables a suma en matriz
-		mat accum `auxt' = `aR' `zvar'		 
-		mat `C'[`ja'..`j',.] = `aux'[`np_prob'..`i',1..`neqn']
-		mat `R'[`ja'..`j',.] = `auxt'[..,..]
+			tempvar acom_`x' 
+			if "`quadratic'" == "" {
+				qui gen `acom_`x''= `a_`x''*(1-((`beta'[1,`i']+ `eta_dem`i'')+2*`M_h'*`lambda'[1,`i'])*lp_`i') 	
+			}
+			else {
+				qui gen `acom_`x''= `a_`x''*(1-((`beta'[1,`i']+ `eta_dem`i''))*lp_`i') 
+			}
+			local Com `Com' `acom_`x''	
+			local ++i
+		}
+		qui mat accum `aux' =  `aC' `Com'		
+		qui mat accum `auxt' = `aR' `Com'		 
+
+		local ja= rowsof(setau)+1
+		local jb= `neqn'+`ja'-1		
+		local jc = rowsof(setau)
+		mat `C' = `aux'[`ja'..`jb',1..`jc'] 
+		mat `R' = `auxt'[`ja'..`jb',1..`jc']  
+
+			
+		//beta section
+		local Com
+		local i=1
+		foreach x of varlist `shares' {	
+			tempvar acom_`x' 
+			if "`quadratic'" == "" {
+			qui gen `acom_`x''= `a_`x''*((`lnexpenditure'-`lnpindex'-ln(`mbar'))*(1-(`M_h'*`lambda'[1,`i'])*lp_`i')) 
+			}
+			else {
+			qui gen `acom_`x''= `a_`x''*(`lnexpenditure'-`lnpindex'-ln(`mbar')) 
+			}
+			local Com `Com' `acom_`x''	
+			local ++i	
+		}
+		qui mat accum `aux' =  `aC' `Com'		
+		qui mat accum `auxt' = `aR' `Com'			 
+
+		local ja= rowsof(setau)+1
+		local jb= `neqn'+`ja'-1			
+		local jc = rowsof(setau)
+		mat `C' = `C' \ `aux'[`ja'..`jb',1..`jc'] 
+		mat `R' = `R' \ `auxt'[`ja'..`jb',1..`jc']  
+
 		
-		*beta section
-		local i=`np_prob'+`neqn'
-		local j= `j'+`neqn'
-		local ja= `j'+`neqn'
+		//gamma section
+		local Com
+		local j=1
 		foreach x of varlist `shares' {
-			tempvar ac_`x' ar_`x'
-			qui gen ac_`x' = a2_`x'*a_`x'
-			qui gen ar_`x' = a1_`x'*a_`x'
-			local aR `aR' ac_`x'
-			local aC `aC' ar_`x'			
-		}		
-		mat accum `aux' = `aC' `zvar'
-		mat accum `auxt' = `aR' `zvar'		 
-		mat `C'[`ja'..`j',.] = `aux'[`np_prob'..`i',1..`neqn']
-		mat `R'[`ja'..`j',.] = `auxt'[..,..]
+		local i=1
+		foreach w of varlist `shares' {
+			if `j'>=`i' {
+				tempvar acom_`x'`w'
+				if "`quadratic'" == "" {
+				quiet gen `acom_`x'`w''= `a_`x''*(1-(0.5*(`beta'[1,`j']+`eta_dem`j'')+`M_h'*`lambda'[1,`j'])*lp_`j')*lp_`i'
+				}
+				else {
+				quiet gen `acom_`x'`w''= `a_`x''*(1-(0.5*(`beta'[1,`j']+`eta_dem`j''))*lp_`j')*lp_`i'
+				}
+				local Com `Com' `acom_`x'`w''
+				}
+			local ++i
+		}
+			local ++j
+		}
+
+		qui mat accum `aux' =  `aC' `Com'		
+		qui mat accum `auxt' = `aR' `Com'			 
+
+		local ja = rowsof(setau)+1
+		local jb : word count `Com'
+		local jb = `jb'+`ja'-1			
+		local jc = rowsof(setau)
+
+		mat `C' = `C' \ `aux'[`ja'..`jb',1..`jc'] 
+		mat `R' = `R' \ `auxt'[`ja'..`jb',1..`jc']  
+
+
+		//lambda section
+		local Com
+		if "`quadratic'" == "" {
+			foreach x of varlist `shares' {	
+			tempvar acom_`x' 
+			qui gen `acom_`x''= `a_`x''*((`lnexpenditure'-`lnpindex'-ln(`mbar'))*`M_h') 
+			local Com `Com' `acom_`x''
+			}
+
+		qui mat accum `aux' =  `aC' `Com'		
+		qui mat accum `auxt' = `aR' `Com'		 
+
+		local ja= rowsof(setau)+1
+		local jb= `neqn'+`ja'-1			
+		local jc = rowsof(setau)
+		mat `C' = `C' \ `aux'[`ja'..`jb',1..`jc'] 
+		mat `R' = `R' \ `auxt'[`ja'..`jb',1..`jc']  
+		}
+
 		
-		*gamma section
+		//eta section
+		local Com
+		local k=1
+		foreach x of varlist `demographics' {
+		local j=1
+		foreach w of varlist `shares' {
+			tempvar acom_`x'`w' 
+			if "`quadratic'" == "quadratic" {
+			qui gen `acom_`x'`w''= `a_`w''*(`lnexpenditure'-`lnpindex'-ln(`mbar'))*(1-`M_h'*`lambda'[1,`j']*`eta'[`k',`j']/lp_`j')*`x'
+			}
+			else {
+			qui gen `acom_`x'`w''= `a_`w''*(`lnexpenditure'-`lnpindex'-ln(`mbar'))*`x'			
+			}
+			local Com `Com' `acom_`x'`w''
+			local ++j
+		}
+			local ++k
+		}
+		qui mat accum `aux' =  `aC' `Com'		
+		qui mat accum `auxt' = `aR' `Com'			 
+
+		local ja= rowsof(setau)+1
+		local jb= `neqn'*`ndemos'+`ja'-1			
+		local jc = rowsof(setau)
+		mat `C' = `C' \ `aux'[`ja'..`jb',1..`jc'] 
+		mat `R' = `R' \ `auxt'[`ja'..`jb',1..`jc']  
+
 		
-		*lambda section
+		//rho section
+		local Com
+		foreach x of varlist `demographics' {
+		local i=1
+			tempvar acom_`x' 
+			qui gen `acom_`x'' = 0
+		foreach w of varlist `shares' {
+			if "`quadratic'" == "quadratic" {
+			qui replace `acom_`x''= `acom_`x'' + `a_`w''*((1/`mbar')*(`beta'[1,`i']+ `eta_dem`i'')+2*`M_h'*`lambda'[1,`i'])*`x'
+			}
+			else {
+			qui replace `acom_`x''= `acom_`x'' + `a_`w''*((1/`mbar')*(`beta'[1,`i']+ `eta_dem`i''))*`x'
+			}
+			local ++i
+		}
+			local Com `Com' `acom_`x''
+		}
+		qui mat accum `aux' =  `aC' `Com'		
+		qui mat accum `auxt' = `aR' `Com'			 
+
+		local ja= rowsof(setau)+1
+		local jb= `ndemos'+`ja'-1			
+		local jc = rowsof(setau)
+		mat `C' = `C' \ `aux'[`ja'..`jb',1..`jc'] 
+		mat `R' = `R' \ `auxt'[`ja'..`jb',1..`jc']  
+	
 		
-		*delta section
-		local i=`np_prob'+`neqn'
-		local j= `j'+`neqn'
-		local ja= `j'+`neqn'
+		//delta section
+		local Com
 		foreach x of varlist `shares' {
-			tempvar ac_`x' ar_`x'
-			qui gen ac_`x' = a2_`x'*a_`x'
-			qui gen ar_`x' = a1_`x'*a_`x'
-			local aR `aR' ac_`x'
-			local aC `aC' ar_`x'			
+			local Com `Com' `a_`x''		
 		}		
-		mat accum `aux' = `aC' `zvar'
-		mat accum `auxt' = `aR' `zvar'		 
-		mat `C'[`ja'..`j',.] = `aux'[`np_prob'..`i',1..`neqn']
-		mat `R'[`ja'..`j',.] = `auxt'[..,..]
+		qui mat accum `aux' =  `aC' `Com'		
+		qui mat accum `auxt' = `aR' `Com'		 
+
+		local ja= rowsof(setau)+1
+		local jb= `neqn'+`ja'-1			
+		local jc = rowsof(setau)
+		mat `C' = `C' \ `aux'[`ja'..`jb',1..`jc'] 
+		mat `R' = `R' \ `auxt'[`ja'..`jb',1..`jc']  
+
+
 		
-		*eta section
+		//bringing all together
+		tempname A1 A2 A3
+		mat `A1' = `C'*`S'*`C''
+		mat `A2' = `R'*`S'*`C''
+		mat `A3' = `C'*`S'*`R''
 		
-		*rho section
+		mat li `A1'
+		mat li `A2'
+		mat li `A3'
 		
-		
-		*final correction
-		*mat `Vfull' = `Vn'+`Vn'*(C*S*C'-R*S*C'-C*S*R')*`Vn'
-		*/
+		*mat `Vfull' = `Vn'+`Vn'*(`A1'-`A2'-`A3')*`Vn'
 		mat `Vfull' = `Vn'
-		*drop `aR' `aC' a_* a1_* a2_* `p_shares' lp*
+		capture drop p_* lp_*
 	}
-	else {
+	else { 
 		mat `Vfull' = `Vn'
 	}
+
 	
 	**************
 	
@@ -390,11 +600,14 @@ program Estimate, eclass
 	mat `auxt' = `auxt' , setau
 	mat `aux' = `Vfull' , `aux'
 	mat `Vfullc' = `aux' \ `auxt'
+	capture drop p_* lp_*
 	}
 	else {
 	mat `bfullc' = `bfull'
 	mat `Vfullc' = `Vfull'
 	}
+		
+
 	
 	forvalues i = 1/`neqn' {
 		local namestripe `namestripe' alpha:alpha_`i'
@@ -504,7 +717,8 @@ program Estimate, eclass
 	else {
 		eret local lnexpenditure `lnexpenditure'
 	}
-	eret local lhs		"`shares'"
+
+	eret local lhs		"`allshares'"
 	eret local demographics	"`demographics'"
 	
 	eret local vcetype	`vcetype'

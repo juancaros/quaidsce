@@ -89,7 +89,7 @@ program DoExp, rclass
 		}
 	}
 	
-	//PROCESSING VARIABLES (MARGINS WONT WORK DUE TO PARAMETER NAMES, NLCOM DOES NOT PRODDUCE SE)
+
 
 	local ndemo = `e(ndemos)'
 	quietly {
