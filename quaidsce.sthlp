@@ -208,8 +208,8 @@ Ray, R.  1983.  Measuring the costs of children: An alternative approach.
 {title:Corresponding author}
 
 {pstd}Juan C. Caro{p_end}
-{pstd}University of Luxembourg{p_end}
-{pstd}juan.caro@uni.lu{p_end}
+{pstd}University of Concepcion{p_end}
+{pstd}juancaros@udec.cl{p_end}
 
 
 {title:Also see}
