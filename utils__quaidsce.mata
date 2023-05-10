@@ -71,20 +71,18 @@ void _quaidsce__getcoefs(string scalar ins,
 	external scalar quadratics
 	real scalar	np
 	real vector	in
-	real vector	alpha, beta, lambda, delta, rho //JCSH agrego delta
+	real vector	alpha, beta, lambda, delta, rho 
 	real matrix	gamma, eta
 
 	in = st_matrix(ins)
 
-	//JCSH np abajo representa numero de parametros
-	// JCHS nuevo incia
 	if (quadratics == "" & censor == "") {
 		np = 4*neqn + neqn*(neqn-1)/2  
 	}
 	else if (censor == "" ) {
 		np = 3*neqn + neqn*(neqn-1)/2
 	}
-	// JCHS nuevo termina; meto un else mas en el if de abajo
+
 	else if (quadratics == "") {
 		np = 3*(neqn-1) + neqn*(neqn-1)/2
 	}
@@ -107,11 +105,9 @@ void _quaidsce__getcoefs(string scalar ins,
 	st_matrix(betas, beta)
 	st_matrix(gammas, gamma)
 	
-	//JCSH Nuevo: inicio
 	if (censor == "") {
 		st_matrix(deltas, delta)
 	}
-	//JCSH Nuevo: fin
 	
 	if (quadratics == "") {
 		st_matrix(lambdas, lambda)
@@ -196,7 +192,6 @@ void _quaidsce__getcoefs_wrk(real rowvector 	in,
 	}
 	
 	
-	//JCSH como delta sera un rowvector como lambda sigo el mismo procedimiento de arriba
 	delta = J(1, neqn, 1)		// NB initialize to one
 	if (censor == "") {
 		for(i=1; i<=neqn; ++i) {
@@ -340,6 +335,97 @@ void _quaidsce__expshrs(string scalar shrs,			///
 			}
 		}
 }
+
+void _quaidsce__predshrs(string scalar shrs,			///
+		      string scalar touses,			///
+		      string scalar lnexps,			///
+		      string scalar lnps,			///
+			  string scalar cdfs,			///
+			  string scalar pdfs,			///			 
+		      real scalar neqn,				///
+		      real scalar ndemo,			///
+		      real scalar a0,				///
+		      string scalar quadratics,			///
+			  string scalar censor,			///
+		      string scalar demos)
+{
+
+	real scalar i
+	real vector alpha, beta, lambda, rho, delta
+	real vector lnexp, lnpindex, bofp, cofp, mbar
+	real matrix gamma, eta
+	real matrix lnp, shr, demo, cdf, pdf
+
+	st_view(shr=.,   .,    shrs, touses)
+	st_view(lnp=.,   .,    lnps, touses)
+	st_view(lnexp=., .,  lnexps, touses)
+	st_view(demo=.,   .,  demos, touses)
+	
+	alpha  = st_matrix("e(alpha)")
+	beta   = st_matrix("e(beta)")
+	gamma  = st_matrix("e(gamma)")
+	lambda = st_matrix("e(lambda)")
+	rho    = st_matrix("e(rho)")
+	eta    = st_matrix("e(eta)")
+	
+	if (censor == "") {
+		delta  = st_matrix("e(delta)")
+		st_view(cdf=.,   .,    cdfs, touses)
+		st_view(pdf=.,   .,    pdfs, touses)
+	}
+	
+	if (cols(shr) != neqn) {
+		exit(9998)
+	}
+	
+	// First get the price index
+	lnpindex = a0 :+ lnp*alpha'
+	for(i=1; i<=rows(lnpindex); ++i) {
+		lnpindex[i] = lnpindex[i] + 0.5*lnp[i,.]*gamma*lnp[i,.]'
+	}
+	
+	if (ndemo > 0) {
+		cofp = J(rows(lnp), 1, 0)
+		for(i=1; i<=rows(lnp); ++i) {
+			cofp[i] = lnp[i,.]*(eta'*demo[i,.]')
+		}
+		cofp = exp(cofp)
+		mbar = 1 :+ demo*rho'
+	}
+	else {
+		cofp = J(rows(lnp), 1, 1)
+		mbar = J(rows(lnp), 1, 1)
+	}
+	if (quadratics == "") {
+		// The b(p) term
+		bofp = exp(lnp*beta')
+	}
+	else {
+		bofp = J(rows(lnp), 1, 1)
+	}	
+	for(i=1; i<=neqn; ++i) {
+		shr[.,i] = alpha[i] :+ lnp*gamma[i,.]'
+		if (ndemo > 0) {
+			shr[., i] = shr[., i] + 
+				(J(rows(lnp), 1, beta[i]) + demo*eta[.,i]):*
+				(lnexp - lnpindex - ln(mbar))
+		}
+		else {
+			shr[., i] = shr[., i] + beta[i]*(lnexp - lnpindex)
+
+		}
+		if (quadratics == "") {
+			shr[., i] = shr[., i] + lambda[i]:/(bofp:*cofp):*(
+				(lnexp - lnpindex - ln(mbar)):^2)
+			
+		}
+		if (censor == "") {
+			shr[., i] = shr[., i]:*cdf[., i] + delta[i]*pdf[., i]
+		}
+	}
+
+}
+
 
 /*
 	This program assumes the Gamma parameters are stored as vech(Gamma) 

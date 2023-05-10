@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.1.0  Sep 2021}{...}
+{* *! version 1.1.0  April 2023}{...}
 {cmd:help quaidsce}
 {right:also see:  {help quaidsce postestimation}}
 {hline}
@@ -30,6 +30,7 @@ not omit one of the shares to avoid a singular covariance matrix;
 {synopthdr}
 {synoptline}
 {p2coldent :# {opt anot(#)}}value to use for alpha_0 parameter{p_end}
+{p2coldent :# {opt reps(#)}}value to use for bootstrap repetitions{p_end}
 {p2coldent :* {opt pr:ices(varlist_prices)}}list of price variables{p_end}
 {p2coldent :* {opt lnpr:ices(varlist_lnprices)}}list of variables containing natural logarithms of prices{p_end}
 {p2coldent :+ {opt exp:enditure(varlist_exp)}}variable representing total expenditure{p_end}
@@ -63,7 +64,11 @@ command, as described in Poi (2012).
 
 {phang}
 {opt anot(#)} specifies the value of the alpha_0 parameter that
-appears in the price index.  {opt anot()} is required.
+appears in the price index. {opt anot()} is required.
+
+{phang}
+{opt reps(#)} specifies the number of repetitions for the bootstrap
+standard errors. {opt reps()} is required.
 
 {phang}
 {opt prices(varlist_prices)} specifies the list of price
@@ -110,18 +115,6 @@ The default is to conduct the two-step as proposed by Shonkwiler and Yen (1999).
 {phang}
 {opt nolog} requests that the iteration log be suppressed.
 
-{marker vcetype}{...}
-{phang}
-{opt vce(vcetype)} specifies the type of standard error reported,
-which includes types that are derived from asymptotic theory, that are
-robust to some kinds of misspecification, that allow for intragroup
-correlation, and that use bootstrap or jackknife methods. This option
-works just as it does for {cmd:nlsur}; see {manhelp nlsur R}.
-
-{pmore}{cmd:vce(gnr)}, the default, uses the conventionally derived
-variance estimator for nonlinear models fit by using Gauss-Newton
-regression. For final output, use {cmd:vce(bootstrap)}
-
 {phang}
 {opt method(method_name)}; nlsur estimator method; see {manhelp nlsur R}. Default is ifgnls.
 Other methods can be used to conduct faster model selection (at your own risk).
@@ -142,6 +135,7 @@ Other methods can be used to conduct faster model selection (at your own risk).
 {synopt:{cmd:e(N_clust)}}number of clusters{p_end}
 {synopt:{cmd:e(ndemos)}}number of demographic variables{p_end}
 {synopt:{cmd:e(anot)}}value of alpha_0{p_end}
+{synopt:{cmd:e(reps)}}number of bootstrap repetitions{p_end}
 {synopt:{cmd:e(ngoods)}}number of goods{p_end}
 
 {p2col 5 15 17 2: Macros}{p_end}
@@ -158,6 +152,8 @@ Other methods can be used to conduct faster model selection (at your own risk).
 {synopt:{cmd:e(lnexpenditure)}}log-expenditure variable{p_end}
 {synopt:{cmd:e(prices)}}price variables{p_end}
 {synopt:{cmd:e(lnprices)}}log-price variables{p_end}
+{synopt:{cmd:e(cdf)}}cdf variables{p_end}
+{synopt:{cmd:e(pdf)}}pdf variables{p_end}
 {synopt:{cmd:e(quadratic)}}{cmd:noquadratic}{p_end}
 {synopt:{cmd:e(censor)}}{cmd:nocensor}{p_end}
 {synopt:{cmd:e(method)}} specified in {cmd:method()}{p_end}
@@ -175,6 +171,7 @@ Other methods can be used to conduct faster model selection (at your own risk).
 {synopt:{cmd:e(eta)}}eta matrix{p_end}
 {synopt:{cmd:e(rho)}}rho vector{p_end}
 {synopt:{cmd:e(delta)}}delta vector{p_end}
+{synopt:{cmd:e(delta)}}tau vector{p_end}
 
 {p2col 5 15 17 2: Functions}{p_end}
 {synopt:{cmd:e(sample)}}marks estimation sample{p_end}
@@ -208,7 +205,7 @@ Ray, R.  1983.  Measuring the costs of children: An alternative approach.
 {title:Corresponding author}
 
 {pstd}Juan C. Caro{p_end}
-{pstd}University of Concepcion{p_end}
+{pstd}Universidad de Concepcion{p_end}
 {pstd}juancaros@udec.cl{p_end}
 
 

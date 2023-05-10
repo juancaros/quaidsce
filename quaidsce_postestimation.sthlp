@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.1.0  Sep 2021}{...}
+{* *! version 1.1.0  April 2023}{...}
 {right:also see:  {help quaidsce} {space 1}}
 {hline}
 
@@ -59,7 +59,7 @@ is the number of goods in the demand system.
 {pstd}
 The command computes the 1 x {it:k} vector of expenditure elasticities 
 calculated when all the variables in the model are set to their sample means.
-Standard errors are based on the delta method.
+Standard errors are based on the delta method from the bootstrap results.
 
 {marker comelas}{...}
 {title:Syntax for estat compensated}
@@ -71,7 +71,7 @@ Standard errors are based on the delta method.
 {pstd}
 The command computes the {it:k} x {it:k} matrix of compensated price elasticities 
 calculated when all the variables in the model are set to their sample means.
-Standard errors are based on the delta method.
+Standard errors are based on the delta method from the bootstrap results.
 
 {marker uncelas}{...}
 {title:Syntax for estat uncompensated}
@@ -83,7 +83,7 @@ Standard errors are based on the delta method.
 {pstd}
 The command computes the {it:k} x {it:k} matrix of uncompensated price elasticities 
 calculated when all the variables in the model are set to their sample means.
-Standard errors are based on the delta method.
+Standard errors are based on the delta method from the bootstrap results.
 
 
 {title:Stored results}
@@ -129,7 +129,7 @@ elasticities{p_end}
 {title:Corresponding author}
 
 {pstd}Juan C. Caro{p_end}
-{pstd}University of Concepcion{p_end}
+{pstd}Universidad de Concepcion{p_end}
 {pstd}juancaros@udec.cl{p_end}
 
 
