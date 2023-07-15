@@ -1,8 +1,6 @@
 clear all
 capture log close
 program drop _all
-log using test.log, replace
-net install quaidsce, replace force from("https://juancaros.github.io/quaidsce/")
 use https://www.stata-press.com/data/r18/food_consumption
 
 *Generated demographics and conditional censoring
