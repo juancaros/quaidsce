@@ -23,7 +23,7 @@ Author 4 email: juan.salgado@insp.mx
 Help keywords: quaids, censoring, quaidsce, demandsys
 
 File list: quaidsce.ado, quaidsce_c.ado, quaidsce_p.ado, nlsur__quaidsce.ado, utils__quaidsce.mata
-, quaidsce.sthlp, quaidsce_postestimation.sthlp
+, quaidsce.sthlp, quaidsce_postestimation.sthlp, example.do
 
 Notes:
 
