@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.1.0  April 2023}{...}
+{* *! version 2.0  June 2023}{...}
 {cmd:help quaidsce}
 {right:also see:  {help quaidsce postestimation}}
 {hline}
@@ -14,16 +14,16 @@
 {title:Syntax}
 
 {p 8 14 2}
-{opt quaidsce} {it:varlist_expshares} {ifin}{cmd:,} {opt anot(#)}
+{opt quaidsce} {it:varlist_expshares} {ifin}{cmd:,} {opt anot(#)} {opt reps(#)} 
    {c -(}{opt pr:ices(varlist_prices)}|{opt lnpr:ices(varlist_lnprices)}{c )-} 
    {c -(}{opt exp:enditure(varlist_exp)}|{opt lnexp:enditure(varlist_lnexp)}{c )-}
    [{it:{help quaidsce##options:options}}]
 
 {pstd}
 where {it:varlist_expshares} is the list of expenditure share
-variables.  You must specify all the expenditure share variables.  Do
+variables.  You must specify all the expenditure share variables. Do
 not omit one of the shares to avoid a singular covariance matrix;
-{cmd:quaidsce} does that automatically.
+{cmd:quaidsce} does that automatically when censoring is not accounted.
 
 {synoptset 30 tabbed}{...}
 {marker options}{...}
@@ -44,7 +44,7 @@ not omit one of the shares to avoid a singular covariance matrix;
 {synopt :{opt m:ethod(method_name)}}NLSUR estimator; default is {ifgnls}{p_end}
 {synoptline}
 {p2colreset}{...}
-{p 4 6 2}# {opt anot(#)} is required.{p_end}
+{p 4 6 2}# {opt anot(#)} and {opt reps(#)} are required.{p_end}
 {p 4 6 2}* You must specify {opt prices()} or {opt lnprices()} but not both.{p_end}
 {p 4 6 2}+ You must specify {opt expenditure()} or {opt lnexpenditure()} but not both.{p_end}
 
@@ -56,9 +56,16 @@ not omit one of the shares to avoid a singular covariance matrix;
 (1980) almost-ideal demand system (AIDS) and Banks, Blundell, and
 Lewbel's (1997) quadratic AIDS model.  Demographic variables can be
 included in the model based on Ray's (1983) expenditure function scaling
-technique.  Censoring is accounted for based on the method proposed by
+technique.  Censoring is accounted for based on the two-step method proposed by
 Shonkwiler and Yen (1999). This command extends over the {cmd:quaids} 
 command, as described in Poi (2012).
+
+{pstd}
+Given the two-step process, {cmd:quaidsce} uses bootstrap to produce standard errors
+that are consistent with the predicted variables in the first stage. If censoring is 
+not required, we recommend using {cmd:quaids} or {cmd:demandsys}. Also note that 
+{cmd:quaidsce} works only when censoring is present in all expenditure shares, and 
+it can be predicted by demographic variables.
 
 {title:Options}
 
@@ -98,7 +105,7 @@ the goods in the demand system.  You must specify {opt expenditure()} or
 {phang}
 {opt demographics(varlist_demo)} requests that the variables
 {it:varlist_demo} be included in the demand system based on the scaling
-technique introduced by Ray (1983).
+technique introduced by Ray (1983) and Poi (2012).
 
 {phang}
 {opt noquadratic} requests that the quadratic income term not be
@@ -172,6 +179,10 @@ Other methods can be used to conduct faster model selection (at your own risk).
 {synopt:{cmd:e(rho)}}rho vector{p_end}
 {synopt:{cmd:e(delta)}}delta vector{p_end}
 {synopt:{cmd:e(delta)}}tau vector{p_end}
+{synopt:{cmd:e(elas_i)}}Income elasticities{p_end}
+{synopt:{cmd:e(elas_u)}}Uncompensated elasticities{p_end}
+{synopt:{cmd:e(elas_c)}}Compensated elasticities{p_end}
+
 
 {p2col 5 15 17 2: Functions}{p_end}
 {synopt:{cmd:e(sample)}}marks estimation sample{p_end}

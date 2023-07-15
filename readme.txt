@@ -20,13 +20,9 @@ Author 4 name: Juan Carlos Salgado
 Author 4 from: INSP, Mexico 
 Author 4 email: juan.salgado@insp.mx
 
-Author 5 name:  
-Author 5 from:  
-Author 5 email: 
+Help keywords: quaids, censoring, quaidsce, demandsys
 
-Help keywords: quaids, censoring, quaidsce
-
-File list: quaidsce.ado, quaidsce_estat.ado, quaidsce_p.ado, nlsur__quaidsce.ado, utils__quaidsce.mata
+File list: quaidsce.ado, quaidsce_c.ado, quaidsce_p.ado, nlsur__quaidsce.ado, utils__quaidsce.mata
 , quaidsce.sthlp, quaidsce_postestimation.sthlp
 
 Notes:
