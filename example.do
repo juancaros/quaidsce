@@ -1,6 +1,8 @@
 clear all
 capture log close
 program drop _all
+log using test.log, replace
+net install quaidsce, replace force from("https://juancaros.github.io/quaidsce/")
 use https://www.stata-press.com/data/r18/food_consumption
 
 *Generated demographics and conditional censoring
@@ -18,8 +20,4 @@ drop aux
 
 *Censored QUAIDS estimation
 quaidsce w_dairy w_proteins w_fruitveg w_flours w_misc, prices(p_dairy p_proteins p_fruitveg p_flours p_misc) expenditure(expfd) nolog demographics(n_adults n_kids income rural) anot(10) reps(10)   
-
-*Comparison via QUAIDS (Poi, 2012)
-quaids w_dairy w_proteins w_fruitveg w_flours w_misc, prices(p_dairy p_proteins p_fruitveg p_flours p_misc) expenditure(expfd) nolog demographics(n_adults n_kids rural income) anot(10) 
-
 
