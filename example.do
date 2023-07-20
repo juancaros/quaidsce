@@ -2,7 +2,7 @@ clear all
 capture log close
 program drop _all
 log using example.log, replace
-*ssc install parmest
+*ssc install parmest, replace
 *ssc install quaidsce 
 use https://www.stata-press.com/data/r18/food_consumption, clear
 
@@ -28,7 +28,7 @@ estat uncomp, atmeans
 mat elas = elas \ vecdiag(r(uncompelas))'
 
 *Censored QUAIDS estimation
-quaidsce w_dairy w_proteins w_fruitveg w_flours w_misc, prices(p_dairy p_proteins p_fruitveg p_flours p_misc) expenditure(expfd) nolog demographics(n_adults n_kids income rural) anot(10) reps(50) 
+quaidsce w_dairy w_proteins w_fruitveg w_flours w_misc, prices(p_dairy p_proteins p_fruitveg p_flours p_misc) expenditure(expfd) nolog demographics(n_adults n_kids income rural) anot(10) reps(100) 
 
 parmest, saving(output, replace)   
 
@@ -47,6 +47,6 @@ use output.dta, clear
 keep if eq =="ELAS_INC" | ((parm=="e_1_1" | parm=="e_1_1" | parm=="e_2_2" | parm=="e_3_3" | parm=="e_4_4" | parm=="e_5_5") & eq=="ELAS_UNCOMP")
 svmat elas, name(quaids)
 gen rw = _n
-tw (rcap min95 max95 rw , horizontal) (scatter rw estimate) (scatter rw quaids1) if eq =="ELAS_INC" , ylabel(1 "Dairy" 2 "Proteins" 3 "Fruit & Vegetables" 4 "Flours" 5 "Misc")
+tw (rcap min95 max95 rw , horizontal) (scatter rw estimate) (scatter rw quaids1) if eq =="ELAS_INC" , ylabel(1 "Dairy" 2 "Proteins" 3 "F & V" 4 "Flours" 5 "Misc", angle(horizontal)) yti("Food Group") xti("Estimate") graphr(color(white)) legend(order(1 "95% CI" 2 "QUAIDSCE" 3 "QUIADS") rows(1))
 
-
+tw (rcap min95 max95 rw , horizontal) (scatter rw estimate) (scatter rw quaids1) if eq =="ELAS_UNCOMP" , ylabel(6 "Dairy" 7 "Proteins" 8 "F & V" 9 "Flours" 10 "Misc", angle(horizontal)) yti("Food Group") xti("Estimate") graphr(color(white)) legend(order(1 "95% CI" 2 "QUAIDSCE" 3 "QUIADS") rows(1))
