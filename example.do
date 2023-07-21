@@ -46,7 +46,8 @@ sum w* dw*
 use output.dta, clear
 keep if eq =="ELAS_INC" | ((parm=="e_1_1" | parm=="e_1_1" | parm=="e_2_2" | parm=="e_3_3" | parm=="e_4_4" | parm=="e_5_5") & eq=="ELAS_UNCOMP")
 svmat elas, name(quaids)
+save output.dta, replace
 gen rw = _n
-tw (rcap min95 max95 rw , horizontal) (scatter rw estimate) (scatter rw quaids1) if eq =="ELAS_INC" , ylabel(1 "Dairy" 2 "Proteins" 3 "F & V" 4 "Flours" 5 "Misc", angle(horizontal)) yti("Food Group") xti("Estimate") graphr(color(white)) legend(order(1 "95% CI" 2 "QUAIDSCE" 3 "QUIADS") rows(1))
+tw (rcap min95 max95 rw , horizontal) (scatter rw estimate) (scatter rw quaids1) if eq =="ELAS_INC" , ylabel(1 "Dairy" 2 "Proteins" 3 "F & V" 4 "Flours" 5 "Misc", angle(horizontal)) yti("Food Group") xti("Estimate") graphr(color(white)) legend(order(1 "95% CI" 2 "QUAIDSCE" 3 "QUAIDS") rows(1))
 
-tw (rcap min95 max95 rw , horizontal) (scatter rw estimate) (scatter rw quaids1) if eq =="ELAS_UNCOMP" , ylabel(6 "Dairy" 7 "Proteins" 8 "F & V" 9 "Flours" 10 "Misc", angle(horizontal)) yti("Food Group") xti("Estimate") graphr(color(white)) legend(order(1 "95% CI" 2 "QUAIDSCE" 3 "QUIADS") rows(1))
+tw (rcap min95 max95 rw , horizontal) (scatter rw estimate) (scatter rw quaids1) if eq =="ELAS_UNCOMP" , ylabel(6 "Dairy" 7 "Proteins" 8 "F & V" 9 "Flours" 10 "Misc", angle(horizontal)) yti("Food Group") xti("Estimate") graphr(color(white)) legend(order(1 "95% CI" 2 "QUAIDSCE" 3 "QUAIDS") rows(1))
