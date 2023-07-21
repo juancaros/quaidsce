@@ -28,7 +28,7 @@ estat uncomp, atmeans
 mat elas = elas \ vecdiag(r(uncompelas))'
 
 *Censored QUAIDS estimation
-quaidsce w_dairy w_proteins w_fruitveg w_flours w_misc, prices(p_dairy p_proteins p_fruitveg p_flours p_misc) expenditure(expfd) nolog demographics(n_adults n_kids income rural) anot(10) reps(100) 
+quaidsce w_dairy w_proteins w_fruitveg w_flours w_misc, prices(p_dairy p_proteins p_fruitveg p_flours p_misc) expenditure(expfd) nolog demographics(n_adults n_kids income rural) anot(10) reps(50) 
 
 parmest, saving(output, replace)   
 
