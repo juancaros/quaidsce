@@ -18,9 +18,6 @@ The following postestimation commands are available after {cmd:quaidsce}:
 {p2coldent :Command}Description{p_end}
 {synoptline}
 {synopt :{helpb quaidsce postestimation##predict:predict}}predicted expenditure shares{p_end}
-INCLUDE help post_predictnl
-INCLUDE help post_test
-INCLUDE help post_testnl
 {synoptline}
 {p2colreset}{...}
 
