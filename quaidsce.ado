@@ -24,7 +24,7 @@ program quaidsce, eclass
 		exit
 	}
 	
-	bs, reps(`reps'): quaidsce_c `0'
+	parallel bs, reps(`reps'): quaidsce_c `0'
 
 end
 
