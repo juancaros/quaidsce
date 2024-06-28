@@ -410,11 +410,11 @@ program define quaidsce_c, eclass
 		}
 	}
 	
+	*GENERAR GSUM'i''j' PARA TODAS LAS COMBINACIONES
 	forvalue i=1/`neqn' {	
 			tempname gsum`i'	
 			scalar `gsum`i''= 0
-			local j=`i' 
-			forvalue ii=`j'/`neqn' {
+			forvalue ii=1/`neqn' {
 				scalar `gsum`i''= `gsum`i'' + `gamma'[`ii',`i']*`lnp`i''m 
 				}
 				}
@@ -502,6 +502,7 @@ program define quaidsce_c, eclass
 	mat elas_i[1,`i'] = `ie`i''
 	}
 	
+	*AJUSTAR LOS GSUM EN FUNCION DE LA ELASTICIDAD
 	***UNCOMPENSATED***
 	local k1 = 1
 	local k2 = (`neqn'*(`neqn'+1))/2
@@ -511,10 +512,13 @@ program define quaidsce_c, eclass
 		local de=cond(`i'==`j',1,0)
 		if `ndemos' == 0 {
 			if `j'==`i' {
-			local ue`i'`j' = (-`de'+1/`w_`i''m*(`gamma'[`j',`i']-(`beta'[1,`i']*(`alpha'[1,`i']+`gsum`i''))))			
+			local ue`i'`j' = (-`de'+1/`w_`i''m*(`gamma'[`j',`i']-(`beta'[1,`i']*(`alpha'[1,`j']+`gsum`j'`i''))))			
 			}
 			if `j'>`i' {	
-			local ue`i'`j' = (-`de'+1/`w_`i''m*(`gamma'[`j',`i']-(`beta'[1,`i']*(`alpha'[1,`j']+`gsum`j''))))
+			local ue`i'`j' = (-`de'+1/`w_`i''m*(`gamma'[`j',`i']-(`beta'[1,`i']*(`alpha'[1,`j']+`gsum`j'`i''))))
+			}
+			else {	
+			local ue`i'`j' = (-`de'+1/`w_`i''m*(`gamma'[`j',`i']-(`beta'[1,`i']*(`alpha'[1,`j']+`gsum`i'`j''))))
 			}
 			
 			if "`quadratic'" == "" {
@@ -549,6 +553,8 @@ program define quaidsce_c, eclass
 			local ue`i'`j' = (-`de'+1/we`i'*(cdf`i'm*((`ue`i'`j''+`de')*`w_`i''m) + tau[`loc',1]*pdf`i'm*(`w_`i''m-`delta'[1,`i']*du`i'm)))
 			}
 		}
+	
+	*GENERAR ELMENTOS EN LA MATRIZ DE SALIDA
 	if `j'>=`i' {	
 	mat elas_u[1,`k1'] = `ue`i'`j''
 	local `++k1'		
@@ -565,6 +571,8 @@ program define quaidsce_c, eclass
 		if `j' >= `i' {
 		local ce`i'`j' = `ue`i'`j''+`ie`i''*`w_`j''m
 		}
+	
+	*GENERAR ELMENTOS EN LA MATRIZ DE SALIDA
 	if `j'>=`i' {	
 	mat elas_c[1,`k1'] = `ce`i'`j''	
 	local `++k1'
