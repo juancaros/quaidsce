@@ -97,12 +97,10 @@ program define quaidsce_c, eclass
 		exit 498
 	}
 
-	***SALIDA DE ERROR SI HAY CENSOR SIN DEMOS
 	
 	marksample touse
 	markout `touse' `prices' `lnprices' `demographics'
 	markout `touse' `expenditure' `lnexpenditure'
-
 
 
 	local i 1
@@ -395,7 +393,7 @@ program define quaidsce_c, eclass
 		}
 	}
 
-	
+	*JCSH discutir con Tocayo
 	tempname lnpindex
 	scalar `lnpindex'= `anot'
 	forvalue i=1/`neqn' {	
@@ -411,14 +409,24 @@ program define quaidsce_c, eclass
 	}
 	
 	*GENERAR GSUM'i''j' PARA TODAS LAS COMBINACIONES
-	forvalue i=1/`neqn' {	
+	*JCSH Previously 
+	/*forvalue i=1/`neqn' {	
 			tempname gsum`i'	
 			scalar `gsum`i''= 0
 			forvalue ii=1/`neqn' {
 				scalar `gsum`i''= `gsum`i'' + `gamma'[`ii',`i']*`lnp`i''m 
 				}
-				}
-	
+				}*/
+
+	forvalue j=1/`neqn' {	
+		tempname gsum`j'	
+		scalar `gsum`j''= 0
+		forvalue l=1/`neqn' {
+		scalar `gsum`j''= `gsum`j'' + `gamma'[`j',`l']*`lnp`l''m 
+		}
+		}
+
+				
 
 	//When quadratics
 	if "`quadratic'" == "" {
@@ -432,7 +440,8 @@ program define quaidsce_c, eclass
 	//When demographics
 	if `ndemos' > 0 {			
 		tempname cofp mbar
-		scalar `cofp'= 1 //It is OK to set 1 because below we set a multiplication
+		*scalar `cofp'= 1 //It is OK to set 1 because below we set a multiplication JCSH previously
+		scalar `cofp'= 0 //To add cofp`i' below
 		scalar `mbar'= 1 //It is OK because I need to add a "1"
 		
 		forvalue i=1/`neqn' {
@@ -453,28 +462,20 @@ program define quaidsce_c, eclass
 		
 		forvalue i=1/`neqn' {
 				scalar `cofp`i''= `cofp`i''*`lnp`i''m
-				scalar `cofp'= `cofp'*`cofp`i''
+				scalar `cofp'= `cofp'+`cofp`i''
 			}
 	}
 	
 	//FUNCTION EVALUATOR (PREDICTED SHARE)
+	
 	forvalues i = 1/`neqn' {
-		if `ndemos' == 0 {
-		scalar we`i' = `alpha'[1,`i']+`beta'[1,`i']*(`lnexp'm-`lnpindex') + `gsum`i''
-			if "`quadratic'" == "" {
-				 scalar we`i' = we`i' + (`lambda'[1,`i']/exp(`bofp'))*(`lnexp'm-`lnpindex')^2
-			}
-		}
-		else {
-		scalar we`i' = `alpha'[1,`i']+`betanz`i''*(`lnexp'm-`lnpindex'-ln(`mbar')) + `gsum`i''
-			if "`quadratic'" == "" {
-				 scalar we`i' = we`i' + (`lambda'[1,`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar'))^2
-				}
-			}
 		//When censor
 		if "`censor'" == "" {
-		 scalar we`i' = we`i'*cdf`i'm + `delta'[1,`i']*pdf`i'm
-		}			 
+		 scalar we`i' = `w_`i''m*cdf`i'm + `delta'[1,`i']*pdf`i'm
+		}
+		else {
+		 scalar we`i' = `w_`i''m	
+		}
 	}
 	
 	
@@ -505,60 +506,42 @@ program define quaidsce_c, eclass
 	*AJUSTAR LOS GSUM EN FUNCION DE LA ELASTICIDAD
 	***UNCOMPENSATED***
 	local k1 = 1
-	local k2 = (`neqn'*(`neqn'+1))/2
+	local k2 = `neqn'* `neqn'
 	mat elas_u = J(1,`k2',0)
+	
+	
 	forvalues i = 1/`neqn' {
-	forvalues j = 1/`neqn' {
+		forvalues j = 1/`neqn' {
+		
 		local de=cond(`i'==`j',1,0)
+		
 		if `ndemos' == 0 {
-			if `j'==`i' {
-			local ue`i'`j' = (-`de'+1/`w_`i''m*(`gamma'[`j',`i']-(`beta'[1,`i']*(`alpha'[1,`j']+`gsum`j'`i''))))			
-			}
-			if `j'>`i' {	
-			local ue`i'`j' = (-`de'+1/`w_`i''m*(`gamma'[`j',`i']-(`beta'[1,`i']*(`alpha'[1,`j']+`gsum`j'`i''))))
-			}
-			else {	
-			local ue`i'`j' = (-`de'+1/`w_`i''m*(`gamma'[`j',`i']-(`beta'[1,`i']*(`alpha'[1,`j']+`gsum`i'`j''))))
-			}
-			
+			//No demographics nor quadratic		
+			local ue`i'`j' = (-`de'+1/`w_`i''m*(`gamma'[`i',`j']-(`beta'[1,`i']*(`alpha'[1,`j']+`gsum`j''))))	
+						
 			if "`quadratic'" == "" {
-				if `j'==`i' {	
-					local ue`i'`j' = (-`de'+1/`w_`i''m*(`gamma'[`j',`i']-(`beta'[1,`i']+(2*`lambda'[1,`i']/exp(`bofp'))*(`lnexp'm-`lnpindex'))*(`alpha'[1,`i']+`gsum`i'')-(`beta'[1,`i']*`lambda'[1,`i']/exp(`bofp')*(`lnexp'm-`lnpindex')^2)))
-				}
-				if `j'>`i' {	
-					local ue`i'`j' = (-`de'+1/`w_`i''m*(`gamma'[`j',`i']-(`beta'[1,`i']+(2*`lambda'[1,`i']/exp(`bofp'))*(`lnexp'm-`lnpindex'))*(`alpha'[1,`j']+`gsum`j'')-(`beta'[1,`j']*`lambda'[1,`i']/exp(`bofp')*(`lnexp'm-`lnpindex')^2)))				
-				}
+					//No demographics & quadratic		
+					local ue`i'`j' = (-`de'+1/`w_`i''m*(`gamma'[`i',`j']-(`beta'[1,`i']+(2*`lambda'[1,`i']/exp(`bofp'))*(`lnexp'm-`lnpindex'))*(`alpha'[1,`j']+`gsum`j'')-(`beta'[1,`i']*`lambda'[1,`i']/exp(`bofp')*(`lnexp'm-`lnpindex')^2)))		
 			}
 		}
-		else {
-			if `j'==`i' {
-				local ue`i'`j' = (-`de'+1/`w_`i''m*(`gamma'[`j',`i']-(`betanz`i'')*(`alpha'[1,`i']+`gsum`i'')))
-			}
-			if `j'>`i' {
-				local ue`i'`j' = (-`de'+1/`w_`i''m*(`gamma'[`j',`i']-(`betanz`i'')*(`alpha'[1,`j']+`gsum`j'')))	
-			}	
-			if "`quadratic'" == "" {
-				if `j'==`i' {	
-				 local ue`i'`j' = (-`de'+1/`w_`i''m*(`gamma'[`j',`i']-(`betanz`i''+(2*`lambda'[1,`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar')))*(`alpha'[1,`i']+`gsum`i'')-(`betanz`i''*`lambda'[1,`i']/exp(`bofp')/exp(`cofp')*(`lnexp'm-`lnpindex'-ln(`mbar'))^2)))
-				}
-				if `j'>`i' {	
-				local ue`i'`j' = (-`de'+1/`w_`i''m*(`gamma'[`j',`i']-(`betanz`i''+(2*`lambda'[1,`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar')))*(`alpha'[1,`j']+`gsum`j'')-(`betanz`j''*`lambda'[1,`i']/exp(`bofp')/exp(`cofp')*(`lnexp'm-`lnpindex'-ln(`mbar'))^2)))
-				}
+		else {	//Demographics no quadratic
+				local ue`i'`j' = (-`de'+1/`w_`i''m*(`gamma'[`i',`j']-(`betanz`i'')*(`alpha'[1,`j']+`gsum`j'')))				
+				if "`quadratic'" == "" {
+					//Demographics & quadratic
+					local ue`i'`j' = (-`de'+1/`w_`i''m*(`gamma'[`i',`j']-(`betanz`i''+(2*`lambda'[1,`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar')))*(`alpha'[1,`j']+`gsum`j'')-(`betanz`i''*`lambda'[1,`i']/exp(`bofp')/exp(`cofp')*(`lnexp'm-`lnpindex'-ln(`mbar'))^2)))
 			}
 		}
 		//When censor
 		local loc = `np_prob'*(`i'-1)+`j'
 		if "`censor'" == "" {
-		    if `j'>=`i' {	
 			local ue`i'`j' = (-`de'+1/we`i'*(cdf`i'm*((`ue`i'`j''+`de')*`w_`i''m) + tau[`loc',1]*pdf`i'm*(`w_`i''m-`delta'[1,`i']*du`i'm)))
-			}
 		}
 	
-	*GENERAR ELMENTOS EN LA MATRIZ DE SALIDA
-	if `j'>=`i' {	
+	*JCSH revisar con tocayo: corroborar con tocayo la salida de mat elas_u
+		
 	mat elas_u[1,`k1'] = `ue`i'`j''
 	local `++k1'		
-	}
+
 	}
 	}
 	
@@ -567,16 +550,12 @@ program define quaidsce_c, eclass
 	local k1 = 1
 	mat elas_c = J(1,`k2',0)
 	forv i = 1/`neqn' {
-	forv j = 1/`neqn' {
-		if `j' >= `i' {
+	forv j = 1/`neqn' {  //JCSH revisar con tocayo esta me falta
 		local ce`i'`j' = `ue`i'`j''+`ie`i''*`w_`j''m
-		}
-	
-	*GENERAR ELMENTOS EN LA MATRIZ DE SALIDA
-	if `j'>=`i' {	
+
 	mat elas_c[1,`k1'] = `ce`i'`j''	
 	local `++k1'
-	}
+	
 	}
 	}
 		
@@ -612,12 +591,12 @@ program define quaidsce_c, eclass
 		local namestripe `namestripe' ELAS_INC:e_`i'
 	}
 	forvalues j = 1/`neqn' {
-		forvalues i = `j'/`neqn' {
+		forvalues i = 1/`neqn' {
 			local namestripe `namestripe' ELAS_UNCOMP:e_`i'_`j'
 		}
 	}
 	forvalues j = 1/`neqn' {
-		forvalues i = `j'/`neqn' {
+		forvalues i = 1/`neqn' {
 			local namestripe `namestripe' ELAS_COMP:e_`i'_`j'
 		}
 	}
