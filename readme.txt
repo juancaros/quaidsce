@@ -1,4 +1,4 @@
-Package name:   <leave blank>
+Package name: quaidsce
 
 DOI:  <leave blank>
 
@@ -25,5 +25,5 @@ Help keywords: quaids, censoring, quaidsce, demandsys
 File list: quaidsce.ado, quaidsce_c.ado, quaidsce_p.ado, nlsur__quaidsce.ado, utils__quaidsce.mata
 , quaidsce.sthlp, quaidsce_postestimation.sthlp, example.do, example.log
 
-Notes:
+Notes: This module should be installed from within Stata by typing "ssc install quaidsce". The module is made available under terms of the GPL v3 (https://www.gnu.org/licenses/gpl-3.0.txt). Windows users should not attempt to download these files with a web browser.
 
