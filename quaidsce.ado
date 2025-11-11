@@ -1,4 +1,4 @@
-*! version 2.0  Jun 2023
+*! version 2.0  Jun 2025
 
 program quaidsce, eclass
 

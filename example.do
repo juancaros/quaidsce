@@ -1,27 +1,28 @@
-*QUAIDSCE EXAMPLE SEPT 2024
+*QUAIDSCE EXAMPLE SEPT 2025
 
-*Quaidsce requires the parallel command, and this example requires the user-written command parmest, as noted below:
+*Quaidsce requires the parallel command, and this example requires the user-written command parmest and quaids (st0268_1.pkg), as noted below:
+
 *ssc install parmest, replace
-*net install quaidsce, replace force from("https://juancaros.github.io/quaidsce/")
-*net install parallel, from("https://raw.github.com/gvegayon/parallel/stable/") replace
-*Enable the next line if you need to download quaids, which corresponds to the demand-model application by Poi that does not address censoring
-*search quaids //Look for "Software update for quaids, quaids_postestimation"
+*net install parallel, from(https://raw.github.com/gvegayon/parallel/stable/) replace
+*net install st0268_1.pkg
 
 *Setup
+
 mata mata mlib index
-parallel initialize 4, f
+parallel initialize 
 clear all
 capture log close
 program drop _all
 log using example.log, replace
 set seed 123456
-use https://www.stata-press.com/data/r18/food_consumption, clear
 
-*Generated demographics and conditional censoring
+*Creating conditionally-censored data using food_consumption.dta using simulated (rural and income) and existing demographics. The aux variable allows to regulate the degree of censoring per group.
+
+use https://www.stata-press.com/data/r18/food_consumption, clear
 gen rural = (runiform() > 0.8)
 gen income = exp(rnormal())+exp(rnormal())*(p_proteins*expfd/10)
 gen aux = (n_adults + n_kids + income - p_fruitveg + p_dairy)*exp(rnormal())
-replace w_flours=0 if aux*aux*aux>20000
+replace w_flours=0 if aux*aux*aux>10000
 replace w_proteins=0 if aux*aux<30
 replace w_fruitveg=0 if aux<5
 replace w_dairy=0 if aux>30
@@ -29,8 +30,7 @@ gen total = w_fruitveg + w_dairy + w_proteins + w_flours
 drop aux
 save foodcomp_censored.dta, replace
 
-*Tables and Figures
-*Table 1
+*Table 1: descriptive statistics
 use foodcomp_censored.dta, clear
 
 foreach var in w_proteins w_fruitveg w_dairy w_flours {
@@ -42,29 +42,36 @@ foreach var in w_proteins w_fruitveg w_dairy w_flours {
 
 sum w* dw*
 
-
 *QUAIDS (Poi 2012)
 quaids w_proteins w_fruitveg w_dairy w_flours, prices(p_proteins p_fruitveg p_dairy p_flours) expenditure(expfd) nolog demographics(income) anot(1.6)
 estat exp, atmeans
 mat elas = r(expelas)'
 estat uncomp, atmeans
 mat elas = elas \ vecdiag(r(uncompelas))'
-
+display c(current_time)
 
 *Censored QUAIDS estimation
-quaidsce w_proteins w_fruitveg w_dairy w_flours, prices(p_proteins p_fruitveg p_dairy p_flours) expenditure(expfd) nolog demographics(income) anot(1.6) reps(100) 
+quaidsce w_proteins w_fruitveg w_dairy w_flours, prices(p_proteins p_fruitveg p_dairy p_flours) expenditure(expfd) nolog demographics(income) anot(1.6) reps(200) 
+display c(current_time)
+parmest, saving(output1, replace)   
 
-parmest, saving(output, replace)   
-
-*Figures 1 and 2
-use output.dta, clear
+*Output for figures
+use output1.dta, clear
 keep if eq =="ELAS_INC" | ((parm=="e_1_1" | parm=="e_2_2" | parm=="e_3_3" | parm=="e_4_4") & eq=="ELAS_UNCOMP")
 svmat elas, name(quaids)
-save output.dta, replace
+rename estimate quaids11
+rename min95 min95_1 
+rename max95 max95_1
 gen rw = _n
+save output1.dta, replace
 
-tw (rcap min95 max95 rw , horizontal) (scatter rw estimate) (scatter rw quaids1) if eq =="ELAS_INC" , ylabel(1 "Proteins" 2 "F & V" 3 "Dairy" 4 "Flours", angle(horizontal)) yti("Food Group") xti("Estimate") graphr(color(white)) legend(order(1 "95% CI" 2 "QUAIDSCE" 3 "QUAIDS") rows(1)) scheme(s2mono)
 
-tw (rcap min95 max95 rw , horizontal) (scatter rw estimate) (scatter rw quaids1) if eq =="ELAS_UNCOMP" , ylabel(5 "Proteins" 6 "F & V" 7 "Dairy" 8 "Flours", angle(horizontal)) yti("Food Group") xti("Estimate") graphr(color(white)) legend(order(1 "95% CI" 2 "QUAIDSCE" 3 "QUAIDS") rows(1)) scheme(s2mono)
+***Figures***
+*boot 200 vs quaids
+
+use output1.dta, clear
+tw (rcap min95_1 max95_1 rw , horizontal) (scatter rw quaids11) (scatter rw quaids1) if eq =="ELAS_INC" , ylabel(1 "Proteins" 2 "F & V" 3 "Dairy" 4 "Flours", angle(horizontal)) yti("Food Group") xti("Estimate") graphr(color(white)) legend(order(1 "95% CI" 2 "QUAIDSCE" 3 "QUAIDS") rows(1)) scheme(s2mono)
+
+tw (rcap min95_2 max95_2 rw , horizontal) (scatter rw quaids21) (scatter rw quaids1) if eq =="ELAS_UNCOMP" , ylabel(5 "Proteins" 6 "F & V" 7 "Dairy" 8 "Flours", angle(horizontal)) yti("Food Group") xti("Estimate") graphr(color(white)) legend(order(1 "95% CI" 2 "QUAIDSCE" 3 "QUAIDS") rows(1)) scheme(s2mono)
 
 log close

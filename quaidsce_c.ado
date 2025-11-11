@@ -1,4 +1,4 @@
-*! version 2.0  Jun 2023
+*! version 2.0  Jun 2025
 program define Display
 
 	syntax , [Level(cilevel)]
@@ -46,7 +46,7 @@ program define quaidsce_c, eclass
 		  noCEnsor   ///
 		  INITial(name) noLOg Level(cilevel) Method(name) * ] 
 		  
-		  
+	***Setup and error check***	  
 	local shares `varlist'
 	
 	if "`options'" != "" {
@@ -109,7 +109,6 @@ program define quaidsce_c, eclass
 		local `++i'
 	}
 	
-	// Check whether variables make sense
 	if "`censor'" == "nocensor" {
 		tempvar sumw
 		egen double `sumw' = rsum(`shares') if `touse'
@@ -190,15 +189,16 @@ program define quaidsce_c, eclass
 			local initialopt initial(`initial')
 		}
 	}
+
 	
 		if "`method'" == "" {
-		local estimator "ifgnls"
+		local estimator "fgnls"
 		}
 		else {
 			local estimator `method'
 		}
 
-		//First stage
+		***First stage estimation***
 		capture drop cdf* pdf* du*
 		local pdf
 		local cdf
@@ -269,10 +269,11 @@ program define quaidsce_c, eclass
 		local neqn2=`=`neqn'-1'
 		}
 		else {
-		local np2= `np2' + `neqn' //adding n deltas
+		local np2= `np2' + `neqn'
 		local neqn2 `neqn'
 		}
 		
+		***Second stage estimation***
 		
 	qui nlsur __quaidsce @ `shares' if `touse',				///
 		lnp(`lnprices') lnexp(`lnexpenditure') cdfi(`cdf') pdfi(`pdf') a0(`anot')	///
@@ -298,7 +299,7 @@ program define quaidsce_c, eclass
 	mat `Vfull' = `Vn'
 
 	
-	**************
+	***Model output***
 	
 	
 	if "`censor'" == "" {
@@ -360,10 +361,8 @@ program define quaidsce_c, eclass
 		}
 	}
 	
-	***ELASTICITIES***
+	***Elasticities***
 
-	
-	//AVERAGES, INDEXES, PREDICTIONS
 	local i 1
 		tempname lnpr
 		local lnpr ""
@@ -393,7 +392,6 @@ program define quaidsce_c, eclass
 		}
 	}
 
-	*JCSH discutir con Tocayo
 	tempname lnpindex
 	scalar `lnpindex'= `anot'
 	forvalue i=1/`neqn' {	
@@ -407,16 +405,6 @@ program define quaidsce_c, eclass
 			}
 		}
 	}
-	
-	*GENERAR GSUM'i''j' PARA TODAS LAS COMBINACIONES
-	*JCSH Previously 
-	/*forvalue i=1/`neqn' {	
-			tempname gsum`i'	
-			scalar `gsum`i''= 0
-			forvalue ii=1/`neqn' {
-				scalar `gsum`i''= `gsum`i'' + `gamma'[`ii',`i']*`lnp`i''m 
-				}
-				}*/
 
 	forvalue j=1/`neqn' {	
 		tempname gsum`j'	
@@ -440,7 +428,6 @@ program define quaidsce_c, eclass
 	//When demographics
 	if `ndemos' > 0 {			
 		tempname cofp mbar
-		*scalar `cofp'= 1 //It is OK to set 1 because below we set a multiplication JCSH previously
 		scalar `cofp'= 0 //To add cofp`i' below
 		scalar `mbar'= 1 //It is OK because I need to add a "1"
 		
@@ -466,7 +453,7 @@ program define quaidsce_c, eclass
 			}
 	}
 	
-	//FUNCTION EVALUATOR (PREDICTED SHARE)
+	***Predicted shares***
 	
 	forvalues i = 1/`neqn' {
 		//When censor
@@ -503,7 +490,6 @@ program define quaidsce_c, eclass
 	mat elas_i[1,`i'] = `ie`i''
 	}
 	
-	*AJUSTAR LOS GSUM EN FUNCION DE LA ELASTICIDAD
 	***UNCOMPENSATED***
 	local k1 = 1
 	local k2 = `neqn'* `neqn'
@@ -528,7 +514,7 @@ program define quaidsce_c, eclass
 				local ue`i'`j' = (-`de'+1/`w_`i''m*(`gamma'[`i',`j']-(`betanz`i'')*(`alpha'[1,`j']+`gsum`j'')))				
 				if "`quadratic'" == "" {
 					//Demographics & quadratic
-					local ue`i'`j' = (-`de'+1/`w_`i''m*(`gamma'[`i',`j']-(`betanz`i''+(2*`lambda'[1,`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar')))*(`alpha'[1,`j']+`gsum`j'')-(`betanz`i''*`lambda'[1,`i']/exp(`bofp')/exp(`cofp')*(`lnexp'm-`lnpindex'-ln(`mbar'))^2)))
+					local ue`i'`j' = (-`de'+1/`w_`i''m*(`gamma'[`i',`j']-(`betanz`i''+(2*`lambda'[1,`i']/exp(`bofp')/exp(`cofp'))*(`lnexp'm-`lnpindex'-ln(`mbar')))*(`alpha'[1,`j']+`gsum`j'')-(`betanz`j''*`lambda'[1,`i']/exp(`bofp')/exp(`cofp')*(`lnexp'm-`lnpindex'-ln(`mbar'))^2)))
 			}
 		}
 		//When censor
@@ -536,9 +522,7 @@ program define quaidsce_c, eclass
 		if "`censor'" == "" {
 			local ue`i'`j' = (-`de'+1/we`i'*(cdf`i'm*((`ue`i'`j''+`de')*`w_`i''m) + tau[`loc',1]*pdf`i'm*(`w_`i''m-`delta'[1,`i']*du`i'm)))
 		}
-	
-	*JCSH revisar con tocayo: corroborar con tocayo la salida de mat elas_u
-		
+			
 	mat elas_u[1,`k1'] = `ue`i'`j''
 	local `++k1'		
 
@@ -550,7 +534,7 @@ program define quaidsce_c, eclass
 	local k1 = 1
 	mat elas_c = J(1,`k2',0)
 	forv i = 1/`neqn' {
-	forv j = 1/`neqn' {  //JCSH revisar con tocayo esta me falta
+	forv j = 1/`neqn' {   
 		local ce`i'`j' = `ue`i'`j''+`ie`i''*`w_`j''m
 
 	mat elas_c[1,`k1'] = `ce`i'`j''	
@@ -601,7 +585,7 @@ program define quaidsce_c, eclass
 		}
 	}
 	
-	*************************
+	***Creating output tables***
 	
 	capture drop du* cdf* pdf*
 	
