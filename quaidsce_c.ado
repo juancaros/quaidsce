@@ -249,10 +249,10 @@ program define quaidsce_c, eclass
 				}
 				quietly predict du`i'
 			
-				if e(N) < _N {
-				di as error "at least one variable completely predicts probit outcome, check your data"
-				exit 499
-				}
+				*if e(N) < _N {
+				*di as error "at least one variable completely predicts probit outcome, check your data"
+				*exit 499
+				*}
 				qui replace pdf`i'= normalden(du`i')
 				qui replace cdf`i'= normal(du`i')
 				}
