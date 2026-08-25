@@ -247,7 +247,7 @@ program define quaidsce_c, eclass
 					local loc = `np_prob'*(`i'-1)+1
 					mat setau[`loc',`loc'] = e(V)
 				}
-				quietly predict du`i'
+				quietly predict double du`i', xb
 			
 				*if e(N) < _N {
 				*di as error "at least one variable completely predicts probit outcome, check your data"
@@ -477,7 +477,7 @@ program define quaidsce_c, eclass
 			}
 		}
 		else {
-			global ie`i' = 1+`betanz`i''/`w_`i''m
+			local ie`i' = 1+`betanz`i''/`w_`i''m
 			if "`quadratic'" == "" {
 				local ie`i'= (1+1/`w_`i''m*(`betanz`i''+2*`lambda'[1,`i']/exp(`bofp')/exp(`cofp')*(`lnexp'm-`lnpindex'-ln(`mbar'))))
 			}
@@ -507,7 +507,7 @@ program define quaidsce_c, eclass
 						
 			if "`quadratic'" == "" {
 					//No demographics & quadratic		
-					local ue`i'`j' = (-`de'+1/`w_`i''m*(`gamma'[`i',`j']-(`beta'[1,`i']+(2*`lambda'[1,`i']/exp(`bofp'))*(`lnexp'm-`lnpindex'))*(`alpha'[1,`j']+`gsum`j'')-(`beta'[1,`i']*`lambda'[1,`i']/exp(`bofp')*(`lnexp'm-`lnpindex')^2)))		
+					local ue`i'`j' = (-`de'+1/`w_`i''m*(`gamma'[`i',`j']-(`beta'[1,`i']+(2*`lambda'[1,`i']/exp(`bofp'))*(`lnexp'm-`lnpindex'))*(`alpha'[1,`j']+`gsum`j'')-(`beta'[1,`j']*`lambda'[1,`i']/exp(`bofp')*(`lnexp'm-`lnpindex')^2)))		
 			}
 		}
 		else {	//Demographics no quadratic
@@ -574,13 +574,13 @@ program define quaidsce_c, eclass
 	forvalues i = 1/`neqn' {
 		local namestripe `namestripe' ELAS_INC:e_`i'
 	}
-	forvalues j = 1/`neqn' {
-		forvalues i = 1/`neqn' {
+	forvalues i = 1/`neqn' {
+		forvalues j = 1/`neqn' {
 			local namestripe `namestripe' ELAS_UNCOMP:e_`i'_`j'
 		}
 	}
-	forvalues j = 1/`neqn' {
-		forvalues i = 1/`neqn' {
+	forvalues i = 1/`neqn' {
+		forvalues j = 1/`neqn' {
 			local namestripe `namestripe' ELAS_COMP:e_`i'_`j'
 		}
 	}
