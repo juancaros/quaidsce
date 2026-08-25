@@ -574,13 +574,13 @@ program define quaidsce_c, eclass
 	forvalues i = 1/`neqn' {
 		local namestripe `namestripe' ELAS_INC:e_`i'
 	}
-	forvalues j = 1/`neqn' {
-		forvalues i = 1/`neqn' {
+	forvalues i = 1/`neqn' {
+		forvalues j = 1/`neqn' {
 			local namestripe `namestripe' ELAS_UNCOMP:e_`i'_`j'
 		}
 	}
-	forvalues j = 1/`neqn' {
-		forvalues i = 1/`neqn' {
+	forvalues i = 1/`neqn' {
+		forvalues j = 1/`neqn' {
 			local namestripe `namestripe' ELAS_COMP:e_`i'_`j'
 		}
 	}
